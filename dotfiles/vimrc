@@ -1,0 +1,295 @@
+" PLAGINS
+call plug#begin('~/.vim/plugged')
+Plug 'scrooloose/nerdtree', { 'on':  ['NERDTreeToggle', 'NERDTreeFind','NERDTreeTabsToggle']}
+Plug 'xuyuanp/nerdtree-git-plugin'
+Plug 'jistr/vim-nerdtree-tabs'
+Plug 'scrooloose/nerdcommenter'
+Plug 'jiangmiao/auto-pairs'
+Plug 'junegunn/fzf' "it fzf silver_searcher
+Plug 'junegunn/fzf.vim'
+Plug 'easymotion/vim-easymotion'
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+Plug 'cohama/agit.vim', { 'on': ['Agit', 'AgitFile'] }
+Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
+Plug 'jpalardy/vim-slime', { 'for':  ['py'] }
+Plug 'w0rp/ale' "it shellcheck
+Plug 'majutsushi/tagbar', { 'on':  'TagbarToggle' } "it ctags
+" Plug 'xolox/vim-misc'
+" Plug 'xolox/vim-easytags'
+Plug 'itchyny/vim-cursorword', { 'for':  ['py', 'c', 'cpp'] }
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'francoiscabrol/ranger.vim' "it ranger
+Plug 'tpope/vim-unimpaired'
+Plug 'qpkorr/vim-bufkill'
+Plug 'tpope/vim-eunuch'
+Plug 'morhetz/gruvbox'
+" Plug 'yggdroot/indentline', { 'for':  ['c', 'cpp'] }
+Plug 'vim-airline/vim-airline'
+Plug 'suan/vim-instant-markdown', {'for': 'markdown'}
+Plug 'godlygeek/tabular'
+if has('nvim')
+    Plug 'rbgrouleff/bclose.vim'
+else
+    " Plug 'jszakmeister/vim-togglecursor'
+endif
+call plug#end()
+
+
+" GENERAL
+set number
+set expandtab
+set tabstop=4
+set shiftwidth=4
+autocmd BufNewFile,BufRead * setlocal formatoptions-=cro
+" set hlsearch
+set incsearch
+set ignorecase
+" set clipboard=unnamedplus
+set noswapfile
+set nobackup
+set splitright
+set splitbelow
+" set mouse=a
+set mouse+=a
+if &term =~ '^screen'
+    set ttymouse=xterm2
+endif
+let g:mapleader=';'
+set autoread
+" set langmap=ёйцукенгшщзхъфывапролджэячсмитьбюЁЙЦУКЕHГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ;`qwertyuiop[]asdfghjkl\\;'zxcvbnm\\,.~QWERTYUIOP{}ASDFGHJKL:\\"ZXCVBNM<>
+
+" Relativenumber
+" set relativenumber
+" autocmd InsertEnter * :set norelativenumber
+" autocmd InsertLeave * :set relativenumber
+
+
+" CUSTOMIZATION
+syntax on
+colorscheme gruvbox
+set background=dark
+set shortmess=I
+set noshowmode
+set cursorline
+" Colors
+" autocmd bufnewfile,bufread * hi Normal guibg=NONE ctermbg=NONE
+hi VertSplit ctermbg=NONE
+set fillchars+=vert:│
+hi SignColumn ctermbg=NONE
+" hi TabLineFill ctermfg=darkgray ctermbg=black
+" hi TabLineSel cterm=bold ctermfg=gray ctermbg=black
+" " hi TabLine ctermfg=NONE ctermbg=NONE
+hi Search cterm=none ctermfg=235 ctermbg=172
+
+
+" PLUGINS SETTINGS
+
+" NERDTree
+let NERDTreeMinimalUI=1
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+" NERDCommenter
+let g:NERDSpaceDelims = 1
+let g:NERDCommentEmptyLines = 1
+let g:NERDCustomDelimiters = { 'c': {'left': '//', 'leftAlt': '/*', 'rightAlt': '*/' } }
+
+" nerdtree-syntax-highlight
+let g:NERDTreeFileExtensionHighlightFullName = 1
+let g:NERDTreeExactMatchHighlightFullName = 1
+let g:NERDTreePatternMatchHighlightFullName = 1
+
+" AutoPairs
+let g:AutoPairsMultilineClose = 0
+" let g:AutoPairsFlyMode = 0
+
+" Airline
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+let g:airline#extensions#tabline#show_buffers = 0
+let g:airline#extensions#tabline#show_splits = 0
+let g:airline#extensions#tabline#show_tabs = 1
+let g:airline#extensions#tabline#show_tab_nr = 0
+let g:airline#extensions#tabline#show_tab_type = 0
+let g:airline#extensions#tabline#close_symbol = '×'
+let g:airline#extensions#tabline#show_close_button = 0
+let g:airline#extensions#tabline#tab_min_count = 2
+let g:airline#extensions#tabline#show_tab_count = 0
+let g:airline#extensions#tabline#left_sep = ''
+let g:airline#extensions#tabline#left_alt_sep = ''
+let g:airline#extensions#tabline#right_sep = ''
+let g:airline#extensions#tabline#right_alt_sep = ''
+
+" FZF
+let g:fzf_layout = { 'down': '~30%' }
+" let g:fzf_action = {
+  " \ 'enter':  'tab split',
+  " \ 'ctrl-t': 'tab split',
+  " \ 'ctrl-x': 'split',
+  " \ 'ctrl-v': 'vsplit' }
+let $FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git -g ""'
+
+" Ale
+let g:ale_enabled=0
+let g:ale_sign_column_always = 1
+let g:ale_sign_error = '•'
+let g:ale_sign_warning = '•'
+let g:ale_linters = {'c': ['gcc'], 'cpp': ['g++']}
+let g:ale_cpp_gcc_options="-Wall -Wextra -pedantic -std=c99"
+hi ALEErrorSign ctermfg=160 ctermbg=NONE
+hi ALEWarningSign ctermfg=178 ctermbg=NONE
+hi ALEInfoSign ctermfg=075 ctermbg=NONE
+
+" CVim
+let g:C_Ctrl_j   = 'off'
+
+" Slime
+let g:slime_target = "tmux"
+let g:slime_python_ipython = 1
+
+" Gitgutter
+set updatetime=100
+hi GitGutterAdd ctermfg=106 guibg=NONE
+hi GitGutterChange ctermfg=172 guibg=NONE
+hi GitGutterDelete ctermfg=160 guibg=NONE
+hi GitGutterChangeDelete ctermfg=172 guibg=NONE
+
+" Tagbar
+let g:tagbar_compact = 1
+let g:tagbar_sort = 0
+
+" identline
+let g:indentLine_char = '⎸'
+
+" instant-markdown
+let g:instant_markdown_autostart = 0
+
+" Ctags
+" set tags=tags;.git/tags;
+
+if has('nvim')
+    " nmap <BS> <C-h>
+else
+    map <Esc>[Z <S-Tab>
+    set timeoutlen=1000 ttimeoutlen=0
+    set wildmode=longest,list,full
+endif
+
+
+" BINDS
+imap jj <Esc>
+imap оо <Esc>
+map <silent> <C-n> :NERDTreeTabsToggle<CR>
+vmap <silent> <C-n> <esc>:NERDTreeTabsToggle<CR>
+map <Leader> <Plug>(easymotion-prefix)
+map <Space> <Plug>(easymotion-s)
+nmap <C-_> <plug>NERDCommenterToggle
+vmap <C-_> <plug>NERDCommenterToggle
+nmap <silent> <F8> :TagbarToggle<CR>
+vmap <silent> <F8> <esc>:TagbarToggle<CR>
+map <silent> <C-p> :Files<CR>
+vmap <silent> <C-p> <esc>:Files<CR>
+" nnoremap <silent> ? :noh<CR>
+" vnoremap <silent> ? <esc>:noh<CR>
+nnoremap <silent> ? :let @/ = ""<CR>
+vnoremap <silent> ? <esc>:let @/ = ""<CR>
+nnoremap <silent> <esc> :noh<cr>
+nnoremap gf <C-W>gf
+nnoremap <silent> <leader>p :Ag<CR>
+nnoremap <silent> <leader>ale :ALEToggle<CR>
+nnoremap <silent> <leader>d :ALEDetail<CR>
+nnoremap <silent> <leader>r :edit!<CR>
+nnoremap <silent> , :Buffers<CR>
+" noremap <silent> <M-w> :BD<cr>
+nnoremap <Leader>re :%s/\<<C-r><C-w>\>/
+vnoremap <Leader>re :s/\<<C-r><C-w>\>/
+nnoremap <Leader>a :%y+<CR>
+" nnoremap <Leader>dif :diffthis<CR>
+nnoremap <Leader>q :qa<CR>
+map <BS> X
+vnoremap <C-C> :w !xclip -i -sel c<CR><CR>
+
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(EasyAlign)
+
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
+
+" inoremap <silent> <c-k> <Esc> :TmuxNavigateUp<cr>
+" inoremap <silent> <c-j> <Esc> :TmuxNavigateDown<cr>
+" inoremap <silent> <c-h> <Esc> :TmuxNavigateLeft<cr>
+" inoremap <silent> <c-l> <Esc> :TmuxNavigateRight<cr>
+
+" inoremap <c-j> <down>
+" inoremap <c-h> <left>
+inoremap <c-k> <up>
+inoremap <c-l> <right>
+
+nnoremap <silent> <C-w>< :exe "vertical resize " . (winwidth(0) * 3/2)<CR>
+nnoremap <silent> <C-w>> :exe "vertical resize " . (winwidth(0) * 2/3)<CR>
+
+" Save file
+noremap <silent> <C-S> :update<CR>
+vnoremap <silent> <C-S> <C-C>:update<CR>
+inoremap <silent> <C-S> <C-O>:update<CR>
+
+" Tabs
+noremap <silent> <leader>1 1gt
+noremap <leader>2 2gt
+noremap <leader>3 3gt
+noremap <leader>4 4gt
+noremap <leader>5 5gt
+noremap <leader>6 6gt
+noremap <leader>7 7gt
+noremap <leader>8 8gt
+noremap <leader>9 9gt
+noremap <silent> <leader>0 :tablast<cr>
+noremap <silent> <leader>h :tabp<cr>
+noremap <silent> <leader>l :tabn<cr>
+inoremap <silent> <leader>h <Esc> :tabp<cr>
+inoremap <silent> <leader>l <Esc> :tabn<cr>
+noremap <silent> <leader>w :q<cr>
+nnoremap <silent> <leader>- :execute 'silent! tabmove ' . (tabpagenr()-2)<CR>
+nnoremap <silent> <leader>= :execute 'silent! tabmove ' . (tabpagenr()+1)<CR>
+nnoremap <silent> <Tab> :tabn<CR>
+nnoremap <silent> <S-Tab> :tabp<CR>
+
+" Fugitive
+nnoremap <silent> <leader>gs :Gstatus<CR>
+nnoremap <silent> <leader>gc :Gcommit -v -q<CR>
+nnoremap <silent> <leader>ga :Gcommit --amend<CR>
+nnoremap <silent> <leader>gt :Gcommit -v -q %<CR>
+nnoremap <silent> <leader>gd :Gdiff<CR>
+nnoremap <silent> <leader>ge :Gedit<CR>
+nnoremap <silent> <leader>gr :Gread<CR>
+nnoremap <silent> <leader>gw :Gwrite<CR><CR>
+nnoremap <silent> <leader>gl :silent! Glog<CR>
+nnoremap <silent> <leader>gp :Ggrep<Space>
+nnoremap <silent> <leader>gm :Gmove<Space>
+nnoremap <silent> <leader>gb :Git branch<Space>
+nnoremap <silent> <leader>go :Git checkout<Space>
+nnoremap <silent> <leader>gps :!git push<CR>
+nnoremap <silent> <leader>gpl :!git pull<CR>
+nnoremap <silent> <leader>gbl :Gblame<CR>
+
+" Agit
+nnoremap <silent> <leader>ag :Agit<CR>
+nnoremap <silent> <leader>agf :AgitFile<CR>
+
+
+function! SetUsLayout()
+    silent !gsettings set org.gnome.desktop.input-sources current 0
+endfunction
+
+autocmd InsertLeave * call SetUsLayout()
+
+
+" ALIASES
+command UP PlugUpdate
+
+map <silent> <C-w>j :split<CR>
+map <silent> <C-w>k :split<CR>
+map <silent> <C-w>h :vsplit<CR>
+map <silent> <C-w>l :vsplit<CR>
+

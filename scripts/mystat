@@ -1,0 +1,86 @@
+#!/bin/bash
+
+if [[ -n "$1" ]]
+then
+    case "$1" in
+        -w) watch -c -t -n 1 $0; exit;;
+        * ) echo "$1 is not an option"
+            exit;;
+    esac
+fi
+
+FREQ=$(($(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)/1000))
+if test -f "/sys/class/hwmon/hwmon1/fan1_input"
+then FUN=$(cat /sys/class/hwmon/hwmon1/fan1_input)
+else FUN=$(cat /sys/class/hwmon/hwmon2/fan1_input)
+fi
+# FUN=$(cat /sys/class/hwmon/hwmon1/fan1_input)
+TEMP=$(($(cat /sys/class/hwmon/hwmon2/temp1_input)/1000))
+
+POWER=$(cat /sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/PNP0C0A:00/power_supply/BAT0/capacity)
+STATE=$(cat /sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/PNP0C0A:00/power_supply/BAT0/status)
+
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+WHITE='\033[1;37m'
+DEF='\033[0;37m'
+
+#FREQ color
+if [[ $FREQ -le 1600 ]]
+then
+    CFREQ=$GREEN
+elif [[ $FREQ -ge 1601 && $FREQ -le 2200 ]]
+then
+    CFREQ=$YELLOW
+else
+    CFREQ=$RED
+fi
+
+#FUN color
+if [[ $FUN -le 1000 ]]
+then
+    CFUN=$GREEN
+elif [[ $FUN -ge 1001 && $FUN -le 2400 ]]
+then
+    CFUN=$YELLOW
+else
+    CFUN=$RED
+fi
+
+#TEMP color
+if [[ $TEMP -le 53 ]]
+then
+    CTEMP=$GREEN
+elif [[ $TEMP -ge 54 && $TEMP -le 60 ]]
+then
+    CTEMP=$YELLOW
+else
+    CTEMP=$RED
+fi
+
+#POWER color
+if [[ $POWER -le 20 ]]
+then
+    CPOWER=$RED
+elif [[ $POWER -ge 21 && $POWER -le 70 ]]
+then
+    CPOWER=$YELLOW
+else
+    CPOWER=$GREEN
+fi
+
+#STATE color
+if [[ $STATE = "Discharging" ]]
+then
+    CSTATE=$YELLOW
+else
+    CSTATE=$GREEN
+fi
+
+echo -e "${WHITE}CPU freq:  ${CFREQ}${FREQ} MHz"
+echo -e "${WHITE}CPU fun:   ${CFUN}${FUN} RPM"
+echo -e "${WHITE}CPU temp:  ${CTEMP}${TEMP}C"
+echo -e "${WHITE}BAT power: ${CPOWER}${POWER}%"
+echo -e "${WHITE}BAT state: ${CSTATE}${STATE}${DEF}"
+

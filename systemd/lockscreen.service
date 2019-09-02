@@ -1,0 +1,12 @@
+[Unit]
+Description=Lockscreen
+Before=sleep.target
+
+[Service]
+User=dmitry
+Type=forking
+Environment=DISPLAY=:0
+ExecStart=/home/dmitry/myconfig/lockscreen/lock.sh -s
+
+[Install]
+WantedBy=sleep.target

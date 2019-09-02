@@ -1,0 +1,63 @@
+#!/bin/bash
+
+RED='\e[0;91m'
+GREEN='\e[0;92m'
+YELLOW='\e[0;93m'
+BLUE='\e[0;94m'
+
+CURFREQ=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq)
+MAXFREQ=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq)
+MIDFREQ=$(($MAXFREQ/2))
+MINFREQ=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq)
+NUMCORE=$(nproc --ignore=1)
+
+# if [[ -n "$1" ]]; then
+# sudo cpupower frequency-set -u ${1}GHz >> /dev/null && echo -e "${YELLOW}set ${1}GHz"
+# exit
+# fi
+
+if [[ -n "$1" ]]; then
+    if [ "$1" = "stat" ];then
+        echo -e "${BLUE} $(($CURFREQ/1000)) Mhz"
+        exit
+    fi
+    if [ "$1" = "max" ]; then
+        for x in /sys/devices/system/cpu/cpu[0-$NUMCORE]/cpufreq/;do
+            echo $MAXFREQ > $x/scaling_max_freq
+        done
+        echo -e "${RED} set $(($MAXFREQ/1000)) Mhz"
+        pkill -RTMIN+2 i3blocks
+        exit
+    fi
+    if [ "$1" = "mid" ]; then
+        for x in /sys/devices/system/cpu/cpu[0-$NUMCORE]/cpufreq/;do
+            echo $MIDFREQ > $x/scaling_max_freq
+        done
+        echo -e "${YELLOW} set $(($MIDFREQ/1000)) Mhz"
+        pkill -RTMIN+2 i3blocks
+        exit
+    fi
+    if [ "$1" = "min" ]; then
+        for x in /sys/devices/system/cpu/cpu[0-$NUMCORE]/cpufreq/;do
+            echo $MINFREQ > $x/scaling_max_freq
+        done
+        echo -e "${GREEN} set $(($MINFREQ/1000)) Mhz"
+        pkill -RTMIN+2 i3blocks
+        exit
+    fi
+fi
+
+if (($CURFREQ == $MAXFREQ )); then
+    for x in /sys/devices/system/cpu/cpu[0-$NUMCORE]/cpufreq/;do
+        echo $MINFREQ > $x/scaling_max_freq
+    done
+    echo -e "${GREEN} set $(($MINFREQ/1000)) Mhz"
+else
+    for x in /sys/devices/system/cpu/cpu[0-$NUMCORE]/cpufreq/;do
+        echo $MAXFREQ > $x/scaling_max_freq
+    done
+    echo -e "${RED} set $(($MAXFREQ/1000)) Mhz"
+fi
+
+pkill -RTMIN+2 i3blocks
+

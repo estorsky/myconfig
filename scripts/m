@@ -1,0 +1,29 @@
+#!/bin/bash
+
+CORES=`grep -c ^processor /proc/cpuinfo`
+make -j $CORES
+
+if [[ -n "$1" ]]; then
+    case "$1" in
+        m) exit;;
+        * ) echo "$1 is not an option"
+            exit;;
+    esac
+fi
+
+print_cols () {
+    COLS=$(tput cols)
+    python -c "print('_' * $COLS)"
+}
+
+NAME=$(basename $(pwd))
+if [ -f "$NAME"  ]; then
+    print_cols
+    ./$NAME
+elif [ -f "./a.out"  ]; then
+    print_cols
+    ./a.out
+fi
+
+echo
+

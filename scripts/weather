@@ -1,0 +1,11 @@
+#!/bin/bash
+
+defcity=novosibirsk
+
+if [[ -n "$1" ]]; then
+    curl wttr.in/$1
+    exit
+fi
+
+curl wttr.in/$defcity
+

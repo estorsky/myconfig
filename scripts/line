@@ -1,0 +1,5 @@
+#!/bin/bash
+
+COLS=$(tput cols)
+python -c "print('_' * $COLS)"
+

@@ -1,0 +1,110 @@
+# PROMPT
+if [ "$HOSTNAME" = estor ]; then
+    GREEN="\[\e[1;92m\]"
+    BLUE="\[\033[38;5;081m\]"
+    HCOLOR="\[\033[38;5;206m\]"
+
+    if [ -f ~/.git-prompt.sh ]; then
+        source ~/.git-prompt.sh
+        export GIT_PS1_SHOWDIRTYSTATE=1
+        export PS1="${GREEN}${BLUE}\W ${GREEN}\$(__git_ps1 '(%s) ')${HCOLOR}> \[\e[0m\]"
+    else
+        export PS1="${GREEN}${BLUE}\W ${HCOLOR}> \[\e[0m\]"
+    fi
+
+    unset GREEN BLUE HCOLOR
+    shopt -s checkwinsize
+else
+    endchar="\$"
+    if [ "$UID" = "0" ]; then
+        endchar="#"
+    fi
+
+    FG="\[\033[38;5;081m\]"
+    BG="\[\033[38;5;245m\]"
+    AT="\[\033[38;5;245m\]"
+    HCOLOR="\[\033[38;5;206m\]"
+    GREEN="\[\e[1;92m\]"
+
+    if [ -f ~/.git-prompt.sh ]; then
+        source ~/.git-prompt.sh
+        export GIT_PS1_SHOWDIRTYSTATE=1
+        export PS1="${FG}\u${AT}@${HCOLOR}\H ${GREEN}\$(__git_ps1 '(%s) ')${BG}\w ${FG}$endchar \[\e[0m\]"
+    else
+        export PS1="${FG}\u${AT}@${HCOLOR}\H ${BG}\w ${FG}$endchar \[\e[0m\]"
+    fi
+
+    unset FG BG AT HCOLOR GREEN
+    shopt -s checkwinsize
+fi
+
+stty -ixon -echoctl
+export VISUAL=vim
+export TERMINAL=kitty
+export EDITOR="$VISUAL"
+export PATH=$PATH:/home/$USER/myconfig/scripts
+
+# BINDS
+# set -o vi
+# bind '"jj":"\e"'
+bind "set completion-ignore-case on"
+
+# ALIASES
+alias l="ls -lh"
+alias ll="ls -lh"
+alias la="ls -lah"
+
+alias .="cd .."
+alias ..="cd ../.."
+alias ...="cd ../../.."
+alias ....="cd ../../../.."
+alias conf="cd ~/config && vi"
+alias eltex="cd ~/Dropbox/courses/eltex"
+
+alias q="exit"
+alias :q="exit"
+
+alias hibernate="systemctl hibernate -i"
+alias suspend="systemctl suspend -i"
+alias reboot="systemctl reboot -i"
+alias poweroff="systemctl poweroff -i"
+alias lock="dm-tool lock"
+alias sp="dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause > /dev/null"
+
+alias battery="watch -t -n 60 upower -i /org/freedesktop/UPower/devices/battery_BAT0"
+
+alias reload="source ~/.bashrc"
+alias google="ping -c 5 8.8.8.8"
+alias weather="curl wttr.in"
+alias orange="ssh orange"
+alias say=espeak
+alias fm="xdg-open ."
+alias efi="sudo mount /dev/sda1 /boot 2> /dev/null && cd /boot/EFI/"
+# alias vim="nvim"
+alias e="vim"
+alias f="ranger"
+alias rm="rm -r"
+alias cp="rsync -r"
+alias df="df -h"
+alias ru='trans -brief en:ru'
+alias cpuhp='ps -eo pcpu,pid,user,args | sort -k 1 -r | head -4'
+
+export cores=`grep -c ^processor /proc/cpuinfo`
+# alias make='make -j $cores'
+alias gdb='gdb -q -ex "set prompt \033[0;32m(gdb) \033[0m"'
+
+export LESS_TERMCAP_mb=$'\e[1;94m'
+export LESS_TERMCAP_md=$'\e[1;94m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[100m'
+export LESS_TERMCAP_ue=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[93m'
+export GROFF_NO_SGR=1
+
+# TMUX
+# if command -v tmux>/dev/null; then
+    # [[ ! $TERM =~ screen ]] && [ -z $TMUX ] \
+        # && { tmux attach || exec tmux new-session && exit;}
+# fi
+
