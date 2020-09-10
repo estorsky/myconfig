@@ -1,0 +1,19 @@
+[user]
+	name = Dmitry Privalov
+	email = estorsky@outlook.com
+[pull]
+	rebase = false
+[push]
+	default = current
+[core]
+        pager = less -F -X
+[oh-my-zsh]
+	hide-status = 1
+[alias]
+	sync = "!f() { git fetch && git rebase origin/"$1" --stat; }; f"
+	stat = "!f() { git diff HEAD~"$1" --stat; }; f"
+	squash = "!f() { git reset --soft HEAD~${1} && \
+	git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; };f"
+
+[include]
+	path = ~/work/.gitconfig

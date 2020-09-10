@@ -1,12 +1,13 @@
 " PLAGINS
 call plug#begin('~/.vim/plugged')
 Plug 'scrooloose/nerdtree', { 'on':  ['NERDTreeToggle', 'NERDTreeFind','NERDTreeTabsToggle']}
-Plug 'xuyuanp/nerdtree-git-plugin'
 Plug 'jistr/vim-nerdtree-tabs'
 Plug 'scrooloose/nerdcommenter'
+Plug 'vim-scripts/DoxygenToolkit.vim'
 Plug 'jiangmiao/auto-pairs'
-Plug 'junegunn/fzf' "it fzf silver_searcher
+Plug 'junegunn/fzf' "it fzf ripgrep
 Plug 'junegunn/fzf.vim'
+Plug 'dyng/ctrlsf.vim'
 Plug 'easymotion/vim-easymotion'
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
@@ -17,70 +18,76 @@ Plug 'w0rp/ale' "it shellcheck
 Plug 'majutsushi/tagbar', { 'on':  'TagbarToggle' } "it ctags
 " Plug 'xolox/vim-misc'
 " Plug 'xolox/vim-easytags'
-Plug 'itchyny/vim-cursorword', { 'for':  ['py', 'c', 'cpp'] }
+Plug 'rrethy/vim-illuminate', { 'for':  ['py', 'c', 'cpp', 'sh'] }
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'francoiscabrol/ranger.vim' "it ranger
 Plug 'tpope/vim-unimpaired'
-Plug 'qpkorr/vim-bufkill'
+Plug 'raimondi/yaifa'
+" Plug 'qpkorr/vim-bufkill'
 Plug 'tpope/vim-eunuch'
+" Plug 'terryma/vim-multiple-cursors'
+Plug 'skywind3000/asyncrun.vim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'gcmt/taboo.vim'
 Plug 'morhetz/gruvbox'
 " Plug 'yggdroot/indentline', { 'for':  ['c', 'cpp'] }
 Plug 'vim-airline/vim-airline'
-Plug 'suan/vim-instant-markdown', {'for': 'markdown'}
+Plug 'vim-airline/vim-airline-themes'
+Plug 'suan/vim-instant-markdown', {'for': 'markdown'} "sudo npm -g install instant-markdown-d
 Plug 'godlygeek/tabular'
+Plug 'lyokha/vim-xkbswitch' " it libxkbfile-devel (https://github.com/ierton/xkb-switch)
 if has('nvim')
     Plug 'rbgrouleff/bclose.vim'
 else
-    " Plug 'jszakmeister/vim-togglecursor'
 endif
 call plug#end()
 
 
 " GENERAL
-set number
-set expandtab
+
+" --codestype--
+set noexpandtab
 set tabstop=4
 set shiftwidth=4
+set cinoptions=(4,W4)
+
 autocmd BufNewFile,BufRead * setlocal formatoptions-=cro
-" set hlsearch
+set hlsearch
+set gdefault
 set incsearch
 set ignorecase
+set smartcase 
 " set clipboard=unnamedplus
 set noswapfile
 set nobackup
 set splitright
 set splitbelow
-" set mouse=a
 set mouse+=a
 if &term =~ '^screen'
     set ttymouse=xterm2
 endif
 let g:mapleader=';'
 set autoread
-" set langmap=ёйцукенгшщзхъфывапролджэячсмитьбюЁЙЦУКЕHГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ;`qwertyuiop[]asdfghjkl\\;'zxcvbnm\\,.~QWERTYUIOP{}ASDFGHJKL:\\"ZXCVBNM<>
-
-" Relativenumber
-" set relativenumber
-" autocmd InsertEnter * :set norelativenumber
-" autocmd InsertLeave * :set relativenumber
 
 
 " CUSTOMIZATION
+set number
 syntax on
 colorscheme gruvbox
 set background=dark
-set shortmess=I
+set shortmess+=O
 set noshowmode
 set cursorline
 " Colors
-" autocmd bufnewfile,bufread * hi Normal guibg=NONE ctermbg=NONE
 hi VertSplit ctermbg=NONE
 set fillchars+=vert:│
 hi SignColumn ctermbg=NONE
-" hi TabLineFill ctermfg=darkgray ctermbg=black
-" hi TabLineSel cterm=bold ctermfg=gray ctermbg=black
-" " hi TabLine ctermfg=NONE ctermbg=NONE
-hi Search cterm=none ctermfg=235 ctermbg=172
+hi TabLineFill ctermfg=gray ctermbg=black
+hi TabLineSel cterm=bold ctermfg=black ctermbg=blue
+hi TabLine cterm=bold ctermfg=gray ctermbg=black
+hi Search ctermfg=110 ctermbg=none cterm=bold
+hi Visual ctermfg=Black ctermbg=110 cterm=bold
+let g:load_doxygen_syntax=1
 
 
 " PLUGINS SETTINGS
@@ -88,6 +95,9 @@ hi Search cterm=none ctermfg=235 ctermbg=172
 " NERDTree
 let NERDTreeMinimalUI=1
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+let g:NERDTreeMapJumpNextSibling = '<Nop>'
+let g:NERDTreeMapJumpPrevSibling = '<Nop>'
+" let g:nerdtree_tabs_autofind = 1
 
 " NERDCommenter
 let g:NERDSpaceDelims = 1
@@ -104,7 +114,9 @@ let g:AutoPairsMultilineClose = 0
 " let g:AutoPairsFlyMode = 0
 
 " Airline
+let g:airline_theme='zenburn'
 let g:airline_powerline_fonts = 1
+let g:airline#extensions#xkblayout#enabled = 0
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail'
 let g:airline#extensions#tabline#show_buffers = 0
@@ -120,26 +132,54 @@ let g:airline#extensions#tabline#left_sep = ''
 let g:airline#extensions#tabline#left_alt_sep = ''
 let g:airline#extensions#tabline#right_sep = ''
 let g:airline#extensions#tabline#right_alt_sep = ''
+let g:airline#extensions#whitespace#enabled = 0
 
 " FZF
-let g:fzf_layout = { 'down': '~30%' }
-" let g:fzf_action = {
-  " \ 'enter':  'tab split',
-  " \ 'ctrl-t': 'tab split',
-  " \ 'ctrl-x': 'split',
-  " \ 'ctrl-v': 'vsplit' }
-let $FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git -g ""'
+let g:fzf_layout = { 'down': '~40%' }
+" let $FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git -g ""'
+" let $FZF_DEFAULT_COMMAND = 'ag -t -g ""'
+let $FZF_DEFAULT_COMMAND = 'rg --files'
+let g:fzf_history_dir = '~/.local/share/fzf-history'
+let g:fzf_buffers_jump = 1
+
+function! s:GotoOrOpen(command, ...)
+  for file in a:000
+    if a:command == 'e'
+      exec 'e ' . file
+    else
+      exec "tab drop " . file
+    endif
+  endfor
+endfunction
+command! -nargs=+ GotoOrOpen call s:GotoOrOpen(<f-args>)
+
+let g:fzf_action = {
+  \ 'return': 'GotoOrOpen tab',
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-v': 'vsplit' }
+
+"off search in filename in Rg
+command! -bang -nargs=* Rg
+      \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>),
+      \ 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
+
 
 " Ale
 let g:ale_enabled=0
 let g:ale_sign_column_always = 1
 let g:ale_sign_error = '•'
 let g:ale_sign_warning = '•'
-let g:ale_linters = {'c': ['gcc'], 'cpp': ['g++']}
+" let g:ale_linters = {'c': ['gcc'], 'cpp': ['g++']}
+let g:ale_linters = {'c': ['clang'], 'cpp': ['clang']}
 let g:ale_cpp_gcc_options="-Wall -Wextra -pedantic -std=c99"
+let g:ale_c_parse_makefile = 1
 hi ALEErrorSign ctermfg=160 ctermbg=NONE
 hi ALEWarningSign ctermfg=178 ctermbg=NONE
 hi ALEInfoSign ctermfg=075 ctermbg=NONE
+" let g:ale_c_clang_options="-I/home/estor/projects/ltp-n"
+" let g:ale_cpp_clang_options="-I/home/estor/projects/ltp-n"
+" let g:ale_c_gcc_autoinclude_source_dir = 1
 
 " CVim
 let g:C_Ctrl_j   = 'off'
@@ -168,47 +208,77 @@ let g:instant_markdown_autostart = 0
 " Ctags
 " set tags=tags;.git/tags;
 
+" Doxygen
+let g:DoxygenToolkit_briefTag_pre="@Synopsis  "
+let g:DoxygenToolkit_paramTag_pre="@Param "
+let g:DoxygenToolkit_returnTag="@Returns   "
+let g:DoxygenToolkit_blockHeader="-------------------------------"
+let g:DoxygenToolkit_blockFooter="---------------------------------"
+let g:DoxygenToolkit_authorName="Dmitry Privalov"
+let g:DoxygenToolkit_licenseTag='Copyright (C) 2020 ООО "Предприятие "Элтекс"'
+
+" XKBSWITCH
+let g:XkbSwitchEnabled = 1
+
 if has('nvim')
     " nmap <BS> <C-h>
+    autocmd bufnewfile,bufread * hi Normal guibg=NONE ctermbg=NONE
 else
-    map <Esc>[Z <S-Tab>
     set timeoutlen=1000 ttimeoutlen=0
     set wildmode=longest,list,full
+
+    let &t_SI.="\e[5 q" "SI = режим вставки
+    let &t_SR.="\e[3 q" "SR = режим замены
+    let &t_EI.="\e[1 q" "EI = нормальный режим
+
+    map <Esc>[Z <S-Tab>
 endif
 
 
 " BINDS
+map <silent> <2-LeftMouse> :set hlsearch<CR>:let @/=expand('<cword>')<CR>
+imap <2-LeftMouse> <c-o>*
+" imap <C-f> <plug>(fzf-complete-line)
+vmap <Leader>sf <Plug>CtrlSFVwordExec
+nmap <Leader>sf <Plug>CtrlSFCCwordPath
+nnoremap * *``
 imap jj <Esc>
 imap оо <Esc>
 map <silent> <C-n> :NERDTreeTabsToggle<CR>
 vmap <silent> <C-n> <esc>:NERDTreeTabsToggle<CR>
 map <Leader> <Plug>(easymotion-prefix)
-map <Space> <Plug>(easymotion-s)
+" map <Space> <Plug>(easymotion-s2)
+nmap <Space> <Plug>(easymotion-overwin-f2)
 nmap <C-_> <plug>NERDCommenterToggle
 vmap <C-_> <plug>NERDCommenterToggle
-nmap <silent> <F8> :TagbarToggle<CR>
-vmap <silent> <F8> <esc>:TagbarToggle<CR>
 map <silent> <C-p> :Files<CR>
 vmap <silent> <C-p> <esc>:Files<CR>
+map <Leader>m :Marks<CR>
+vmap <Leader>m <esc>:Marks<CR>
 " nnoremap <silent> ? :noh<CR>
 " vnoremap <silent> ? <esc>:noh<CR>
 nnoremap <silent> ? :let @/ = ""<CR>
 vnoremap <silent> ? <esc>:let @/ = ""<CR>
 nnoremap <silent> <esc> :noh<cr>
-nnoremap gf <C-W>gf
-nnoremap <silent> <leader>p :Ag<CR>
+nnoremap <silent> gf <C-W>gf
+nnoremap <silent> <leader>p :Rg<CR>
+nnoremap <silent> <leader>l :BLines<CR>
 nnoremap <silent> <leader>ale :ALEToggle<CR>
 nnoremap <silent> <leader>d :ALEDetail<CR>
 nnoremap <silent> <leader>r :edit!<CR>
 nnoremap <silent> , :Buffers<CR>
 " noremap <silent> <M-w> :BD<cr>
-nnoremap <Leader>re :%s/\<<C-r><C-w>\>/
-vnoremap <Leader>re :s/\<<C-r><C-w>\>/
+nnoremap <Leader>re :%s/\<<C-r><C-w>\>/<C-r><C-w>
+vnoremap <Leader>re :s/\<<C-r><C-w>\>/<C-r><C-w>
 nnoremap <Leader>a :%y+<CR>
 " nnoremap <Leader>dif :diffthis<CR>
-nnoremap <Leader>q :qa<CR>
+nnoremap <silent> <Leader>q :call ConfirmQuit(0)<CR>
 map <BS> X
-vnoremap <C-C> :w !xclip -i -sel c<CR><CR>
+nmap <C-c> ^v$h"+y<CR>
+vmap <C-c> "+y<CR>"
+
+vnoremap p "_dP"
+noremap <Leader>v "+p
 
 " Start interactive EasyAlign in visual mode (e.g. vipga)
 xmap ga <Plug>(EasyAlign)
@@ -229,6 +299,10 @@ inoremap <c-l> <right>
 nnoremap <silent> <C-w>< :exe "vertical resize " . (winwidth(0) * 3/2)<CR>
 nnoremap <silent> <C-w>> :exe "vertical resize " . (winwidth(0) * 2/3)<CR>
 
+" swap words
+nnoremap <silent> gw "_yiw:s/\(\%#\w\+\)\(\_W\+\)\(\w\+\)/\3\2\1/<CR><c-o><c-l>:nohlsearch<CR>"
+nnoremap <silent> gl "_yiw?\w\+\_W\+\%#<CR>:s/\(\%#\w\+\)\(\_W\+\)\(\w\+\)/\3\2\1/<CR><c-o><c-l>:nohlsearch<CR>"
+
 " Save file
 noremap <silent> <C-S> :update<CR>
 vnoremap <silent> <C-S> <C-C>:update<CR>
@@ -245,15 +319,18 @@ noremap <leader>7 7gt
 noremap <leader>8 8gt
 noremap <leader>9 9gt
 noremap <silent> <leader>0 :tablast<cr>
-noremap <silent> <leader>h :tabp<cr>
-noremap <silent> <leader>l :tabn<cr>
-inoremap <silent> <leader>h <Esc> :tabp<cr>
-inoremap <silent> <leader>l <Esc> :tabn<cr>
+" noremap <silent> <leader>h :tabp<cr>
+" noremap <silent> <leader>l :tabn<cr>
+" inoremap <silent> <leader>h <Esc> :tabp<cr>
+" inoremap <silent> <leader>l <Esc> :tabn<cr>
 noremap <silent> <leader>w :q<cr>
 nnoremap <silent> <leader>- :execute 'silent! tabmove ' . (tabpagenr()-2)<CR>
 nnoremap <silent> <leader>= :execute 'silent! tabmove ' . (tabpagenr()+1)<CR>
 nnoremap <silent> <Tab> :tabn<CR>
 nnoremap <silent> <S-Tab> :tabp<CR>
+vnoremap <silent> <Tab> <ESC>:tabn<CR>
+vnoremap <silent> <S-Tab> <ESC>:tabp<CR>
+nnoremap <silent> <leader><Tab> :Windows<CR>
 
 " Fugitive
 nnoremap <silent> <leader>gs :Gstatus<CR>
@@ -273,23 +350,68 @@ nnoremap <silent> <leader>gps :!git push<CR>
 nnoremap <silent> <leader>gpl :!git pull<CR>
 nnoremap <silent> <leader>gbl :Gblame<CR>
 
+nmap ]c <Plug>(GitGutterNextHunk)zz
+nmap [c <Plug>(GitGutterPrevHunk)zz
+
 " Agit
 nnoremap <silent> <leader>ag :Agit<CR>
 nnoremap <silent> <leader>agf :AgitFile<CR>
-
-
-function! SetUsLayout()
-    silent !gsettings set org.gnome.desktop.input-sources current 0
-endfunction
-
-autocmd InsertLeave * call SetUsLayout()
-
-
-" ALIASES
-command UP PlugUpdate
 
 map <silent> <C-w>j :split<CR>
 map <silent> <C-w>k :split<CR>
 map <silent> <C-w>h :vsplit<CR>
 map <silent> <C-w>l :vsplit<CR>
+
+nnoremap <silent> <leader>nf :NERDTreeTabsFind<CR>
+nnoremap <silent> <Leader>rg :Rg <C-R><C-W><CR>
+nnoremap <leader>/ /\<\><left><left>
+nnoremap <silent> <leader>t :tabnew<CR>
+
+" F-keys
+nnoremap <silent> <F2> :CtrlSFToggle<CR>
+vnoremap <silent> <F2> <Esc>:CtrlSFToggle<CR>
+inoremap <silent> <F2> <Esc>:CtrlSFToggle<CR>
+
+nnoremap <silent> <F3> :AsyncRun ctags -R --exclude={external,linux,toolchain,bootloader,prebuilt} --exclude="compilation_branch__*"<CR>
+vnoremap <silent> <F3> <Esc>:AsyncRun ctags -R --exclude={external,linux,toolchain,bootloader,prebuilt} --exclude="compilation_branch__*"<CR>
+inoremap <silent> <F3> <Esc>:AsyncRun ctags -R --exclude={external,linux,toolchain,bootloader,prebuilt} --exclude="compilation_branch__*"<CR>
+
+nnoremap <F5> :checktime<CR>
+inoremap <F5> <Esc>:checktime<CR>
+vnoremap <F5> <Esc>:checktime<CR>
+
+nnoremap <silent> <F8> :TagbarToggle<CR>
+inoremap <silent> <F8> <Esc>:TagbarToggle<CR>
+vnoremap <silent> <F8> <Esc>:TagbarToggle<CR>
+
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+
+" ALIASES
+command UP PlugUpdate
+command DelWhitespace %s/\s\+$//e
+
+
+function! ConfirmQuit(writeFile)
+    if (a:writeFile)
+        if (expand('%:t')=="")
+            echo "Can't save a file with no name."
+            return
+        endif
+        :write
+    endif
+
+    if (confirm("Do you really want to quit?", "&Yes\n&No", 2)==1)
+        :quitall
+    endif
+endfu
 

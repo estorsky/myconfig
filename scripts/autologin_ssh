@@ -1,0 +1,8 @@
+#!/usr/bin/expect 
+
+set pass "password"
+spawn ssh board_root
+expect "Password:";
+send "$pass\n"
+interact
+

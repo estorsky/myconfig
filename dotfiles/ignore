@@ -1,0 +1,8 @@
+tags
+
+external/
+linux/
+toolchain/
+bootloader/
+/* prebuilt/ */
+

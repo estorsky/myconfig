@@ -39,9 +39,11 @@
 | prefix [        | copy mode                     |
 |                 | space - select                |
 |                 | enter - paste in buf          |
+|                 | * -  search cur word          |
 |                 | :choose-buffer / = - open buf |
 | prefix + ( / )  | prev/next session             |
 | prefix + L      | last session                  |
+| list-keys       | -                             |
 
 ### dunst
 | Action               | Binding                       |
@@ -56,9 +58,9 @@
 | Action          | Binding                       |
 | --------------- | ----------------------------- |
 | ^               | start line                    |
-| ctrl+w q        | close win                     |
-| ctrl+w n        | new win                       |
-| ctrl+w o        | close all win, but cur        |
+| ctrl + w q      | close win                     |
+| ctrl + w n      | new win                       |
+| ctrl + w o      | close all win, but cur        |
 | :noh            | hide highlight                |
 | dt'             | del to '                      |
 | mp              | create mark p                 |
@@ -93,14 +95,16 @@
 | zz              | cursor centered               |
 | 3K              | open man 3                    |
 | J               | del symb \n                   |
-| :Tab /\         | tabularize \                  |
+| :Tabularize /\  | tabularize \                  |
 | :set syntax=sh  | syntax hi                     |
-
-<!-- | :vimgrep test * | поиск по файлам в текущей
-директории (:cnext -следующий результат; cpref - предыдущий результат) | -->
-<!-- | :grep | не интегрированный поиск -->
-<!-- | ; + c space - переключение комментирования -->
-<!-- https://vim.fandom.com/wiki/Jumping_to_previously_visited_locations -->
+| [{  /  }]       | go to parent bracket          |
+| [[  /  ]]       | go to bracket                 |
+| ; + t           | new tab                       |
+| Enter           | highlight cur word            |
+| ; + m           | Marks                         |
+| *               | search whole word under cur   |
+| ; + /           | search whole word             |
+| %               | move to '({""})'              |
 
 ### macros
 
@@ -118,6 +122,8 @@
 | --------------- | ----------------------------- |
 | ctrl + ]        | go to def                     |
 | ctrl + t        | go back                       |
+| ctrl + w + ]    | go to def in new window       |
+| ctrl + w + t    | go back in new window         |
 
 
 ### nerdtree:
@@ -128,6 +134,7 @@
 | s               | open in vert win              |
 | t               | open in new tab               |
 | m               | menu                          |
+| cd              | change dir                    |
 
 ### fzf commands
 
@@ -157,6 +164,8 @@
 | `Maps`            | Normal mode mappings                                                     |
 | `Helptags`        | Help tags [1]                                                            |
 | `Filetypes`       | File types                                                               |
+| p / n             | prev / next search                                                       |
+| tab               | select several files                                                     |
 
 ### ag:
 
@@ -188,10 +197,11 @@
 
 ### fugitive:
 
-| Action          | Binding                       |
-| --------------- | ----------------------------- |
-| cc              | commit                        |
-| --              | add all                       |
+| Action              | Binding                       |
+| ------------------- | ----------------------------- |
+| cc                  | commit                        |
+| --                  | add all                       |
+| in Gblame: Ctrl + o | going back to edit file       |
 
 ### gitgutter:
 

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+trap 'exit' INT
+
+ret=0
+
+if [[ -n "$1"  ]]; then
+    while true
+    do
+        while true 
+        do
+            ping $1 -c1 > /dev/null
+            ret=$?
+            if [ $ret -eq 0 ]; then
+                break
+            fi
+            sleep 1
+        done
+        sleep 3
+        # notify-send $(basename $0) "Trying connect to $1"
+        dunstify -u normal -t 10000 -r 2 "$(basename $0)" "Trying connect to $1"
+        # telnet $1
+        autologin_telnet $1
+    done
+else
+    echo "IP needed"
+fi
+

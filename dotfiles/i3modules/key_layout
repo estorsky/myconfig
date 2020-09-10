@@ -1,10 +1,22 @@
 #!/bin/bash
 
-layout=$(xset -q | grep -A 0 'LED' | cut -c59-67)
-if [[ $layout -eq "000000000" || $layout -eq "000000002" ]]; then
-    layout=US
-elif [[ $layout -eq "00001000" || $layout -eq "00001002" ]]; then
-    layout=RU
-fi
-echo -n " $layout "
+red="#FF0000"
+orange="#FFAE00"
+yellow="#FFF600"
+green="#A8FF00"
+
+while true; do
+    layout=$(xset -q | grep -A 0 'LED' | cut -c59-67)
+
+    if [[ $layout -eq "000000000" || $layout -eq "000000002" ]]; then
+        layout=US
+        color=$green
+    elif [[ $layout -eq "00001000" || $layout -eq "00001002" ]]; then
+        layout=RU
+        color=$red
+    fi
+
+    echo "<span color='$color'> $layout </span>"
+    sleep 0.3
+done
 

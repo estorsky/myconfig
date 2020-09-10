@@ -13,10 +13,11 @@ params () {
                 tr -d '\0' | cut -d= -f2-)
             $0 &
             sleep 3
+            systemctl suspend -i
             exit;;
         -q) exec 2>/dev/null;;
         -f) FREQ_CHANGE=true;;
-        -ws) SUSPEND=$((60 * 4320));;
+        -ws) SUSPEND=$((60 * 43200));;
         * ) echo "$1 is not an option"
             exit;;
     esac
@@ -92,11 +93,17 @@ cpufreq () {
 # ~/Downloads/xwobf-master/xwobf -s 5 /tmp/screen.png
 # convert /tmp/screen.png -blur 0x3 /tmp/screen.png
 # mogrify -scale 10% -scale 1000% -gamma 0.8 /tmp/screen.png
-gsettings set org.gnome.desktop.input-sources current 0
-setxkbmap -layout us
+if xkb-switch --list &> /dev/null; then
+    xkb-switch -s us
+else
+    setxkbmap "us" ",winkeys" "grp:alt_shift_toggle" "ctrl:nocaps"
+    sleep 1
+    setxkbmap "us,ru" ",winkeys" "grp:alt_shift_toggle" "ctrl:nocaps"
+    (gsettings set org.gnome.desktop.input-sources current 0) &
+fi
 playerctl pause
-dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify \
-    /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause >> /dev/null
+# dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify \
+    # /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause >> /dev/null
 brghtdn &
 # ~/Dropbox/linux/scrot /tmp/screen.png --blur 5 --icon ~/Dropbox/linux/lock.png
 # (i3lock -n -i /tmp/screen.png && rm /tmp/screen.png && pkill -P $$) &
@@ -108,14 +115,10 @@ AVGCOLOR=$(convert $tSCREEN -scale 1x1\! \
     -format '%[fx:int(255*r+.5)],%[fx:int(255*g+.5)],%[fx:int(255*b+.5)]' info:- | \
     sed 's/,/\n/g' | \
     xargs -L 1 printf "%x")
-INVCOLOR=$(printf "%X\n" $((0xffffff-0x$AVGCOLOR)))
-if [ ${#INVCOLOR} -lt 6  ]; then
-    INVCOLOR=0$INVCOLOR
-fi
+INVCOLOR=$(printf "%06X\n" $((0xffffff-0x$AVGCOLOR)))
 
 # ($DIR/i3lock -n --24 -e -i $SCREEN -w '#E08122' -o '#8AE234' -l '#34E2E2' \
 ($DIR/i3lock -n --24 -e -i $SCREEN -w ED3939 -o 8AE234 -l $INVCOLOR \
-    && setxkbmap "us,ru" ",winkeys" "grp:alt_shift_toggle" "ctrl:nocaps" \
     && brghtup \
     && cpufreq $LIMIT \
     && rm $SCREEN \
@@ -133,7 +136,7 @@ while [[ $(pgrep i3lock) ]]; do
     brghtdn
     sleep $DELAY
     xset dpms force off
-    while [[ "$(xset -q|sed -ne 's/^[ ]*Monitor is //p')" = "Off" ]]; do
+    while [[ "$(xset -q | sed -ne 's/^[ ]*Monitor is //p')" = "Off" ]]; do
         if [ $sspnd -le 0 ]; then
             sspnd=$SUSPEND
             systemctl suspend -i

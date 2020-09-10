@@ -1,0 +1,18 @@
+#!/bin/bash
+
+SNAME="remote"
+
+tmux has-session -t $SNAME > /dev/null
+test $? -eq 0 && tmux attach -t $SNAME && exit
+
+tmux new-session -s $SNAME -n comport -d
+tmux send-keys -t $SNAME 'comport' C-m
+tmux split-window -h -t $SNAME
+
+tmux new-window -t "$SNAME" -n qemu
+# tmux send-keys -t "$SNAME" "myqemu s" C-m
+tmux split-window -h -t "$SNAME"
+
+tmux select-window -t $SNAME:1
+
+tmux attach -t $SNAME

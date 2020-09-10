@@ -1,0 +1,32 @@
+#!/bin/bash
+
+EDITOR=nvim
+
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo not valid git repo
+    exit
+fi
+
+commit () {
+    $EDITOR $(git show $1 --pretty=format: --name-only) +'tab all'
+}
+
+mod () {
+    $EDITOR $(git ls-files -m) +'tab all'
+}
+
+case "$1" in
+    modified|mod|m) mod
+        exit;;
+    commit|com|c) commit $2
+        exit;;
+    *? ) echo "bad arg '$1'"
+        exit;;
+esac
+
+if [ ! -z "$(git ls-files -m)" ]; then
+    mod
+else
+    commit
+fi
+

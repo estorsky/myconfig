@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ "$#" -lt 2   ]; then
+    echo "usage: grep-mask <paramaters to include> <file from>"
+    exit
+fi
+
+
+FILE="${@: -1}"
+MASK="${@:1:$#-1}"
+MASK="${MASK// /|}"
+
+
+if [ ! -f "$FILE"  ]; then
+    echo "$FILE not exist"
+    exit
+fi
+
+
+grep -E "$MASK" "$FILE" > "$FILE.grep"
+

@@ -1,0 +1,12 @@
+#!/usr/bin/expect 
+
+set ip [lindex $argv 0]
+set pass "password"
+set user "admin"
+spawn telnet $ip
+expect "login:"
+send "$user\n"
+expect "Password:";
+send "$pass\n"
+interact
+

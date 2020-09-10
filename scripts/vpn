@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd ~/Dropbox/work/vpn/
+sudo ~/Dropbox/work/vpn/vpn.sh
+

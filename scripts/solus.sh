@@ -2,19 +2,21 @@
 
 trap 'exit' INT
 
-# if [[ $(id -u) -ne 0 ]];then
-    # echo run with root
-    # exit
-# fi
-
-echo -n "Checking internet connection..."
-wget -q --spider http://google.com
-if [ $? -ne 0 ]; then
-    echo "off"
+if [[ $(id -u) -ne 0 ]]; then
+    sudo $0 $1
     exit
-else
-    echo "on"
 fi
+
+check_connection () {
+    echo -n "Checking internet connection..."
+    wget -q --spider http://google.com
+    if [ $? -ne 0 ]; then
+        echo "off"
+        exit
+    else
+        echo "on"
+    fi
+}
 
 LINK="https://raw.githubusercontent.com/getsolus/3rd-party/master"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -24,27 +26,30 @@ init () {
 
     # sudo eopkg up
     sudo eopkg it -y screenfetch telegram nautilus-dropbox git vim tmux vlc \
-        htop fish albert linux-lts-headers make gcc g++ gnome-tweaks \
+        htop zsh albert linux-lts-headers make gcc g++ gnome-tweaks \
         simplenote llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
-        linux-current-headers lm_sensors geary qbittorrent wireshark xkill \
+        linux-current-headers lm_sensors qbittorrent wireshark xkill \
         neovim mtr python3-ipython i3lock krita ranger cmus cava etcher \
         speedtest-cli cmatrix highlight curl-gnutls iotop iftop sshfs-fuse \
-        glances feh gnuplot shellcheck kdeconnect translate-shell rsync geary \
-        openvpn intel-microcode i3blocks i3 compton lxappearance dunst
+        glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
+        openvpn intel-microcode i3blocks i3 compton lxappearance dunst kitty \
+        xsel docker pidgin pavucontrol doxygen cppcheck font-awesome-ttf \
+        ripgrep net-snmp expect qemu dnsmasq openssh-server xev openjdk-8 \
+        ghex picocom golang
     # sudo eopkg it iw aircrack-ng libpcap-devel hashcat bzip2-devel
     sudo eopkg it -y -c system.devel
     sudo eopkg it -y silver-searcher ctags fzf # for vim
-    sudo eopkg remove -y firefox hexchat thunderbird transmission
+    sudo eopkg remove -y firefox hexchat transmission
 
-    gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
-    gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
+    # gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
+    # gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
 
     # autostart unit
-    sudo cp ../../.myconfig/systemd/autostart_root.service /etc/systemd/system/
-    systemctl enable autostart_root.service
-    systemctl start autostart_root.service
-    systemctl status autostart_root.service
-    sudo chattr +i ../../.myconfig/scripts/autostart_root.sh
+    # sudo cp ../../.myconfig/systemd/autostart_root.service /etc/systemd/system/
+    # systemctl enable autostart_root.service
+    # systemctl start autostart_root.service
+    # systemctl status autostart_root.service
+    # sudo chattr +i ../../.myconfig/scripts/autostart_root.sh
 
     # lockscreen unit
     # sudo cp ../../.myconfig/systemd/lockscreen.service /etc/systemd/system/
@@ -65,9 +70,9 @@ init () {
     sudo eopkg it sublime*.eopkg;sudo rm sublime*.eopkg
 
     # TeamViewer
-    sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
-    sudo eopkg it teamviewer*.eopkg; sudo rm teamviewer*.eopkg
-    sudo systemctl start teamviewerd.service
+    # sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
+    # sudo eopkg it teamviewer*.eopkg; sudo rm teamviewer*.eopkg
+    # sudo systemctl start teamviewerd.service
 
     # Fonts
     sudo eopkg bi --ignore-safety $LINK/desktop/font/mscorefonts/pspec.xml
@@ -78,7 +83,7 @@ update () {
     sudo eopkg -y up
 
     # VIM
-    vi +PlugUpdate +qa && echo "vim is updated!"
+    # sudo -u estor vi +PlugUpdate +qa && echo "vim is updated!"
 
     # Google Chrome
     if eopkg li | grep -q google-chrome; then
@@ -99,11 +104,11 @@ update () {
     fi
 
     # TeamViewer
-    if eopkg li | grep -q teamviewer; then
-        sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
-        sudo eopkg it teamviewer*.eopkg; sudo rm teamviewer*.eopkg
-        sudo systemctl start teamviewerd.service
-    fi
+    # if eopkg li | grep -q teamviewer; then
+        # sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
+        # sudo eopkg it teamviewer*.eopkg; sudo rm teamviewer*.eopkg
+        # sudo systemctl start teamviewerd.service
+    # fi
 }
 
 clean () {
@@ -113,8 +118,8 @@ clean () {
 if [[ -n "$1" ]]
 then
     case "$1" in
-        init) init; exit;;
-        up) update; exit;;
+        init) check_connection; init; exit;;
+        up) check_connection; update; exit;;
         clean) clean; exit;;
         * ) echo "$1 is not an option"
             exit;;

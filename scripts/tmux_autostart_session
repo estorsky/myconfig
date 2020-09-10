@@ -1,0 +1,20 @@
+#!/bin/bash
+
+usr/bin/tmux new-session -s autostart -n bot -d
+usr/bin/tmux send-keys -t autostart 'cd ~/road_bot' C-m
+usr/bin/tmux send-keys -t autostart 'git pull && make clean && make' C-m
+usr/bin/tmux send-keys -t autostart './run.sh' C-m
+usr/bin/tmux split-window -h -t autostart
+usr/bin/tmux select-layout -t autostart main-vertical
+usr/bin/tmux send-keys -t autostart:1.2 'cd ~/road_bot && ranger' C-m
+
+usr/bin/tmux new-window -n kbrace -t autostart
+usr/bin/tmux send-keys -t autostart:2 'cd ~/kbrace' C-m
+usr/bin/tmux send-keys -t autostart:2 'git pull && make clean && make' C-m
+usr/bin/tmux send-keys -t autostart:2 './kbrace_server' C-m
+
+usr/bin/tmux new-window -n htop -t autostart
+usr/bin/tmux send-keys -t autostart:3 'htop' C-m
+
+usr/bin/tmux select-window -t autostart:1
+

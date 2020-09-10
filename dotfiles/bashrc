@@ -1,5 +1,5 @@
 # PROMPT
-if [ "$HOSTNAME" = estor ]; then
+if [ "$HOSTNAME" = estor ] || [ "$USER" = estor ]; then
     GREEN="\[\e[1;92m\]"
     BLUE="\[\033[38;5;081m\]"
     HCOLOR="\[\033[38;5;206m\]"
@@ -43,11 +43,24 @@ export VISUAL=vim
 export TERMINAL=kitty
 export EDITOR="$VISUAL"
 export PATH=$PATH:/home/$USER/myconfig/scripts
+export PATH=$PATH:/home/$USER/.cargo/bin
+export PATH=$PATH:/home/$USER/Dropbox/bin
 
 # BINDS
 # set -o vi
 # bind '"jj":"\e"'
-bind "set completion-ignore-case on"
+export PROMPT_COMMAND="history -a; history -n"
+bind 'set completion-ignore-case on'
+bind 'set show-all-if-ambiguous on'
+bind 'set menu-complete-display-prefix on'
+bind 'set colored-completion-prefix on'
+bind 'set match-hidden-files off'
+bind 'set colored-stats on'
+
+bind 'TAB:menu-complete'
+bind '"\e[Z": menu-complete-backward'
+bind '"\e[A": history-search-backward'
+# bind '"\e[B": history-previous-history'
 
 # ALIASES
 alias l="ls -lh"
@@ -58,7 +71,7 @@ alias .="cd .."
 alias ..="cd ../.."
 alias ...="cd ../../.."
 alias ....="cd ../../../.."
-alias conf="cd ~/config && vi"
+alias conf="cd ~/myconfig && vi"
 alias eltex="cd ~/Dropbox/courses/eltex"
 
 alias q="exit"
@@ -88,6 +101,7 @@ alias cp="rsync -r"
 alias df="df -h"
 alias ru='trans -brief en:ru'
 alias cpuhp='ps -eo pcpu,pid,user,args | sort -k 1 -r | head -4'
+alias watch="watch -t"
 
 export cores=`grep -c ^processor /proc/cpuinfo`
 # alias make='make -j $cores'

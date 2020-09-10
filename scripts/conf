@@ -1,0 +1,14 @@
+#!/bin/bash
+
+tmux has-session -t conf > /dev/null
+test $? -eq 0 && tmux attach -t conf && exit
+
+tmux new-session -s conf -n myconfig -d
+tmux send-keys -t conf 'cd myconfig && sleep 1; vg' C-m
+tmux split-window -h -t conf
+tmux send-keys -t conf 'cd myconfig && clear' C-m
+tmux select-layout -t conf main-vertical
+
+tmux select-window -t conf:1
+
+tmux attach -t conf

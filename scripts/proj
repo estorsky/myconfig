@@ -1,0 +1,54 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+    echo pls enter first arg - project, second - name tmux session
+    exit
+fi
+
+case "$1" in
+    ltp-x|ltpx|x) PNAME="ltp-x";;
+    MA4000|ma4000|ma4k|ma|m) PNAME="MA4000";;
+    ltp-n_1|ltpn1|n1) PNAME="ltp-n_1";;
+    ltp-n_2|ltpn2|n2) PNAME="ltp-n_2";;
+    ltp-n_3|ltpn3|n3) PNAME="ltp-n_3";;
+    * ) echo "dont know project '$1'"
+        exit;;
+esac
+
+cd ~/projects/$PNAME
+
+if [ -z "$2" ]; then
+    SNAME="[$(basename $(pwd))] $(git symbolic-ref --short -q HEAD)"
+    SNAME=${SNAME//./,}
+else
+    SNAME="[$1] $2"
+fi
+
+tmux has-session -t "$SNAME" > /dev/null
+test $? -eq 0 && tmux attach -t "$SNAME" && exit
+
+tmux new-session -s "$SNAME" -n src -d
+tmux send-keys -t "$SNAME" "cd ~/projects/$PNAME && clear" C-m
+tmux send-keys -t "$SNAME" "ctags -R \
+    --exclude={external,linux,toolchain,bootloader,prebuilt} \
+    --exclude='compilation_branch__*' \
+    && vg" C-m C-n F8
+
+tmux new-window -t "$SNAME" -n build
+tmux send-keys -t "$SNAME" "dockerun.sh $1" C-m
+tmux split-window -h -t "$SNAME"
+tmux send-keys -t "$SNAME" "cd ~/projects/$PNAME && \
+    clear && sleep 1 && ranger" C-m
+tmux split-window -v -t "$SNAME"
+tmux send-keys -t "$SNAME" "cd ~/projects/$PNAME && \
+    clear && sleep 1 && vim *.sh +'tab all'" C-m C-n
+
+tmux new-window -t "$SNAME" -n search
+tmux send-keys -t "$SNAME" "cd ~/projects/$PNAME && clear" C-m
+tmux split-window -h -t "$SNAME"
+tmux send-keys -t "$SNAME" "cd ~/projects/$PNAME && clear" C-m
+
+tmux select-window -t "$SNAME":1
+
+tmux attach -t "$SNAME"
+

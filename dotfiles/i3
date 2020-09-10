@@ -31,22 +31,23 @@ set $right l
 # is used in the bar {} block below.
 # font pango:Clear Sans Bold 9
 font pango: Roboto Bold 9
-# font pango:System San Francisco Display 10
-# font pango:Hack Bold 9
 for_window [class=".*"] title_format "  %title"
-# new_window 1pixel
 workspace_layout tabbed
 
 ########## Autolaunch ##########
+exec_always --no-startup-id feh --randomize --no-fehbg --bg-fill ~/Dropbox/images/chen/*
+exec setxkbmap "us,ru" ",winkeys" "grp:alt_shift_toggle" "ctrl:nocaps"
 exec_always --no-startup-id nm-applet
 exec --no-startup-id /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
-# exec telegram
 exec telegram-desktop
+exec thunderbird
 exec dropbox start
+exec albert
+# exec_always compton -f -c -I 0.1 -O 0.1 -o 0.3 --inactive-dim 0.2 # -r 12
 
 ########## Keybindings ##########
 # bindsym Mod4+Shift+s exec i3lock # Easier locking
-bindsym Mod4+Shift+s exec $HOME/myconfig/lockscreen/lock.sh -f
+bindsym Mod4+Shift+s exec $HOME/myconfig/lockscreen/lock.sh -ws
 
 ### Backlight ###
 # Note: If light doesn't work, install xbacklight and 1) uncomment the two lines below.
@@ -81,7 +82,7 @@ bindsym Mod4+Return exec kitty
 
 # kill focused window
 bindsym Mod4+q kill
-bindsym $alt+F4 kill
+bindsym Mod1+F4 kill
 
 # start dmenu (a program launcher)
 # bindsym Mod4+d exec dmenu_run
@@ -142,16 +143,17 @@ bindsym Mod4+minus scratchpad show
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws1 "  1  "
-set $ws2 "  2  "
-set $ws3 "  3  "
-set $ws4 "  4  "
-set $ws5 "  5  "
-set $ws6 "  6  "
-set $ws7 "  7  "
-set $ws8 "  8  "
-set $ws9 "  9  "
-set $ws10 "  10  "
+set $ws1  "   1     "
+set $ws2  "   2     "
+set $ws3  "   3     "
+set $ws4  "   4     "
+set $ws5  "   5     "
+set $ws6  "   6     "
+set $ws7  "   7     "
+set $ws8  "   8     "
+set $ws9  "   9     "
+set $ws10 "  10     "
+#  
 
 
 # switch to workspace
@@ -179,19 +181,21 @@ bindsym Mod4+Shift+9 move container to workspace $ws9
 bindsym Mod4+Shift+0 move container to workspace $ws10
 
 # move container
-# bindsym Mod4+z move workspace to output left
-# bindsym Mod4+x move workspace to output right
+bindsym Mod4+Shift+greater move container to output right
+bindsym Mod4+Shift+less move container to output left
+bindsym Mod4+greater move workspace to output right
+bindsym Mod4+less move workspace to output left
 
-workspace $ws1 output HDMI1 eDP1
-workspace $ws2 output HDMI1 eDP1
-workspace $ws3 output HDMI1 eDP1
-workspace $ws4 output HDMI1 eDP1
-workspace $ws5 output HDMI1 eDP1
-workspace $ws6 output HDMI1 eDP1
-workspace $ws7 output HDMI1 eDP1
-workspace $ws8 output HDMI1 eDP1
-workspace $ws9 output HDMI1 eDP1
-workspace $ws10 output HDMI1 eDP1
+workspace $ws1  output HDMI-1 eDP-1 DP-1
+workspace $ws2  output HDMI-1 eDP-1 DP-1
+workspace $ws3  output HDMI-1 eDP-1 DP-1
+workspace $ws4  output HDMI-1 eDP-1 DP-1
+workspace $ws5  output HDMI-1 eDP-1 DP-1
+workspace $ws6  output eDP-1 DP-1 HDMI-1 
+workspace $ws7  output eDP-1 DP-1 HDMI-1 
+workspace $ws8  output eDP-1 DP-1 HDMI-1 
+workspace $ws9  output eDP-1 DP-1 HDMI-1 
+workspace $ws10 output eDP-1 DP-1 HDMI-1 
 
 
 # reload the configuration file
@@ -259,18 +263,19 @@ set $bg-color            #222222
 set $inactive-bg-color   #3E3E46
 set $text-color          #DEDEDE
 set $inactive-text-color #DEDEDE
-set $urgent-bg-color     #E53935
+set $urgent-bg-color     #CB1D1A
 set $border              #355F90
 
-client.focused          $border           $border          $text-color          #00ff00
-client.unfocused        $inactive-bg-color  $inactive-bg-color $inactive-text-color #00ff00
-client.focused_inactive $border  $border $text-color #00ff00
-client.urgent           $urgent-bg-color    $urgent-bg-color   $text-color          #00ff00
+client.focused          $bg-color  $border            $text-color          #00ff00
+client.focused_inactive $bg-color  $inactive-bg-color $text-color          #00ff00
+client.unfocused        $bg-color  $inactive-bg-color $inactive-text-color #00ff00
+client.urgent           $bg-color  $urgent-bg-color   $text-color          #00ff00
 
 # bar
 bar {
-    output eDP1
+    output eDP-1
     tray_padding 3
+    tray_output primary
     status_command i3blocks -c $HOME/myconfig/dotfiles/i3blocks.conf
         position top
         colors {
@@ -284,9 +289,28 @@ bar {
 }
 
 bar {
-    output HDMI1
-    # tray_output none
+    output DP-1
+    tray_padding 3
     tray_output primary
+    status_command i3blocks -c $HOME/myconfig/dotfiles/i3blocks.conf
+        position top
+        colors {
+        background $bg-color
+        statusline $text-color
+        separator #757575
+        focused_workspace  $border          $border          $text-color
+        inactive_workspace $bg-color $bg-color $inactive-text-color
+        urgent_workspace   $urgent-bg-color   $urgent-bg-color   $text-color
+        active_workspace $inactive-bg-color $inactive-bg-color $inactive-text-color
+    }
+}
+
+bar {
+    output HDMI-1
+    tray_output primary
+    # tray_output none
+    # tray_output HDMI-1
+    tray_padding 3
     status_command i3blocks -c $HOME/myconfig/dotfiles/i3blocks.conf
         position top
         colors {
@@ -301,26 +325,24 @@ bar {
 
 ########## i3-gaps integration ##########
 
-for_window [class="^.*"] border pixel 3
+# for_window [class="^.*"] border pixel 3
 for_window [window_role="pop-up"] floating enable
 for_window [window_role="task_dialog"] floating enable
 for_window [title="Preferences$"] floating enable
 
 # smart_borders no_gaps
-smart_gaps on
-gaps inner 5
+# smart_gaps on
+gaps inner 0
 gaps outer 0
 
+hide_edge_borders smart
 
 assign [class="Telegram"] $ws10
-for_window [class="Spotify"] move to workspace $ws10
+assign [class="Pidgin"] $ws10
+assign [class="Geary"] $ws9
+assign [class="Thunderbird"] $ws9
+# for_window [class="Spotify"] move to workspace $ws7
 for_window [instance="gnome-calculator"] floating enable
-
-exec_always feh --bg-scale $HOME/Dropbox/alena-aenami-you-1k-2.jpg
-bindsym Mod4+Shift+greater move container to output right
-bindsym Mod4+Shift+less move container to output left
-bindsym Mod4+greater move workspace to output right
-bindsym Mod4+less move workspace to output left
 
 bindsym Mod4+Tab workspace next
 bindsym Mod4+Shift+Tab workspace prev
@@ -331,15 +353,12 @@ bindsym Mod4+d exec $HOME/myconfig/scripts/albert.sh
 bindsym Mod4+n exec kitty -e ranger
 bindsym Mod4+b exec simplenote
 bindsym Mod4+c exec gnome-calculator
-bindsym Mod4+p exec $HOME/myconfig/scripts/xrndrtgl
+# bindsym Mod4+p exec $HOME/myconfig/scripts/xrndrtgl
 bindsym Mod4+t exec $HOME/myconfig/scripts/translate.sh
-# bindsym Mod4+u exec $HOME/test.sh
 bindsym --release Mod4+Shift+q exec xkill
 bindsym Control+Shift+Escape exec gnome-system-monitor
-
-exec_always setxkbmap "us,ru" ",winkeys" "grp:alt_shift_toggle" "ctrl:nocaps"
-exec albert
 bindsym Control+space exec $HOME/myconfig/scripts/albert.sh
-exec spotify
-# exec_always compton -f -c -I 0.1 -O 0.1 -o 0.3 --inactive-dim 0.2 # -r 12
+# bindsym Mod4+u exec $HOME/test.sh
+bindsym Mod1+Tab focus output right
+bindsym --release button2 kill
 

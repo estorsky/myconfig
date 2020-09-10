@@ -1,0 +1,13 @@
+[Unit]
+Description=Autostart tmux session
+Requires=network.target local-fs.target
+After=network.target local-fs.target
+
+[Service]
+Type=oneshot
+User=dmitry
+ExecStart=/home/dmitry/myconfig/scripts/tmux_autostart_session
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
