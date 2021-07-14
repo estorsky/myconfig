@@ -6,11 +6,14 @@ FREQ_CHANGE=false
 
 params () {
     case "$1" in
-        -s) USER=$(whoami)
-            PIDGN=$(pgrep -u $USER gnome-session)
-            export DBUS_SESSION_BUS_ADDRESS=$(\
-                grep -z DBUS_SESSION_BUS_ADDRESS /proc/$PIDGN/environ | \
-                tr -d '\0' | cut -d= -f2-)
+        -s) 
+            if [ "$XDG_CURRENT_DESKTOP" == "Budgie:GNOME" ]; then
+                USER=$(whoami)
+                PIDGN=$(pgrep -u $USER gnome-session)
+                export DBUS_SESSION_BUS_ADDRESS=$(\
+                    grep -z DBUS_SESSION_BUS_ADDRESS /proc/$PIDGN/environ | \
+                    tr -d '\0' | cut -d= -f2-)
+            fi
             $0 &
             sleep 3
             systemctl suspend -i
@@ -96,14 +99,14 @@ cpufreq () {
 if xkb-switch --list &> /dev/null; then
     xkb-switch -s us
 else
-    setxkbmap "us" ",winkeys" "grp:alt_shift_toggle" "ctrl:nocaps"
+    setxkbmap -layout us -option grp:alt_shift_toggle -option ctrl:nocaps
     sleep 1
-    setxkbmap "us,ru" ",winkeys" "grp:alt_shift_toggle" "ctrl:nocaps"
+    setxkbmap -layout us,ru -option grp:alt_shift_toggle -option ctrl:nocaps
     (gsettings set org.gnome.desktop.input-sources current 0) &
 fi
 playerctl pause
-# dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify \
-    # /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause >> /dev/null
+dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify \
+    /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause >> /dev/null
 brghtdn &
 # ~/Dropbox/linux/scrot /tmp/screen.png --blur 5 --icon ~/Dropbox/linux/lock.png
 # (i3lock -n -i /tmp/screen.png && rm /tmp/screen.png && pkill -P $$) &

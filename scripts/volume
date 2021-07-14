@@ -1,6 +1,14 @@
 #!/bin/bash
 
-if [[ -n "$1" ]]; then
+# check if num
+case $1 in
+    ''|*[!0-9]*) echo "enter num in arg (0-10)"; exit;;
+    *) ;;
+esac
+
+if [[ "$1" -ge "0" && "$1" -le "10" ]]; then
     amixer -q sset Master ${1}0%
+else
+    echo "enter num in arg (0-10)"
 fi
 

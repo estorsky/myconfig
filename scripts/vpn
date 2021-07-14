@@ -1,5 +1,13 @@
 #!/bin/bash
 
-cd ~/Dropbox/work/vpn/
-sudo ~/Dropbox/work/vpn/vpn.sh
+case "$1" in
+    work|eltex)
+        cd ~/Dropbox/work/vpn/
+        sudo ~/Dropbox/work/vpn/vpn.sh
+        exit;;
+    *)
+        cd ~/Dropbox/other/
+        sudo openvpn us-free-01.protonvpn.com.udp.ovpn
+        exit;;
+esac
 

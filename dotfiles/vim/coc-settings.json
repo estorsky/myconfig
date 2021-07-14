@@ -1,0 +1,7 @@
+{
+  "explorer.file.cdCommand": "tcd",
+  "explorer.keyMappings.global": {
+    "<tab>": false,
+    "i":"actionMenu"
+  }
+}

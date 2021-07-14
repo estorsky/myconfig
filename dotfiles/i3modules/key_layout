@@ -6,14 +6,25 @@ yellow="#FFF600"
 green="#A8FF00"
 
 while true; do
-    layout=$(xset -q | grep -A 0 'LED' | cut -c59-67)
+    if xkb-switch --list &> /dev/null; then
 
-    if [[ $layout -eq "000000000" || $layout -eq "000000002" ]]; then
-        layout=US
-        color=$green
-    elif [[ $layout -eq "00001000" || $layout -eq "00001002" ]]; then
-        layout=RU
-        color=$red
+        if [[ "$(xkb-switch)" -eq "us" ]]; then
+            layout=US
+            color=$green
+        else
+            layout=RU
+            color=$red
+        fi
+    else
+        layout=$(xset -q | grep -A 0 'LED' | cut -c59-67)
+
+        if [[ $layout -eq "000000000" || $layout -eq "000000002" ]]; then
+            layout=US
+            color=$green
+        elif [[ $layout -eq "00001000" || $layout -eq "00001002" ]]; then
+            layout=RU
+            color=$red
+        fi
     fi
 
     echo "<span color='$color'> $layout </span>"

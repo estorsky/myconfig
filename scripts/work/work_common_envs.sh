@@ -1,0 +1,2 @@
+export COMMON_INTERFACE=enp3s0
+

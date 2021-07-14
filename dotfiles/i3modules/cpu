@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# 1 - left click, 2 - middle click, 3 - right click, 4 - up wheel, 5 - down wheel.
+
+if [[ ! -z "${BLOCK_BUTTON}" ]]; then
+    ~/myconfig/scripts/cpufreq > /dev/null
+fi
+
 red="#FF0000"
 orange="#FFAE00"
 yellow="#FFF600"
