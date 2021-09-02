@@ -1,0 +1,27 @@
+" call plug#begin('~/.vim/plugged')
+" Plug 'morhetz/gruvbox'
+" Plug 'mtdl9/vim-log-highlighting'
+" call plug#end()
+"
+" autocmd TermOpen * set syntax=log
+
+" let s:hidden_all = 1
+" set noruler
+" set laststatus=0
+" set noshowcmd
+
+" colorscheme gruvbox
+
+" set noshowmode
+
+setlocal nonumber
+set syntax=log
+hi Normal ctermfg=white
+set laststatus=0
+setlocal nocursorline
+nnoremap <buffer> <Enter> i
+vnoremap <buffer> <Enter> <Esc>i
+tnoremap <buffer> <Esc> <C-\><C-n>
+tnoremap <buffer> jj <C-\><C-n>
+setlocal scrollback=100000
+setlocal redrawtime=10000

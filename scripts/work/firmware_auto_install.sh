@@ -1,4 +1,4 @@
-#!/usr/bin/expect 
+#!/usr/bin/expect
 
 set pass "password"
 spawn firmware_install.sh

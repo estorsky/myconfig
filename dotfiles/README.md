@@ -6,6 +6,12 @@
 | --------------- | ----------------------------- |
 | shift + mouse   | sel area                      |
 
+### picocom
+
+| Action             | Binding                       |
+| ------------------ | ----------------------------- |
+| ctrl + a  ctrl + x | exit picocom                  |
+
 ### bash
 
 | Action          | Binding                       |
@@ -19,31 +25,41 @@
 | ctrl + f        | mv forw one character         |
 | alt + f         | mv forw one word              |
 
-
-### tmux
+### zsh
 
 | Action          | Binding                       |
 | --------------- | ----------------------------- |
-| prefix + p / n  | prev / next win               |
-| prefix + &      | win win                       |
-| prefix + x      | kill pane                     |
-| prefix + d      | detach                        |
-| prefix + space  | change loc win                |
-| prefix +  { / } | move pane left/right          |
-| prefix + z      | fullsize win                  |
-| prefix + /      | serach                        |
-| prefix + ,      | rename window                 |
-| prefix w        | win list                      |
-| prefix !        | pane on new window            |
-| :capture-pane   | pane copy in buf              |
-| prefix [        | copy mode                     |
-|                 | space - select                |
-|                 | enter - paste in buf          |
-|                 | * -  search cur word          |
-|                 | :choose-buffer / = - open buf |
-| prefix + ( / )  | prev/next session             |
-| prefix + L      | last session                  |
-| list-keys       | -                             |
+| ctrl + t        | fzf file                      |
+| alt + c         | cd dir                        |
+
+### tmux
+
+| Action           | Binding                       |
+| ---------------- | ----------------------------- |
+| prefix + p / n   | prev / next win               |
+| prefix + &       | win win                       |
+| prefix + x       | kill pane                     |
+| prefix + d       | detach                        |
+| prefix + space   | change loc win                |
+| prefix +  { / }  | move pane left/right          |
+| prefix + z       | fullsize win                  |
+| prefix + /       | serach                        |
+| prefix + ,       | rename window                 |
+| prefix w         | win list                      |
+| prefix !         | pane on new window            |
+| :capture-pane    | pane copy in buf              |
+| prefix [         | copy mode                     |
+|                  | space - select                |
+|                  | enter - paste in buf          |
+|                  | * -  search cur word          |
+|                  | :choose-buffer / = - open buf |
+| prefix + ( / )   | prev/next session             |
+| prefix + L       | last session                  |
+| list-keys        | -                             |
+| ---------------- | ----------------------------- |
+| copy mode: y     | copy to clipboard             |
+| prefix + Alt + x | kill window                   |
+| prefix + X       | kill session                  |
 
 ### dunst
 | Action               | Binding                       |
@@ -64,6 +80,7 @@
 | :noh            | hide highlight                |
 | dt'             | del to '                      |
 | mp              | create mark p                 |
+| ''              | last location                 |
 | 'p              | mv to mark p                  |
 | '.              | mv to last change             |
 | mD              | global mark                   |
@@ -96,6 +113,7 @@
 | 3K              | open man 3                    |
 | J               | del symb \n                   |
 | :Tabularize /\  | tabularize \                  |
+| :tabdo e        | reload all tabs               |
 | :set syntax=sh  | syntax hi                     |
 | [{  /  }]       | go to parent bracket          |
 | [[  /  ]]       | go to bracket                 |
@@ -105,6 +123,26 @@
 | *               | search whole word under cur   |
 | ; + /           | search whole word             |
 | %               | move to '({""})'              |
+| ctrl + c        | copy to clipboard             |
+| E file.txt      | open file in new tab          |
+
+### spell checking
+
+| Action          | Binding                       |
+| --------------- | ----------------------------- |
+| ]s / [s         | next/prev misspelled word     |
+| z=              | show alternatives             |
+| zg              | add word to dict              |
+| zug             | undo add work to dict         |
+| zw              | mark word incorrect           |
+
+#### paste text in several lines
+* Move the cursor to the n in name.
+* Enter visual block mode (Ctrlv).
+* Press j three times (or 3j).
+* Press I (capital i).
+* Type text.
+* Press Esc.
 
 ### macros
 
@@ -207,8 +245,8 @@
 
 | Action          | Binding                       |
 | --------------- | ----------------------------- |
-| [c / ]c         | go to next / prev commit      |
-| ;hu             | undo commit                   |
+| ]c / [c         | go to next / prev changes     |
+| ;hu             | undo changes                  |
 | ;hp             | previw                        |
 | ;hs             | stage                         |
 | git reset HEAD^ | roll back last commit         |
@@ -239,6 +277,24 @@
 | |File type detection for sudo -e is based on original file name.                       |
 | |New files created with a shebang line are automatically made executable.              |
 | |New init scripts are automatically prepopulated with /etc/init.d/skeleton.            |
+
+### CtrlSF
+
+| Action                 | Binding                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| Enter, o, double-click | Open corresponding file of current line in the window which CtrlSF is launched from. |
+| C + O                  | Like Enter but open file in a horizontal split window.                               |
+| t                      | Like Enter but open file in a new tab.                                               |
+| p                      | Like Enter but open file in a preview window.                                        |
+| P                      | Like Enter but open file in a preview window and switch focus to it.                 |
+| O                      | Like Enter but always leave CtrlSF window opening.                                   |
+| T                      | Like t but focus CtrlSF window instead of new opened tab.                            |
+| M                      | Switch result window between normal view and compact view.                           |
+| q                      | Quit CtrlSF window.                                                                  |
+| C + J                  | Move cursor to next match.                                                           |
+| C + K                  | Move cursor to previous match.                                                       |
+| C + C                  | Stop a background searching process.                                                 |
+| q                      | Close preview window.                                                                |
 
 
 ### Funcs and tricks

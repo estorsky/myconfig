@@ -41,6 +41,7 @@ if (/Currently/) {chomp;/\<title\>Currently: (.*)?\<\/title\>/;
         $values[0] eq "Mostly Cloudy W/ Showers" ||
         $values[0] eq "Partly Sunny w/ Showers" ||
         $values[0] eq "T-Storms" ||
+        $values[0] eq "Thunderstorms" ||
         $values[0] eq "Mostly Cloudy w/ T-Storms" ||
         $values[0] eq "Partly Sunny w/ T-Storms" ||
         $values[0] eq "Rain")

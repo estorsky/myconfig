@@ -1,32 +1,77 @@
 #!/bin/bash
 
+set -e
+
 trap 'exit' INT
-
-if [[ $(id -u) -ne 0 ]]; then
-    sudo $0 $1
-    exit
-fi
-
-check_connection () {
-    echo -n "Checking internet connection..."
-    wget -q --spider http://google.com
-    if [ $? -ne 0 ]; then
-        echo "off"
-        exit
-    else
-        echo "on"
-    fi
-}
 
 LINK="https://raw.githubusercontent.com/getsolus/3rd-party/master"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+source $DIR/common_funcs.sh
+
+run_with_root $1
+
+install__xkb_switch () {
+    set -x
+
+    ldconfig /usr/local/lib
+
+    cd /tmp/
+
+    if [[ "$1" == "i3" ]]; then
+        # jsoncpp-devel libsigc++-devel i3-devel
+        rm -rf /tmp/xkb-switch-i3
+        gclonecd https://github.com/zebradil/xkb-switch-i3
+        git submodule update --init
+    else
+        rm -rf /tmp/xkb-switch
+        gclonecd https://github.com/grwlf/xkb-switch.git
+    fi
+
+    mkdir build && cd build
+    cmake ..
+    make
+
+    make install
+
+    cd /tmp/
+
+    ln -sf /usr/local/bin/xkb-switch /usr/bin/xkb-switch
+}
+
+install__google_chrome () {
+    sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
+    sudo eopkg it google-chrome-*.eopkg;sudo rm google-chrome-*.eopkg
+}
+
+install__spotify () {
+    sudo eopkg bi --ignore-safety $LINK/multimedia/music/spotify/pspec.xml
+    sudo eopkg it spotify*.eopkg;sudo rm spotify*.eopkg
+}
+
+install__sublime_text_3 () {
+    sudo eopkg bi --ignore-safety $LINK/programming/sublime-text-3/pspec.xml
+    sudo eopkg it sublime*.eopkg;sudo rm sublime*.eopkg
+}
+
+install__team_viewer () {
+    sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
+    sudo eopkg it teamviewer*.eopkg; sudo rm teamviewer*.eopkg
+    sudo systemctl start teamviewerd.service
+}
+
+install__ms_fonts () {
+    sudo eopkg bi --ignore-safety $LINK/desktop/font/mscorefonts/pspec.xml
+    sudo eopkg it mscorefonts*.eopkg;sudo rm mscorefonts*.eopkg
+}
+
 init () {
     cd $DIR
 
-    # sudo eopkg up
+    sudo eopkg up -y
+
     sudo eopkg it -y screenfetch telegram nautilus-dropbox git vim tmux vlc \
-        htop zsh albert linux-lts-headers make gcc g++ gnome-tweaks \
+        htop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks \
         simplenote llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
         linux-current-headers lm_sensors qbittorrent wireshark xkill \
         neovim mtr python3-ipython i3lock krita ranger cmus cava etcher \
@@ -34,15 +79,21 @@ init () {
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
         openvpn intel-microcode i3blocks i3 compton lxappearance dunst kitty \
         xsel docker pidgin pavucontrol doxygen cppcheck font-awesome-ttf \
-        ripgrep net-snmp expect qemu dnsmasq openssh-server xev openjdk-8 \
-        ghex picocom golang
+        net-snmp expect qemu dnsmasq openssh-server xev openjdk-8 \
+        ghex picocom golang nmap maim fzf fd
+
+    # Deleted from repository: albert
+    # Optional: bat
+
     # sudo eopkg it iw aircrack-ng libpcap-devel hashcat bzip2-devel
     sudo eopkg it -y -c system.devel
-    sudo eopkg it -y silver-searcher ctags fzf # for vim
+    sudo eopkg it -y silver-searcher ctags ripgrep  # for vim
     sudo eopkg remove -y firefox hexchat transmission
 
-    # gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
-    # gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
+    sudo pip3 install eopkg3p
+
+    gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
+    gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
 
     # autostart unit
     # sudo cp ../../.myconfig/systemd/autostart_root.service /etc/systemd/system/
@@ -52,67 +103,30 @@ init () {
     # sudo chattr +i ../../.myconfig/scripts/autostart_root.sh
 
     # lockscreen unit
-    # sudo cp ../../.myconfig/systemd/lockscreen.service /etc/systemd/system/
+    # sudo cp ../../myconfig/systemd/lockscreen.service /etc/systemd/system/
     # systemctl enable lockscreen.service
     # systemctl start lockscreen.service
     # systemctl status lockscreen.service
 
-    # Google Chrome
-    sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
-    sudo eopkg it google-chrome-*.eopkg;sudo rm google-chrome-*.eopkg
+    install__google_chrome
+    install__spotify
+    install__sublime_text_3
+    install__ms_fonts
+    install__xkb_switch i3
 
-    # Spotify
-    sudo eopkg bi --ignore-safety $LINK/multimedia/music/spotify/pspec.xml
-    sudo eopkg it spotify*.eopkg;sudo rm spotify*.eopkg
-
-    # Sublime Text 3
-    sudo eopkg bi --ignore-safety $LINK/programming/sublime-text-3/pspec.xml
-    sudo eopkg it sublime*.eopkg;sudo rm sublime*.eopkg
-
-    # TeamViewer
-    # sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
-    # sudo eopkg it teamviewer*.eopkg; sudo rm teamviewer*.eopkg
-    # sudo systemctl start teamviewerd.service
-
-    # Fonts
-    sudo eopkg bi --ignore-safety $LINK/desktop/font/mscorefonts/pspec.xml
-    sudo eopkg it mscorefonts*.eopkg;sudo rm mscorefonts*.eopkg
+    go get github.com/gcla/termshark/v2/cmd/termshark
+    # go get github.com/sorenisanerd/gotty
 }
 
 update () {
-    sudo eopkg -y up
-
-    # VIM
-    # sudo -u estor vi +PlugUpdate +qa && echo "vim is updated!"
-
-    # Google Chrome
-    if eopkg li | grep -q google-chrome; then
-        sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
-        sudo eopkg it google-chrome-*.eopkg;sudo rm google-chrome-*.eopkg
-    fi
-
-    # Spotify
-    if eopkg li | grep -q spotify; then
-        sudo eopkg bi --ignore-safety $LINK/multimedia/music/spotify/pspec.xml
-        sudo eopkg it spotify*.eopkg;sudo rm spotify*.eopkg
-    fi
-
-    # Sublime Text 3
-    if eopkg li | grep -q sublime; then
-        sudo eopkg bi --ignore-safety $LINK/programming/sublime-text-3/pspec.xml
-        sudo eopkg it sublime*.eopkg;sudo rm sublime*.eopkg
-    fi
-
-    # TeamViewer
-    # if eopkg li | grep -q teamviewer; then
-        # sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
-        # sudo eopkg it teamviewer*.eopkg; sudo rm teamviewer*.eopkg
-        # sudo systemctl start teamviewerd.service
-    # fi
+    sudo eopkg up -y
+    sudo eopkg3p up -y
+    install__xkb_switch i3
 }
 
 clean () {
     sudo eopkg delete-cache
+    sudo eopkg3p delete-cache
 }
 
 if [[ -n "$1" ]]

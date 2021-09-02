@@ -1,14 +1,21 @@
 #!/bin/bash
 
-tmux has-session -t conf > /dev/null
-test $? -eq 0 && tmux attach -t conf && exit
+SNAME="[CONFIG]"
 
-tmux new-session -s conf -n myconfig -d
-tmux send-keys -t conf 'cd myconfig && sleep 1; vg' C-m
-tmux split-window -h -t conf
-tmux send-keys -t conf 'cd myconfig && clear' C-m
-tmux select-layout -t conf main-vertical
+if [[ -n $SSH_CONNECTION ]]; then
+    SNAME="SSH $SNAME"
+fi
 
-tmux select-window -t conf:1
+tmux has-session -t "$SNAME" 2> /dev/null
+test $? -eq 0 && tmux attach -t "$SNAME" && exit
 
-tmux attach -t conf
+tmux new-session -s "$SNAME" -n myconfig -d
+tmux send-keys -t "$SNAME" " cd myconfig && sleep 1; vg" C-m
+tmux split-window -h -t "$SNAME"
+tmux send-keys -t "$SNAME" " cd myconfig && clear" C-m
+tmux select-layout -t "$SNAME" main-vertical
+
+tmux select-window -t "$SNAME":1
+
+tmux attach -t "$SNAME"
+

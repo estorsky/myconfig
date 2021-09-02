@@ -1,0 +1,7 @@
+#!/bin/bash
+
+EDITOR=vim
+
+file=`mktemp -u`.tmux_cap
+tmux capture-pane -pS -32768 > $file
+tmux new-window -n "$(basename $file)" "$EDITOR '+ normal G $' $file"

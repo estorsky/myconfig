@@ -1,18 +1,18 @@
 #!/bin/bash
 
-EDITOR=nvim
+source ~/myconfig/scripts/common_funcs.sh
 
-if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    echo not valid git repo
-    exit
-fi
+check_git
+
+EDITOR="nvim"
+
 
 commit () {
-    $EDITOR $(git show $1 --pretty=format: --name-only) +'tab all'
+    $EDITOR $(git show $1 --pretty=format: --name-only) -p
 }
 
 mod () {
-    $EDITOR $(git ls-files -m) +'tab all'
+    $EDITOR $(git ls-files -m) -p
 }
 
 case "$1" in

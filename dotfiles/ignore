@@ -1,8 +1,25 @@
 tags
 
+/* LTP-N */
 external/
 linux/
 toolchain/
 bootloader/
 /* prebuilt/ */
+/* snmp */
+/* TEST */
+*.html
+build.log
+/* safe-c */
+
+/* LTP-X */
+modules/pmchal/pmclib_1_2_31/
+modules/pmchal/pmclib_1_2_40/
+modules/pmchal/pmclib_1_2_50/
+modules/pmchal/pmclib_1_2_53/
+modules/pmchal/pmclib_1_2_561/
+
+/* MA4000 */
+/* mkcontainer.sh */
+/* fastmkcontainer.sh */
 

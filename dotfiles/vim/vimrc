@@ -1,12 +1,12 @@
 " PLAGINS
 call plug#begin('~/.vim/plugged')
-Plug 'scrooloose/nerdtree', { 'on':  ['NERDTreeToggle', 'NERDTreeFind','NERDTreeTabsToggle']}
-Plug 'jistr/vim-nerdtree-tabs'
+" Plug 'scrooloose/nerdtree', { 'on':  ['NERDTreeToggle', 'NERDTreeFind','NERDTreeTabsToggle']}
+" Plug 'jistr/vim-nerdtree-tabs'
 Plug 'scrooloose/nerdcommenter'
 Plug 'vim-scripts/DoxygenToolkit.vim'
 Plug 'jiangmiao/auto-pairs'
-Plug 'junegunn/fzf' "it fzf ripgrep
-Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install()  }  } "it fzf ripgrep
+Plug 'junegunn/fzf.vim' " it bat (for highlighting)
 Plug 'dyng/ctrlsf.vim'
 Plug 'easymotion/vim-easymotion'
 Plug 'tpope/vim-fugitive'
@@ -15,6 +15,7 @@ Plug 'cohama/agit.vim', { 'on': ['Agit', 'AgitFile'] }
 Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
 Plug 'jpalardy/vim-slime', { 'for':  ['py'] }
 Plug 'w0rp/ale' "it shellcheck
+Plug 'ludovicchabant/vim-gutentags'
 Plug 'majutsushi/tagbar', { 'on':  'TagbarToggle' } "it ctags
 " Plug 'xolox/vim-misc'
 " Plug 'xolox/vim-easytags'
@@ -23,21 +24,23 @@ Plug 'christoomey/vim-tmux-navigator'
 Plug 'francoiscabrol/ranger.vim' "it ranger
 Plug 'tpope/vim-unimpaired'
 Plug 'raimondi/yaifa'
-" Plug 'qpkorr/vim-bufkill'
 Plug 'tpope/vim-eunuch'
 " Plug 'terryma/vim-multiple-cursors'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'gcmt/taboo.vim'
 Plug 'morhetz/gruvbox'
+Plug 'mtdl9/vim-log-highlighting'
+Plug 'hjson/vim-hjson'
 " Plug 'yggdroot/indentline', { 'for':  ['c', 'cpp'] }
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'suan/vim-instant-markdown', {'for': 'markdown'} "sudo npm -g install instant-markdown-d
 Plug 'godlygeek/tabular'
-Plug 'lyokha/vim-xkbswitch' " it libxkbfile-devel (https://github.com/ierton/xkb-switch)
+Plug 'lyokha/vim-xkbswitch' " it libxkbfile-devel (https://github.com/grwlf/xkb-switch)
+" Plug 'qpkorr/vim-bufkill'
 if has('nvim')
-    Plug 'rbgrouleff/bclose.vim'
+" Plug 'rbgrouleff/bclose.vim'
 else
 endif
 call plug#end()
@@ -56,7 +59,7 @@ set hlsearch
 set gdefault
 set incsearch
 set ignorecase
-set smartcase 
+set smartcase
 " set clipboard=unnamedplus
 set noswapfile
 set nobackup
@@ -79,25 +82,34 @@ set shortmess+=O
 set noshowmode
 set cursorline
 " Colors
-hi VertSplit ctermbg=NONE
+hi VertSplit ctermbg=none
 set fillchars+=vert:│
-hi SignColumn ctermbg=NONE
+hi SignColumn ctermbg=none
 hi TabLineFill ctermfg=gray ctermbg=black
 hi TabLineSel cterm=bold ctermfg=black ctermbg=blue
 hi TabLine cterm=bold ctermfg=gray ctermbg=black
 hi Search ctermfg=110 ctermbg=none cterm=bold
-hi Visual ctermfg=Black ctermbg=110 cterm=bold
+" hi Visual ctermfg=Black ctermbg=110 cterm=bold
+" hi Visual cterm=bold
+hi Visual cterm=none
 let g:load_doxygen_syntax=1
+au FileType gitcommit setlocal tw=90
+au FileType markdown setlocal colorcolumn=120
+au FileType c,cpp setlocal colorcolumn=90
+au BufNewFile,BufRead Jenkinsfile setf groovy
 
 
 " PLUGINS SETTINGS
+
+" Coc
+let g:coc_global_extensions = ['coc-json', 'coc-explorer', 'coc-calc']
 
 " NERDTree
 let NERDTreeMinimalUI=1
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let g:NERDTreeMapJumpNextSibling = '<Nop>'
 let g:NERDTreeMapJumpPrevSibling = '<Nop>'
-" let g:nerdtree_tabs_autofind = 1
+" let g:nerdtree_tabs_autofind = 1 " fugitive breaks
 
 " NERDCommenter
 let g:NERDSpaceDelims = 1
@@ -132,26 +144,14 @@ let g:airline#extensions#tabline#left_sep = ''
 let g:airline#extensions#tabline#left_alt_sep = ''
 let g:airline#extensions#tabline#right_sep = ''
 let g:airline#extensions#tabline#right_alt_sep = ''
-let g:airline#extensions#whitespace#enabled = 0
+" let g:airline#extensions#whitespace#enabled = 0
 
 " FZF
 let g:fzf_layout = { 'down': '~40%' }
-" let $FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git -g ""'
-" let $FZF_DEFAULT_COMMAND = 'ag -t -g ""'
 let $FZF_DEFAULT_COMMAND = 'rg --files'
+let $FZF_DEFAULT_OPTS = ''
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 let g:fzf_buffers_jump = 1
-
-function! s:GotoOrOpen(command, ...)
-  for file in a:000
-    if a:command == 'e'
-      exec 'e ' . file
-    else
-      exec "tab drop " . file
-    endif
-  endfor
-endfunction
-command! -nargs=+ GotoOrOpen call s:GotoOrOpen(<f-args>)
 
 let g:fzf_action = {
   \ 'return': 'GotoOrOpen tab',
@@ -164,6 +164,13 @@ command! -bang -nargs=* Rg
       \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>),
       \ 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
 
+" Ctrlsf
+let g:ctrlsf_follow_symlinks = 0
+let g:ctrlsf_position = 'bottom'
+let g:ctrlsf_mapping = {
+    \ "next": "<C-l>",
+    \ "prev": "<C-h>",
+    \ }
 
 " Ale
 let g:ale_enabled=0
@@ -204,9 +211,15 @@ let g:indentLine_char = '⎸'
 
 " instant-markdown
 let g:instant_markdown_autostart = 0
+let g:instant_markdown_open_to_the_world = 1
 
 " Ctags
 " set tags=tags;.git/tags;
+
+" Gutentags
+let g:gutentags_ctags_exclude = [
+            \ 'external', 'linux', 'toolchain', 'bootloader', 'prebuilt',
+            \'compilation_branch__*' ]
 
 " Doxygen
 let g:DoxygenToolkit_briefTag_pre="@Synopsis  "
@@ -215,7 +228,7 @@ let g:DoxygenToolkit_returnTag="@Returns   "
 let g:DoxygenToolkit_blockHeader="-------------------------------"
 let g:DoxygenToolkit_blockFooter="---------------------------------"
 let g:DoxygenToolkit_authorName="Dmitry Privalov"
-let g:DoxygenToolkit_licenseTag='Copyright (C) 2020 ООО "Предприятие "Элтекс"'
+let g:DoxygenToolkit_licenseTag='Copyright (C) 2021 ООО "Предприятие "Элтекс"'
 
 " XKBSWITCH
 let g:XkbSwitchEnabled = 1
@@ -237,6 +250,7 @@ endif
 
 " BINDS
 map <silent> <2-LeftMouse> :set hlsearch<CR>:let @/=expand('<cword>')<CR>
+map <silent> <3-LeftMouse> :let @/ = ""<CR>
 imap <2-LeftMouse> <c-o>*
 " imap <C-f> <plug>(fzf-complete-line)
 vmap <Leader>sf <Plug>CtrlSFVwordExec
@@ -244,11 +258,14 @@ nmap <Leader>sf <Plug>CtrlSFCCwordPath
 nnoremap * *``
 imap jj <Esc>
 imap оо <Esc>
-map <silent> <C-n> :NERDTreeTabsToggle<CR>
-vmap <silent> <C-n> <esc>:NERDTreeTabsToggle<CR>
+" map <silent> <C-n> :NERDTreeTabsToggle<CR>
+" vmap <silent> <C-n> <esc>:NERDTreeTabsToggle<CR>
+map <silent> <C-n> :CocCommand explorer --sources=buffer+,file+<CR>
+vmap <silent> <C-n> <esc>:CocCommand explorer --sources=buffer+,file+<CR>
 map <Leader> <Plug>(easymotion-prefix)
+nmap <Space> <Plug>(easymotion-s)
 " map <Space> <Plug>(easymotion-s2)
-nmap <Space> <Plug>(easymotion-overwin-f2)
+" nmap <Space> <Plug>(easymotion-overwin-f2)
 nmap <C-_> <plug>NERDCommenterToggle
 vmap <C-_> <plug>NERDCommenterToggle
 map <silent> <C-p> :Files<CR>
@@ -277,6 +294,7 @@ map <BS> X
 nmap <C-c> ^v$h"+y<CR>
 vmap <C-c> "+y<CR>"
 
+" vnoremap p "_dp
 vnoremap p "_dP"
 noremap <Leader>v "+p
 
@@ -333,22 +351,23 @@ vnoremap <silent> <S-Tab> <ESC>:tabp<CR>
 nnoremap <silent> <leader><Tab> :Windows<CR>
 
 " Fugitive
-nnoremap <silent> <leader>gs :Gstatus<CR>
-nnoremap <silent> <leader>gc :Gcommit -v -q<CR>
-nnoremap <silent> <leader>ga :Gcommit --amend<CR>
-nnoremap <silent> <leader>gt :Gcommit -v -q %<CR>
-nnoremap <silent> <leader>gd :Gdiff<CR>
+nnoremap <silent> <leader>gs :Git<CR>
+nnoremap <silent> <leader>gc :Git commit -v -q<CR>
+nnoremap <silent> <leader>ga :Git commit --amend<CR>
+nnoremap <silent> <leader>gt :Git commit -v -q %<CR>
+nnoremap <silent> <leader>gd :Gdiffsplit<CR>
 nnoremap <silent> <leader>ge :Gedit<CR>
 nnoremap <silent> <leader>gr :Gread<CR>
 nnoremap <silent> <leader>gw :Gwrite<CR><CR>
-nnoremap <silent> <leader>gl :silent! Glog<CR>
+nnoremap <silent> <leader>gl :Git log<CR>
+nnoremap <silent> <leader>gll :Git log .<CR>
 nnoremap <silent> <leader>gp :Ggrep<Space>
-nnoremap <silent> <leader>gm :Gmove<Space>
+nnoremap <silent> <leader>gm :GMove<Space>
 nnoremap <silent> <leader>gb :Git branch<Space>
 nnoremap <silent> <leader>go :Git checkout<Space>
-nnoremap <silent> <leader>gps :!git push<CR>
-nnoremap <silent> <leader>gpl :!git pull<CR>
-nnoremap <silent> <leader>gbl :Gblame<CR>
+nnoremap <silent> <leader>gps :Git push<CR>
+nnoremap <silent> <leader>gpl :Git pull<CR>
+nnoremap <silent> <leader>gbl :Git blame<CR>
 
 nmap ]c <Plug>(GitGutterNextHunk)zz
 nmap [c <Plug>(GitGutterPrevHunk)zz
@@ -362,10 +381,16 @@ map <silent> <C-w>k :split<CR>
 map <silent> <C-w>h :vsplit<CR>
 map <silent> <C-w>l :vsplit<CR>
 
-nnoremap <silent> <leader>nf :NERDTreeTabsFind<CR>
+" nnoremap <silent> <leader>nf :NERDTreeTabsFind<CR>
 nnoremap <silent> <Leader>rg :Rg <C-R><C-W><CR>
 nnoremap <leader>/ /\<\><left><left>
 nnoremap <silent> <leader>t :tabnew<CR>
+
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
 " F-keys
 nnoremap <silent> <F2> :CtrlSFToggle<CR>
@@ -376,30 +401,47 @@ nnoremap <silent> <F3> :AsyncRun ctags -R --exclude={external,linux,toolchain,bo
 vnoremap <silent> <F3> <Esc>:AsyncRun ctags -R --exclude={external,linux,toolchain,bootloader,prebuilt} --exclude="compilation_branch__*"<CR>
 inoremap <silent> <F3> <Esc>:AsyncRun ctags -R --exclude={external,linux,toolchain,bootloader,prebuilt} --exclude="compilation_branch__*"<CR>
 
+nnoremap <F4> :setlocal spell! spelllang=ru_ru,en_us<CR>
+inoremap <F4> <Esc>:setlocal spell! spelllang=ru_ru,en_us<CR>
+vnoremap <F4> <Esc>:setlocal spell! spelllang=ru_ru,en_us<CR>
+
 nnoremap <F5> :checktime<CR>
 inoremap <F5> <Esc>:checktime<CR>
 vnoremap <F5> <Esc>:checktime<CR>
+
+nnoremap <silent> <F7> :tabdo windo set number!<CR>
+inoremap <silent> <F7> <Esc>:tabdo windo set number!<CR>
+vnoremap <silent> <F7> <Esc>:tabdo windo set number!<CR>
 
 nnoremap <silent> <F8> :TagbarToggle<CR>
 inoremap <silent> <F8> <Esc>:TagbarToggle<CR>
 vnoremap <silent> <F8> <Esc>:TagbarToggle<CR>
 
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+" ALIASES
+command UP PlugUpdate
+command MDStart InstantMarkdownPreview
+command MDStop InstantMarkdownStop
+command DelWhitespace %s/\s\+$//e
+command! -nargs=1 -complete=file E tabnew <args>
+
+
+" FUNCS
+function! s:GotoOrOpen(command, ...)
+  for file in a:000
+    if a:command == 'e'
+      exec 'e ' . file
+    else
+      exec "tab drop " . file
+    endif
+  endfor
+endfunction
+command! -nargs=+ GotoOrOpen call s:GotoOrOpen(<f-args>)
 
 function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
-
-
-" ALIASES
-command UP PlugUpdate
-command DelWhitespace %s/\s\+$//e
-
 
 function! ConfirmQuit(writeFile)
     if (a:writeFile)
@@ -414,4 +456,12 @@ function! ConfirmQuit(writeFile)
         :quitall
     endif
 endfu
+
+
+" GEN SPELL FILES
+for d in glob('~/.vim/spell/*.add', 1, 1)
+    if filereadable(d) && (!filereadable(d . '.spl') || getftime(d) > getftime(d . '.spl'))
+        silent exec 'mkspell! ' . fnameescape(d)
+    endif
+endfor
 
