@@ -11,6 +11,22 @@ source $DIR/common_funcs.sh
 
 run_with_root $1
 
+install__earlyoom () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/earlyoom
+    gclonecd https://github.com/rfjakob/earlyoom.git
+    make
+    sudo make install
+    sudo systemctl start earlyoom
+
+    # sudo vim /etc/default/earlyoom
+    # EARLYOOM_ARGS="-m 1 -s 100"
+    # sudo journalctl -u earlyoom | grep sending
+}
+
 install__xkb_switch () {
     set -x
 
@@ -42,6 +58,8 @@ install__xkb_switch () {
 install__google_chrome () {
     sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
     sudo eopkg it google-chrome-*.eopkg;sudo rm google-chrome-*.eopkg
+
+    # sudo sed -i '/Exec/s/$/ --force-dark-mode/' /usr/share/applications/google-chrome.desktop
 }
 
 install__spotify () {
@@ -65,32 +83,40 @@ install__ms_fonts () {
     sudo eopkg it mscorefonts*.eopkg;sudo rm mscorefonts*.eopkg
 }
 
+install__anydesk () {
+    sudo eopkg bi --ignore-safety $LINK/network/util/anydesk/pspec.xml
+    sudo eopkg it anydesk*.eopkg;sudo rm anydesk*.eopkg
+}
+
 init () {
     cd $DIR
 
     sudo eopkg up -y
 
-    sudo eopkg it -y screenfetch telegram nautilus-dropbox git vim tmux vlc \
-        htop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks \
+    sudo eopkg it -y screenfetch telegram discord pidgin nautilus-dropbox git vim tmux \
+        vlc htop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks \
         simplenote llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
         linux-current-headers lm_sensors qbittorrent wireshark xkill \
         neovim mtr python3-ipython i3lock krita ranger cmus cava etcher \
         speedtest-cli cmatrix highlight curl-gnutls iotop iftop sshfs-fuse \
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
-        openvpn intel-microcode i3blocks i3 compton lxappearance dunst kitty \
-        xsel docker pidgin pavucontrol doxygen cppcheck font-awesome-ttf \
+        openvpn intel-microcode i3blocks i3 lxappearance dunst kitty \
+        xsel docker pavucontrol doxygen cppcheck font-awesome-ttf \
         net-snmp expect qemu dnsmasq openssh-server xev openjdk-8 \
-        ghex picocom golang nmap maim fzf fd
+        ghex picocom golang nmap maim fzf fd stress-ng valgrind
 
-    # Deleted from repository: albert
-    # Optional: bat
+    # Deleted from repository: albert compton
+    # Optional: bat steam (SDK)
 
     # sudo eopkg it iw aircrack-ng libpcap-devel hashcat bzip2-devel
+    # sudo eopkg it curl-devel
     sudo eopkg it -y -c system.devel
     sudo eopkg it -y silver-searcher ctags ripgrep  # for vim
     sudo eopkg remove -y firefox hexchat transmission
 
+    sudo eopkg it pip
     sudo pip3 install eopkg3p
+    sudo pip2 install autorandr
 
     gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
     gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
@@ -112,10 +138,29 @@ init () {
     install__spotify
     install__sublime_text_3
     install__ms_fonts
-    install__xkb_switch i3
 
-    go get github.com/gcla/termshark/v2/cmd/termshark
-    # go get github.com/sorenisanerd/gotty
+    sudo eopkg it -y jsoncpp-devel libsigc++-devel i3-devel libx11-devel libxkbfile-devel
+    install__xkb_switch i3
+    setxkbmap -layout us,ru -option grp:alt_shift_toggle -option ctrl:nocaps
+
+    sudo eopkg it -y pandoc
+    install__earlyoom
+
+    # go get github.com/gcla/termshark/v2/cmd/termshark@latest
+    # go get github.com/sorenisanerd/gotty@latest
+
+    snap install mattermost-desktop
+
+    # chsh -s /bin/zsh
+    # dropbox start -i
+    # lxappearance
+    # timedatectl set-local-rtc 1
+    # sudo ln -sf /usr/share/zoneinfo/Asia/Novosibirsk /etc/localtime
+    # sudo passwd
+    # systemctl enable systemd-timesyncd
+
+    # sudo groupadd docker
+    # sudo usermod -aG docker ${USER}
 }
 
 update () {

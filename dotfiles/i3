@@ -41,15 +41,15 @@ exec_always --no-startup-id xkb-switch --i3
 exec_always --no-startup-id nm-applet
 exec --no-startup-id /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 exec telegram-desktop
-exec pidgin
 exec thunderbird
 exec dropbox start
+exec autorandr default
 # exec albert
 # exec_always compton -f -c -I 0.1 -O 0.1 -o 0.3 --inactive-dim 0.2 # -r 12
 
 ########## Keybindings ##########
 # bindsym Mod4+Shift+s exec i3lock # Easier locking
-bindsym Mod4+Shift+s exec $HOME/myconfig/lockscreen/lock.sh -ws
+bindsym Mod4+Shift+s exec ~/myconfig/lockscreen/lock.sh -ws
 
 ### Backlight ###
 # Note: If light doesn't work, install xbacklight and 1) uncomment the two lines below.
@@ -154,16 +154,16 @@ bindsym Mod4+minus scratchpad show
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws1  "   1     "
-set $ws2  "   2     "
-set $ws3  "   3     "
-set $ws4  "   4     "
-set $ws5  "   5     "
-set $ws6  "   6     "
-set $ws7  "   7     "
-set $ws8  "   8     "
-set $ws9  "   9     "
-set $ws10 "  10     "
+set $ws1  "    1    "
+set $ws2  "    2    "
+set $ws3  "    3    "
+set $ws4  "    4    "
+set $ws5  "    5    "
+set $ws6  "    6    "
+set $ws7  "    7    "
+set $ws8  "    8    "
+set $ws9  "    9    "
+set $ws10 "   10    "
 
 
 # switch to workspace
@@ -248,21 +248,24 @@ bindsym Mod4+Tab workspace next
 bindsym Mod4+Shift+Tab workspace prev
 
 # bindsym Mod4+x exec gnome-screenshot -i
-bindsym Mod4+x exec $HOME/myconfig/scripts/screenshot.sh buffer
-bindsym Mod4+Shift+x exec $HOME/myconfig/scripts/screenshot.sh shared
-bindsym Mod4+d exec $HOME/myconfig/scripts/run_dialog.sh
+bindsym Mod4+x exec ~/myconfig/scripts/screenshot.sh buffer
+bindsym Mod4+Shift+x exec ~/myconfig/scripts/screenshot.sh shared
+bindsym Mod4+d exec ~/myconfig/scripts/run_dialog.sh
 
 bindsym Mod4+n exec kitty -e ranger
 bindsym Mod4+b exec simplenote
 bindsym Mod4+c exec gnome-calculator
-# bindsym Mod4+p exec $HOME/myconfig/scripts/xrndrtgl
-bindsym Mod4+t exec $HOME/myconfig/scripts/translate.sh
+# bindsym Mod4+p exec ~/myconfig/scripts/xrndrtgl
+bindsym Mod4+t exec ~/myconfig/scripts/translate.sh
 bindsym --release Mod4+Shift+q exec xkill
 bindsym Control+Shift+Escape exec gnome-system-monitor
-bindsym Control+space exec $HOME/myconfig/scripts/run_dialog.sh
-# bindsym Mod4+u exec $HOME/test.sh
+bindsym Control+space exec ~/myconfig/scripts/run_dialog.sh
+# bindsym Mod4+u exec ~/test.sh
 bindsym Mod1+Tab focus output right
 bindsym --release button2 kill
+# bindsym Shift+space exec dunstctl close
+# bindsym Control+Shift+space exec dunstctl close-all
+bindsym Control+Shift+space exec dunstctl close
 
 
 # Start i3bar to display a workspace bar (plus the system information i3status
@@ -305,7 +308,7 @@ client.urgent           $bg-color  $urgent-bg-color   $text-color          #00ff
 # bar
 bar {
     output eDP-1
-    tray_padding 3
+    tray_padding 4
     tray_output primary
     status_command i3blocks -c ~/myconfig/dotfiles/i3blocks.conf
         position top
@@ -321,7 +324,7 @@ bar {
 
 bar {
     output DP-1
-    tray_padding 3
+    tray_padding 4
     tray_output primary
     status_command i3blocks -c ~/myconfig/dotfiles/i3blocks.conf
         position top
@@ -341,7 +344,39 @@ bar {
     tray_output primary
     # tray_output none
     # tray_output HDMI-1
-    tray_padding 3
+    tray_padding 4
+    status_command i3blocks -c ~/myconfig/dotfiles/i3blocks.conf
+        position top
+        colors {
+        background $bg-color
+        statusline $text-color
+        separator #757575
+        focused_workspace  $border          $border            $text-color
+        inactive_workspace $bg-color        $bg-color          $inactive-text-color
+        urgent_workspace   $urgent-bg-color $urgent-bg-color   $text-color
+    }
+}
+
+bar {
+    output eDP-1-1
+    tray_padding 4
+    tray_output primary
+    status_command i3blocks -c ~/myconfig/dotfiles/i3blocks.conf
+        position top
+        colors {
+        background $bg-color
+        statusline $text-color
+        separator #757575
+        focused_workspace  $border            $border            $text-color
+        inactive_workspace $bg-color          $bg-color          $inactive-text-color
+        urgent_workspace   $urgent-bg-color   $urgent-bg-color   $text-color
+    }
+}
+
+bar {
+    output HDMI-0
+    tray_output primary
+    tray_padding 4
     status_command i3blocks -c ~/myconfig/dotfiles/i3blocks.conf
         position top
         colors {

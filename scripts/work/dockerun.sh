@@ -10,24 +10,24 @@ build_ltpn=false
 ma4000 () {
     docker run -t -i --rm --privileged \
         -v ~/.ssh/:/home/user/.ssh \
-        -v /home/$USER/projects/toolchains/:/opt/toolchains \
         -v /home/$USER/projects:/home/user/projects \
         -v /home/$USER/shared:/home/user/shared \
         -v /home/$USER/myconfig/scripts/work/ma/:/home/user/projects/$PROJECT_NAME/scripts \
         -w /home/user/projects/$PROJECT_NAME \
-        xpon/builder:latest \
+        xpon-ng.eltex.loc:5000/builders/ltp-x:latest \
         $CMD
+        # -v /home/$USER/projects/toolchains/:/opt/toolchains \
 }
 
 ltpx () {
     docker run -t -i --rm --privileged \
         -v ~/.ssh/:/home/user/.ssh \
-        -v /home/$USER/projects/toolchains/:/opt/toolchains \
         -v /home/$USER/projects:/home/user/projects \
         -v /home/$USER/shared:/home/user/shared \
         -w /home/user/projects/$PROJECT_NAME \
-        xpon/builder:latest \
+        xpon-ng.eltex.loc:5000/builders/ltp-x:latest \
         $CMD
+        # -v /home/$USER/projects/toolchains/:/opt/toolchains \
 }
 
 ltpn () {
@@ -52,7 +52,12 @@ do
             build_ltpx=true
             shift
             ;;
-        MA4000_1|m1)
+        ltp-x_2|ltpx2|x2)
+            PROJECT_NAME="ltp-x_2"
+            build_ltpx=true
+            shift
+            ;;
+        MA4000_1|m1|ma|m)
             PROJECT_NAME="MA4000_1"
             build_ma4000=true
             shift
@@ -62,12 +67,7 @@ do
             build_ma4000=true
             shift
             ;;
-        MA4000_3|m3)
-            PROJECT_NAME="MA4000_3"
-            build_ma4000=true
-            shift
-            ;;
-        ltp-n_1|ltpn1|n1)
+        ltp-n_1|ltpn1|n1|n)
             PROJECT_NAME="ltp-n_1"
             build_ltpn=true
             shift

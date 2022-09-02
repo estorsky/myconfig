@@ -6,7 +6,7 @@ FREQ_CHANGE=false
 
 params () {
     case "$1" in
-        -s) 
+        -s)
             if [ "$XDG_CURRENT_DESKTOP" == "Budgie:GNOME" ]; then
                 USER=$(whoami)
                 PIDGN=$(pgrep -u $USER gnome-session)

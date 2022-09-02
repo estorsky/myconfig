@@ -26,6 +26,21 @@ four () {
     # i3-msg "workspace 10, move workspace to output DP-1"
 }
 
+five () {
+    xrandr --output eDP-1-1 --auto --primary --output HDMI-0 --off
+    i3-msg "restart"
+}
+
+six () {
+    xrandr --output HDMI-0 --auto --primary --output eDP-1-1 --off
+    i3-msg "restart"
+}
+
+seven () {
+    xrandr --output HDMI-0 --auto --left-of eDP-1-1 --output eDP-1-1 --primary --auto
+    i3-msg "restart"
+}
+
 if [[ -n "$1"  ]]
 then
     case "$1" in
@@ -33,6 +48,9 @@ then
         two|2) two; exit;;
         three|3) three; exit;;
         four|4) four; exit;;
+        five|5) five; exit;;
+        six|6) six; exit;;
+        seven|7) seven; exit;;
         * ) echo "$1 is not an option"
             exit;;
     esac

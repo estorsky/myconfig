@@ -1,7 +1,7 @@
 configuration {
 	modi: "window,drun,ssh,combi";
 	combi-modi: "drun,window";
-	theme: "/usr/share/rofi/themes/Arc-Dark.rasi";
 	kb-row-select: "";
 	kb-cancel: "Escape,Control+g,Control+bracketleft,Control+space";
 }
+@theme "/usr/share/rofi/themes/Arc-Dark.rasi"

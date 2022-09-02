@@ -81,6 +81,7 @@
 | dt'             | del to '                      |
 | mp              | create mark p                 |
 | ''              | last location                 |
+| ; + ''          | last tab                      |
 | 'p              | mv to mark p                  |
 | '.              | mv to last change             |
 | mD              | global mark                   |
@@ -174,7 +175,7 @@
 | m               | menu                          |
 | cd              | change dir                    |
 
-### fzf commands
+### fzf
 
 | Command           | List                                                                     |
 | ----------------- | -------------------------------------------------------------------------|
@@ -204,6 +205,22 @@
 | `Filetypes`       | File types                                                               |
 | p / n             | prev / next search                                                       |
 | tab               | select several files                                                     |
+
+#### [Search syntax](https://github.com/junegunn/fzf#search-syntax)
+
+Unless otherwise specified, fzf starts in "extended-search mode" where you can
+type in multiple search terms delimited by spaces. e.g. `^music .mp3$ sbtrkt
+!fire`
+
+| Token     | Match type                 | Description                          |
+| --------- | -------------------------- | ------------------------------------ |
+| `sbtrkt`  | fuzzy-match                | Items that match `sbtrkt`            |
+| `'wild`   | exact-match (quoted)       | Items that include `wild`            |
+| `^music`  | prefix-exact-match         | Items that start with `music`        |
+| `.mp3$`   | suffix-exact-match         | Items that end with `.mp3`           |
+| `!fire`   | inverse-exact-match        | Items that do not include `fire`     |
+| `!^music` | inverse-prefix-exact-match | Items that do not start with `music` |
+| `!.mp3$`  | inverse-suffix-exact-match | Items that do not end with `.mp3`    |
 
 ### ag:
 

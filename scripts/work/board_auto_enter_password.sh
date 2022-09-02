@@ -1,7 +1,7 @@
 #!/usr/bin/expect
 
 set pass "password"
-spawn firmware_install.sh
+spawn $argv 1
 expect "Password:";
 send "$pass\n"
 interact

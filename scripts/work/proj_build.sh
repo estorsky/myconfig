@@ -16,6 +16,7 @@ PROJECT_NAME=$(basename `git rev-parse --show-toplevel`)
 
 FLAG__AUTO_INSTALL=false
 FLAG__FULL_BUILD=false
+FLAG__REBOOT=false
 
 
 ltpn () {
@@ -42,9 +43,14 @@ ltpn () {
     # install on board
     if [ "$FLAG__AUTO_INSTALL" = true ]
     then
-        firmware_auto_install.sh
+        board_auto_enter_password.sh board_firmware_install.sh
         notif $? "[$PROJECT_NAME] firmware install successfully!" \
             "[$PROJECT_NAME] firmware install fail!"
+    elif [ "$FLAG__REBOOT" = true ]
+    then
+        board_auto_enter_password.sh board_reboot.sh
+        notif $? "[$PROJECT_NAME] board rebooted successfully!" \
+            "[$PROJECT_NAME] board rebooted fail!"
     fi
 }
 
@@ -52,6 +58,7 @@ params () {
     case "$1" in
         -a) FLAG__AUTO_INSTALL=true ;;
         -f) FLAG__FULL_BUILD=true ;;
+        -r) FLAG__REBOOT=true ;;
         * ) echo "$1 is not an option"
             exit 3;;
     esac

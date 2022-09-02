@@ -93,3 +93,6 @@ if (/Currently/) {chomp;/\<title\>Currently: (.*)?\<\/title\>/;
 
     print"$values[1]"; }'
 
+# doubles:
+# Mostly Cloudy
+# Intermittent Clouds

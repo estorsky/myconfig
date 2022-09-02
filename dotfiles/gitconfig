@@ -6,15 +6,15 @@
 [push]
 	default = current
 [core]
-        pager = less -F
+	pager = less -F
 [oh-my-zsh]
 	hide-status = 1
 [alias]
-	sync = "!f() { git fetch && git rebase origin/"$1" --stat; }; f"
-	stat = "!f() { git diff HEAD~"$1" --stat; }; f"
-	squash = "!f() { git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
-	update = "!f() { if [ -z "$1" ];  then git fetch && git reset --hard origin/master;  else git fetch && git reset --hard origin/"$1";  fi; }; f"
-	remove-old-branches = "!f() { git fetch --prune; git branch --merged master | grep -v '^[ *]*master$' | xargs git branch -d; }; f"
-
+	sync = !bash -c 'source ~/.git_funcs.sh && sync \"$@\"' -
+	stat = !bash -c 'source ~/.git_funcs.sh && stat \"$@\"' -
+	squash = !bash -c 'source ~/.git_funcs.sh && squash \"$@\"' -
+	update = !bash -c 'source ~/.git_funcs.sh && update \"$@\"' -
+	remove-all-files = !bash -c 'source ~/.git_funcs.sh && remove-all-files \"$@\"' -
+	remove-old-branches = !bash -c 'source ~/.git_funcs.sh && remove-old-branches \"$@\"' -
 [include]
 	path = ~/work/.gitconfig

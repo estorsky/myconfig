@@ -32,6 +32,7 @@ mv ~/.config/ranger/rc.conf         ~/dotfiles_old/
 mv ~/.zshrc                         ~/dotfiles_old/
 mv ~/.ignore                        ~/dotfiles_old/
 mv ~/.gitconfig                     ~/dotfiles_old/
+mv ~/.config/autorandr              ~/dotfiles_old/
 
 #CREATE DIRS
 mkdir -p ~/remote
@@ -41,7 +42,7 @@ if [ ! -f ~/.vim/autoload/plug.vim ]; then
     echo -n -e "${GREEN}"
     curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    vi +"source $SCRIPT_DIR/vim/vimrc" +PlugInstall +qa
+    vim +"source $SCRIPT_DIR/vim/vimrc" +PlugInstall +qa
     echo -n -e "${RED}"
 fi
 ln -s $SCRIPT_DIR/vim/vimrc ~/.vimrc
@@ -75,7 +76,9 @@ ln -s $SCRIPT_DIR/tmux.conf ~/.tmux.conf
 
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
-go get -u github.com/arl/gitmux
+go get -u github.com/arl/gitmux@latest
+# TODO: add command
+# Press prefix + I (capital i, as in Install) to fetch the plugin.
 
 #ALBERT
 # if ! [ -d ~/.config/albert ]; then
@@ -133,7 +136,11 @@ ln -s $SCRIPT_DIR/ignore ~/.ignore
 
 #GITCONFIG
 ln -s $SCRIPT_DIR/gitconfig ~/.gitconfig
+ln -s $SCRIPT_DIR/git_funcs.sh ~/.git_funcs.sh
 
+#AUTORANDR
+product_serial="$(sudo cat /sys/devices/virtual/dmi/id/product_serial)"
+ln -s $SCRIPT_DIR/autorandr/"${product_serial}" ~/.config/autorandr
 
 #WORK DOTFILES
 if [ -d ~/work ]; then

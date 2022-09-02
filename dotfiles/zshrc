@@ -139,6 +139,8 @@ alias weather="curl wttr.in"
 alias ag="ag --color-match '1;33' --color-line-number '0;34'"
 alias rg="rg -F"
 alias tmux="tmux -u"
+alias UP="vim +PlugUpdate +CocUpdateSync +qa && solus up"
+alias beep="notify-send beep"
 
 alias lock="~/myconfig/lockscreen/lock.sh"
 alias suspend="~/myconfig/lockscreen/lock.sh -s"

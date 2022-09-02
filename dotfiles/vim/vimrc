@@ -52,7 +52,7 @@ call plug#end()
 set noexpandtab
 set tabstop=4
 set shiftwidth=4
-set cinoptions=(4,W4)
+set cinoptions=(shiftwidth,W4
 
 autocmd BufNewFile,BufRead * setlocal formatoptions-=cro
 set hlsearch
@@ -96,7 +96,8 @@ let g:load_doxygen_syntax=1
 au FileType gitcommit setlocal tw=90
 au FileType markdown setlocal colorcolumn=120
 au FileType c,cpp setlocal colorcolumn=90
-au BufNewFile,BufRead Jenkinsfile setf groovy
+au BufNewFile,BufRead Jenkinsfile* setf groovy
+au BufNewFile,BufRead gitconfig setf gitconfig
 
 
 " PLUGINS SETTINGS
@@ -145,6 +146,9 @@ let g:airline#extensions#tabline#left_alt_sep = ''
 let g:airline#extensions#tabline#right_sep = ''
 let g:airline#extensions#tabline#right_alt_sep = ''
 " let g:airline#extensions#whitespace#enabled = 0
+
+" EasyMotion
+let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnmfj'
 
 " FZF
 let g:fzf_layout = { 'down': '~40%' }
@@ -255,13 +259,13 @@ imap <2-LeftMouse> <c-o>*
 " imap <C-f> <plug>(fzf-complete-line)
 vmap <Leader>sf <Plug>CtrlSFVwordExec
 nmap <Leader>sf <Plug>CtrlSFCCwordPath
-nnoremap * *``
+" nnoremap * *``
 imap jj <Esc>
 imap оо <Esc>
 " map <silent> <C-n> :NERDTreeTabsToggle<CR>
 " vmap <silent> <C-n> <esc>:NERDTreeTabsToggle<CR>
-map <silent> <C-n> :CocCommand explorer --sources=buffer+,file+<CR>
-vmap <silent> <C-n> <esc>:CocCommand explorer --sources=buffer+,file+<CR>
+map <silent> <C-n> :CocCommand explorer --sources=buffer-,file+<CR>
+vmap <silent> <C-n> <esc>:CocCommand explorer --sources=buffer-,file+<CR>
 map <Leader> <Plug>(easymotion-prefix)
 nmap <Space> <Plug>(easymotion-s)
 " map <Space> <Plug>(easymotion-s2)
@@ -290,12 +294,15 @@ vnoremap <Leader>re :s/\<<C-r><C-w>\>/<C-r><C-w>
 nnoremap <Leader>a :%y+<CR>
 " nnoremap <Leader>dif :diffthis<CR>
 nnoremap <silent> <Leader>q :call ConfirmQuit(0)<CR>
+vnoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
+inoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
 map <BS> X
 nmap <C-c> ^v$h"+y<CR>
 vmap <C-c> "+y<CR>"
 
 " vnoremap p "_dp
-vnoremap p "_dP"
+" vnoremap p "_dP"
+vnoremap p "0P
 noremap <Leader>v "+p
 
 " Start interactive EasyAlign in visual mode (e.g. vipga)
@@ -337,6 +344,8 @@ noremap <leader>7 7gt
 noremap <leader>8 8gt
 noremap <leader>9 9gt
 noremap <silent> <leader>0 :tablast<cr>
+noremap <silent> <leader>) :tabmove<cr>
+noremap <silent> <leader>! :tabmove 0<cr>
 " noremap <silent> <leader>h :tabp<cr>
 " noremap <silent> <leader>l :tabn<cr>
 " inoremap <silent> <leader>h <Esc> :tabp<cr>
@@ -349,6 +358,11 @@ nnoremap <silent> <S-Tab> :tabp<CR>
 vnoremap <silent> <Tab> <ESC>:tabn<CR>
 vnoremap <silent> <S-Tab> <ESC>:tabp<CR>
 nnoremap <silent> <leader><Tab> :Windows<CR>
+if !exists('g:lasttab')
+  let g:lasttab = 1
+endif
+nnoremap <silent> <Leader>'' :exe "tabn ".g:lasttab<CR>
+au TabLeave * let g:lasttab = tabpagenr()
 
 " Fugitive
 nnoremap <silent> <leader>gs :Git<CR>
@@ -387,10 +401,18 @@ nnoremap <leader>/ /\<\><left><left>
 nnoremap <silent> <leader>t :tabnew<CR>
 
 inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#pum#visible() ? coc#pum#next(1):
+      \ CheckBackspace() ? "\<Tab>" :
       \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
 
 " F-keys
 nnoremap <silent> <F2> :CtrlSFToggle<CR>
@@ -419,10 +441,10 @@ vnoremap <silent> <F8> <Esc>:TagbarToggle<CR>
 
 
 " ALIASES
-command UP PlugUpdate
-command MDStart InstantMarkdownPreview
-command MDStop InstantMarkdownStop
-command DelWhitespace %s/\s\+$//e
+command! UP PlugUpdate
+command! MDStart InstantMarkdownPreview
+command! MDStop InstantMarkdownStop
+command! DelWhitespace %s/\s\+$//e
 command! -nargs=1 -complete=file E tabnew <args>
 
 

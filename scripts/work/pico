@@ -1,7 +1,13 @@
 #!/bin/bash
 
+DEVICE="/dev/ttyUSB$1"
+COMMAND="picocom -q -b 115200 $DEVICE"
+
+# try kill old connection
+lsof $DEVICE | awk 'NR > 1 {print $2}' | xargs kill -15 && sleep 1
+
 nvim \
-    -c "terminal picocom -b 115200 /dev/ttyUSB$1" \
+    -c "terminal $COMMAND" \
     -c "source ~/myconfig/dotfiles/vim/vimrc_terminal" \
     -c "tabnew ~/shared/logs/temp.log" \
     -c "tabfirst"

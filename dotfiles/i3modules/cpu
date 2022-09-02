@@ -33,13 +33,16 @@ fi
 
 echo -n "CPU ${GFREQ} ${CPUSAGE}% "
 
+NUM_DIRS="$(ls /sys/class/hwmon/ | wc -l)"
+((NUM_DIRS=NUM_DIRS-1))
 
-if test -f "/sys/class/hwmon/hwmon2/temp1_input"
-then TEMP=$(($(cat /sys/class/hwmon/hwmon2/temp1_input)/1000))
-else TEMP=$(($(cat /sys/class/hwmon/hwmon1/temp1_input)/1000))
-fi
+for x in /sys/class/hwmon/hwmon[0-$NUM_DIRS]; do
+    if grep -q "coretemp" "$x/name"; then
+        TEMP="$(($(cat $x/temp1_input)/1000))"
+    fi
+done
 
-if [[ $TEMP -ge 70 ]];then
+if [[ $TEMP -ge 85 ]];then
     COLOR=$red
 fi
 

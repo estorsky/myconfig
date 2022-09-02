@@ -9,10 +9,7 @@ buffer () {
 }
 
 shared () {
-    IP=$(ifconfig $COMMON_INTERFACE | \
-        grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | \
-        grep -Eo '([0-9]*\.){3}[0-9]*' | \
-        grep -v '127.0.0.1')
+    IP=$(ip route get 1 | head -1 | cut -d' ' -f7)
     PORT="8887"
     DATE=$(date +%s)
     FILE_NAME="$DATE.png"

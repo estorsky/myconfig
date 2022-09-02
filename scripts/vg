@@ -6,6 +6,13 @@ check_git
 
 EDITOR="nvim"
 
+# TODO: add check if bin
+# FILE_LENGTH=${#FILE}
+# MIME=$(file --dereference --mime "$FILE")
+# if [[ "${MIME:FILE_LENGTH}" =~ binary ]]; then
+  # echo "$MIME"
+  # exit 0
+# fi
 
 commit () {
     $EDITOR $(git show $1 --pretty=format: --name-only) -p
