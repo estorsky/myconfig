@@ -1,4 +1,11 @@
 {
+  "semanticTokens.enable": true,
+
+  "clangd.arguments": [
+    "--header-insertion=never",
+    "-j=4"
+  ],
+
   "explorer.file.cdCommand": "tcd",
   "explorer.keyMappings.global": {
     "<tab>": false,

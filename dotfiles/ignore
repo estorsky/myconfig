@@ -1,11 +1,13 @@
 tags
+tags.temp
+compile_commands*
 
 /* LTP-N */
 external/
 linux/
 toolchain/
 bootloader/
-/* prebuilt/ */
+prebuilt/
 /* snmp */
 /* TEST */
 *.html
@@ -23,3 +25,8 @@ modules/pmchal/pmclib_1_2_561/
 /* mkcontainer.sh */
 /* fastmkcontainer.sh */
 
+/* iss */
+kernel/
+opensource
+loader/
+*.js

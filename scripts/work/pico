@@ -4,7 +4,7 @@ DEVICE="/dev/ttyUSB$1"
 COMMAND="picocom -q -b 115200 $DEVICE"
 
 # try kill old connection
-lsof $DEVICE | awk 'NR > 1 {print $2}' | xargs kill -15 && sleep 1
+lsof -w "$DEVICE" | awk 'NR > 1 {print $2}' | xargs -r kill -15 && sleep 1
 
 nvim \
     -c "terminal $COMMAND" \

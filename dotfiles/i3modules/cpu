@@ -6,10 +6,11 @@ if [[ ! -z "${BLOCK_BUTTON}" ]]; then
     ~/myconfig/scripts/cpufreq > /dev/null
 fi
 
-red="#FF0000"
-orange="#FFAE00"
-yellow="#FFF600"
-green="#A8FF00"
+COLOR_DEFAULT="#DEDEDE"
+COLOR_RED="#FF0000"
+COLOR_ORANGE="#FFAE00"
+COLOR_YELLOW="#FFF600"
+COLOR_GREEN="#A8FF00"
 
 FREQ=$(($(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)/1000))
 GFREQ=$(echo "$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)\
@@ -25,10 +26,10 @@ NUMPROC=$(nproc --ignore=1)
 
 if ((CURFREQ > MINFREQ)); then
     if ((CURFREQ < MAXFREQ)); then
-        COLOR=$yellow
+        COLOR_DEFAULT=$COLOR_YELLOW
     fi
 else
-    COLOR=$green
+    COLOR_DEFAULT=$COLOR_GREEN
 fi
 
 echo -n "CPU ${GFREQ} ${CPUSAGE}% "
@@ -43,10 +44,9 @@ for x in /sys/class/hwmon/hwmon[0-$NUM_DIRS]; do
 done
 
 if [[ $TEMP -ge 85 ]];then
-    COLOR=$red
+    COLOR_DEFAULT=$COLOR_RED
 fi
 
 echo "${TEMP}°C "
 echo
-echo "$COLOR"
-
+echo "$COLOR_DEFAULT"

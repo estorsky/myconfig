@@ -60,6 +60,8 @@
 | copy mode: y     | copy to clipboard             |
 | prefix + Alt + x | kill window                   |
 | prefix + X       | kill session                  |
+| prefix + I       | install plugins               |
+| prefix + U       | update plugins                |
 
 ### dunst
 | Action               | Binding                       |
@@ -256,6 +258,7 @@ type in multiple search terms delimited by spaces. e.g. `^music .mp3$ sbtrkt
 | ------------------- | ----------------------------- |
 | cc                  | commit                        |
 | --                  | add all                       |
+| O                   | jump in new tab               |
 | in Gblame: Ctrl + o | going back to edit file       |
 
 ### gitgutter:
@@ -329,3 +332,10 @@ type in multiple search terms delimited by spaces. e.g. `^music .mp3$ sbtrkt
 
 https://i3wm.org/docs/refcard.html
 
+### pyrightconfig.json
+{
+    "extraPaths": [
+        "/home/estor/.local/lib/python3.10/site-packages/",
+        "/usr/lib64/python3.10/site-packages/"
+    ]
+}

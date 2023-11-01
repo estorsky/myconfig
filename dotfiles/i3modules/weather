@@ -91,7 +91,7 @@ if (/Currently/) {chomp;/\<title\>Currently: (.*)?\<\/title\>/;
             print "$night";
         }
 
-    print"$values[1]"; }'
+    print "$values[1]\n"; }'
 
 # doubles:
 # Mostly Cloudy

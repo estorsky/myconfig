@@ -14,8 +14,9 @@ proj_open () {
         MA4000_1|m1|ma|m) PROJECT_NAME="MA4000_1";;
         MA4000_2|m2) PROJECT_NAME="MA4000_2";;
         ltp-n_1|ltpn1|n1|n) PROJECT_NAME="ltp-n_1";;
-        ltp-n_2|ltpn2|n2) PROJECT_NAME="ltp-n_2";;
-        ltp-n_3|ltpn3|n3) PROJECT_NAME="ltp-n_3";;
+        realtek_iss|iss|i) PROJECT_NAME="realtek_iss";;
+        realtek_iss_2|iss2|i2) PROJECT_NAME="realtek_iss_2";;
+        realtek_iss_3|iss3|i3) PROJECT_NAME="realtek_iss_3";;
         * ) echo "dont know project '$1'"
             exit;;
     esac

@@ -25,3 +25,5 @@ tnoremap <buffer> <Esc> <C-\><C-n>
 tnoremap <buffer> jj <C-\><C-n>
 setlocal scrollback=100000
 setlocal redrawtime=10000
+
+let b:strip_trailing_whitespace_enabled = 0

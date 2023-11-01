@@ -10,7 +10,7 @@ myecho () {
 }
 
 notif () {
-    if [[ -z "$1" || -z "$2" || -z "$3" ]]
+    if [[ -z "$1" ]]
     then
         echo "notif() not enough arguments"
         exit 1
@@ -20,11 +20,36 @@ notif () {
         dunstify () { true; }
     fi
 
+    # env echo -en '\a'
+
+    dunstify -u normal -t 10000 "$(basename $0)" "$1"
+    nohup bash -c "tmux set message-style fg=colour237,bg=$TMUX_MAIN_COLOUR,bold && tmux display-message -d 2000 ' $1'" >/dev/null 2>&1 &
+    echo "$1"
+}
+
+notif_check () {
+    if [[ -z "$1" || -z "$2" || -z "$3" ]]
+    then
+        echo "notif_check() not enough arguments"
+        exit 1
+    fi
+
+    if [[ -n $SSH_CONNECTION ]]; then
+        dunstify () { true; }
+    fi
+
+    env echo -en '\a'
+
     if [ $1 -eq 0 ]; then
-        dunstify -u normal -t 10000 "$(basename $0)" "$2"
+        dunstify -u normal "$(basename $0)" "$2"
+        nohup bash -c "tmux display-message -d 2000 ' $2'" >/dev/null 2>&1 &
         echo "$2"
+    elif [ $1 -eq 130 ]; then
+        echo "command canceled"
+        exit $1
     else
-        dunstify -u critical -t 10000 "$(basename $0)" "$3"
+        dunstify -u critical "$(basename $0)" "$3"
+        nohup bash -c "tmux set message-style fg=colour237,bg=colour203,bold && tmux display-message -d 2000 ' $3' && sleep 3 && tmux set message-style fg=colour237,bg=$TMUX_MAIN_COLOUR,bold" >/dev/null 2>&1 &
         echo "$3"
         exit 2
     fi

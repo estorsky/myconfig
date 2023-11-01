@@ -124,7 +124,7 @@ export LESS_TERMCAP_ue=$'\e[0m'
 export LESS_TERMCAP_us=$'\e[93m'
 export GROFF_NO_SGR=1
 
-alias sudo='sudo -E env "PATH=$PATH"'
+# alias sudo='sudo -E env "PATH=$PATH"'
 alias neovim="nvim"
 alias v="nvim"
 alias q="exit"

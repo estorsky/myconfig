@@ -1,4 +1,4 @@
 {
     "dns": ["172.16.0.250", "172.16.0.100", "8.8.8.8"],
-    "insecure-registries" : ["xpon-ng.eltex.loc:5000"]
+    "insecure-registries" : ["xpon-ng.eltex.loc:5000", "gitlab.eltex.loc:4567"]
 }
