@@ -128,6 +128,7 @@
 | %               | move to '({""})'              |
 | ctrl + c        | copy to clipboard             |
 | E file.txt      | open file in new tab          |
+| /nnoremap\|vnoremap | hi several words          |
 
 ### spell checking
 
@@ -229,28 +230,6 @@ type in multiple search terms delimited by spaces. e.g. `^music .mp3$ sbtrkt
 | Action          | Binding                       |
 | --------------- | ----------------------------- |
 | :Ag def ./      | ?                             |
-
-### cvim:
-| Action          | Binding                                                        |
-| --------------- | -------------------------------------------------------------- |
-| \rc             | save and compile                    (n,i)                      |
-| \rl             | link                                (n,i)                      |
-| \rr             | run                                 (n,i)                      |
-| \ra             | set comand line arguments           (n,i)                      |
-| \rm             | run make                            (n,i)                      |
-| \rmc            | run 'make clean'                    (n,i)                      |
-| \rcm            | choose makefile                     (n,i)                      |
-| \rme            | executable to run                   (n,i)                      |
-| \rma            | cmd. line arg. for make             (n,i)                      |
-| \rp             | run splint                          (n,i)                      |
-| \rpa            | cmd. line arg. for splint           (n,i)                      |
-| \rk             | run CodeCheck (TM)                  (n,i)                      |
-| \rka            | cmd. line arg. for CodeCheck (TM)   (n,i)                      |
-| \rd             | run indent                          (n,v,i)                    |
-| \rh             | hardcopy buffer                     (n,v,i)                    |
-| \rs             | show plugin settings                (n,i)                      |
-| \rx             | set xterm size                      (n, only Linux/UNIX & GUI) |
-| \ro             | change output destination           (n,i)                      |
 
 ### fugitive:
 

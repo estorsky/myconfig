@@ -15,7 +15,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'aacunningham/vim-fuzzy-stash'
 Plug 'airblade/vim-gitgutter'
 Plug 'cohama/agit.vim', { 'on': ['Agit', 'AgitFile'] }
-Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
+" Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
 Plug 'jpalardy/vim-slime', { 'for':  ['py'] }
 Plug 'w0rp/ale' "it shellcheck
 Plug 'ludovicchabant/vim-gutentags'
@@ -83,6 +83,7 @@ set autoread
 set number
 syntax on
 colorscheme gruvbox
+set background=dark
 set shortmess+=O
 set noshowmode
 set cursorline
@@ -105,7 +106,7 @@ au BufNewFile,BufRead Jenkinsfile* setf groovy
 au BufNewFile,BufRead gitconfig setf gitconfig
 au BufNewFile,BufRead *dotfiles/i3 setf i3config
 au BufNewFile,BufRead *waybar/config setf jsonc
-au BufNewFile,BufRead default_monitor_preset setf swayconfig
+au BufNewFile,BufRead *_monitor_preset setf swayconfig
 au BufNewFile,BufRead *.def set syntax=c
 
 
@@ -205,7 +206,7 @@ hi ALEWarningSign ctermfg=178 ctermbg=NONE
 hi ALEInfoSign ctermfg=075 ctermbg=NONE
 
 " CVim
-let g:C_Ctrl_j   = 'off'
+" let g:C_Ctrl_j   = 'off'
 
 " Slime
 let g:slime_target = "tmux"
@@ -272,7 +273,7 @@ endif
 
 
 " BINDS
-nnoremap <silent> <CR> :set hlsearch<CR>:let @/=expand('<cword>')<CR><CR>
+" nnoremap <silent> <CR> :set hlsearch<CR>:let @/=expand('<cword>')<CR><CR>
 map <silent> <2-LeftMouse> :set hlsearch<CR>:let @/=expand('<cword>')<CR>
 map <silent> <3-LeftMouse> :let @/ = ""<CR>
 imap <2-LeftMouse> <c-o>*
@@ -317,8 +318,8 @@ nnoremap <silent> <Leader>q :call ConfirmQuit(0)<CR>
 vnoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
 inoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
 map <BS> X
-nmap <C-c> ^v$h"+y<CR>
-vmap <C-c> "+y<CR>
+nmap <C-c> ^v$h"+y
+vmap <C-c> "+y
 
 " vnoremap p "_dp
 " vnoremap p "_dP"
@@ -465,6 +466,8 @@ nmap <silent> gdt :vsp<CR><Plug>(coc-definition)<C-W>T
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+nmap <silent> gh :call CocAction("showIncomingCalls")<CR>
+               " :call CocAction("showOutgoingCalls")<CR>
 
 inoremap <silent><expr> <TAB>
       \ coc#pum#visible() ? coc#pum#next(1):
