@@ -215,6 +215,7 @@ include /etc/sway/config.d/*
 font pango: Roboto Bold 9
 # for_window [class=".*"] title_format "  %title"
 workspace_layout tabbed
+output * bg ~/Dropbox/images/alena-aenami-eternity-1080px.jpg fill
 
 bindsym $mod+Tab workspace next
 bindsym $mod+Shift+Tab workspace prev
@@ -224,13 +225,8 @@ bindsym button2 kill
 
 bindsym Control+Shift+space exec dunstctl close
 
-#TODO: https://github.com/mortie/swaylock-effects
-# bindsym --to-code $mod+Shift+s exec swaylock -f -c 000000 && systemctl suspend
-
-set $background ~/Dropbox/images/alena-aenami-eternity-1080px.jpg
-output * bg $background fill
-bindsym --to-code $mod+x exec swaylock -f -i $background
-bindsym --to-code $mod+Shift+x exec swaylock -f -i $background && systemctl suspend
+bindsym --to-code $mod+x exec ~/myconfig/scripts/swaylock.sh
+bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/swaylock.sh && systemctl suspend
 
 ### Music
 bindsym --to-code $mod+p exec playerctl play-pause
@@ -248,6 +244,8 @@ bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym --to-code $mod+t exec ~/myconfig/scripts/translate.sh
 bindsym --to-code $mod+n exec kitty -e ranger
 bindsym --to-code $mod+c exec gnome-calculator
+bindsym --to-code $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
+bindsym Print exec grim - | wl-copy && wl-paste > "Screenshot_$(date +%F_%H-%M-%S).png"
 bindsym Control+Shift+Escape exec gnome-system-monitor
 for_window [instance="gnome-calculator"] floating enable
 
@@ -257,44 +255,15 @@ exec sway-xkb-switcher
 exec blueman-applet
 exec dunst
 exec thunderbird
+exec pavucontrol
 exec sleep 5 && telegram-desktop
 exec sleep 5 && dropbox start
-
-#TODO maybe set settings in another place
-# exec pavucontrol
-exec pactl set-source-volume 2 20%
-# exec --no-startup-id /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
-
-# TODO
-# exec autorandr default
-
-# exec_always --no-startup-id nm-applet --indicator
-# sudo eopkg it networkmanager-qt-devel
-# git clone git@github.com:palinek/nm-tray.git
-# cd nm-tray
-# mkdir build
-# cd build
-# cmake ..
-# make
-# ./nm-tray
-exec sleep 60 && QT_QPA_PLATFORMTHEME=gtk2 nm-tray
-
-
-# sudo eopkg it wayland-devel wayland-protocols-devel (optional)
-# git clone git@github.com:bugaevc/wl-clipboard.git
-# cd wl-clipboard
-# meson build
-# cd build
-# ninja
-# sudo ninja install
-bindsym --to-code $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
-bindsym Print exec grim - | wl-copy && wl-paste > "Screenshot_$(date +%F_%H-%M-%S).png"
+exec sleep 5 && nm-tray
+exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 
 assign [instance="Mail"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="org.telegram.desktop"] 10
-
-#TODO setting bar
 
 set $bg-color            #222222
 set $inactive-bg-color   #3E3E46
@@ -315,4 +284,6 @@ input type:keyboard {
     xkb_options grp:alt_shift_toggle,ctrl:nocaps
 }
 
-include ~/myconfig/dotfiles/sway/default_monitor_preset
+# TODO
+# exec autorandr default
+include ~/.config/sway/default_monitor_preset

@@ -76,10 +76,7 @@ echo -n -e "${RED}"
 
 #TMUX
 ln -s "$SCRIPT_DIR/tmux.conf" ~/.tmux.conf
-
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-
-~/.tmux/plugins/tpm/bin/install_plugins
 
 #ALBERT
 # if ! [ -d ~/.config/albert ]; then
@@ -114,6 +111,9 @@ if ! [ -d ~/.config/sway ]; then
     mkdir ~/.config/sway
 fi
 ln -s "$SCRIPT_DIR/sway/config" ~/.config/sway/config
+if ! [ -d ~/work ]; then
+    ln -s "$SCRIPT_DIR/sway/default_monitor_preset" ~/.config/sway/default_monitor_preset
+fi
 
 #WAYBAR
 if ! [ -d ~/.config/waybar ]; then

@@ -20,8 +20,13 @@ if [ "$FLAG__PIPE" = true ]
 then
     text=`cat`
 else
-    # text=$(xclip -selection primary -o)
-    text=$(xsel -o)
+    if [ "$XDG_SESSION_TYPE" = wayland ]
+    then
+        text=$(wl-paste --primary)
+    else
+        # text=$(xclip -selection primary -o)
+        text=$(xsel -o)
+    fi
 fi
 
 # some transform text
