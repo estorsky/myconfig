@@ -113,6 +113,8 @@ fi
 ln -s "$SCRIPT_DIR/sway/config" ~/.config/sway/config
 if ! [ -d ~/work ]; then
     ln -s "$SCRIPT_DIR/sway/default_monitor_preset" ~/.config/sway/default_monitor_preset
+else
+    ln -s "$SCRIPT_DIR/sway/work_monitor_preset" ~/.config/sway/default_monitor_preset
 fi
 
 #WAYBAR

@@ -226,7 +226,23 @@ bindsym button2 kill
 bindsym Control+Shift+space exec dunstctl close
 
 bindsym --to-code $mod+x exec ~/myconfig/scripts/swaylock.sh
-bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/swaylock.sh && systemctl suspend
+# bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/swaylock.sh && systemctl suspend
+
+bindsym $mod+Control+Shift+greater move container to output right
+bindsym $mod+Control+Shift+less move container to output left
+bindsym $mod+Control+greater move workspace to output right
+bindsym $mod+Control+less move workspace to output left
+
+workspace number 1  output HDMI-A-1 eDP-1 DP-1
+workspace number 2  output HDMI-A-1 eDP-1 DP-1
+workspace number 3  output HDMI-A-1 eDP-1 DP-1
+workspace number 4  output HDMI-A-1 eDP-1 DP-1
+workspace number 5  output HDMI-A-1 eDP-1 DP-1
+workspace number 6  output eDP-1 DP-1 HDMI-A-1
+workspace number 7  output eDP-1 DP-1 HDMI-A-1
+workspace number 8  output eDP-1 DP-1 HDMI-A-1
+workspace number 9  output eDP-1 DP-1 HDMI-A-1
+workspace number 10 output eDP-1 DP-1 HDMI-A-1
 
 ### Music
 bindsym --to-code $mod+p exec playerctl play-pause
@@ -247,7 +263,6 @@ bindsym --to-code $mod+c exec gnome-calculator
 bindsym --to-code $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
 bindsym Print exec grim - | wl-copy && wl-paste > "Screenshot_$(date +%F_%H-%M-%S).png"
 bindsym Control+Shift+Escape exec gnome-system-monitor
-for_window [instance="gnome-calculator"] floating enable
 
 ########## Autolaunch ##########
 
@@ -264,6 +279,7 @@ exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 assign [instance="Mail"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="org.telegram.desktop"] 10
+for_window [app_id="org.gnome.Calculator"] floating enable
 
 set $bg-color            #222222
 set $inactive-bg-color   #3E3E46

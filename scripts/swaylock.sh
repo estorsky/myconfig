@@ -3,6 +3,8 @@
 /usr/local/bin/swaylock \
     --screenshots \
     --clock \
+    --timestr '%H:%M' \
+    --datestr '%a, %d.%m.%y' \
     --indicator \
     --indicator-radius 100 \
     --indicator-thickness 7 \

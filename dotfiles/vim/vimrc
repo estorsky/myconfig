@@ -106,7 +106,7 @@ au BufNewFile,BufRead Jenkinsfile* setf groovy
 au BufNewFile,BufRead gitconfig setf gitconfig
 au BufNewFile,BufRead *dotfiles/i3 setf i3config
 au BufNewFile,BufRead *waybar/config setf jsonc
-au BufNewFile,BufRead default_monitor_preset setf swayconfig
+au BufNewFile,BufRead *_monitor_preset setf swayconfig
 au BufNewFile,BufRead *.def set syntax=c
 
 

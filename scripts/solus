@@ -95,6 +95,11 @@ install__google_chrome () {
     sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
 
     # sudo sed -i '/Exec/s/$/ --force-dark-mode/' /usr/share/applications/google-chrome.desktop
+
+    # for Wayland
+    # Go to chrome://flags
+    # Search "Preferred Ozone platform"
+    # Set it to "Wayland"
 }
 
 install__spotify () {
@@ -218,9 +223,6 @@ init () {
     # sudo usermod -aG wireshark $USER
 
     # install_dns_vpn_resolver.sh
-
-    # : 1694679969:0;dbus-update-activation-environment DISPLAY
-    # : 1694679977:0;echo $DISPLAY
 }
 
 update () {
