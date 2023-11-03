@@ -17,7 +17,7 @@ install__nm_tray () {
     cd /tmp/
 
     rm -rf /tmp/nm-tray
-    gclonecd git@github.com:palinek/nm-tray.git
+    gclonecd https://github.com/palinek/nm-tray.git
     mkdir build
     cd build
     cmake ..
@@ -30,7 +30,7 @@ install__wl_clipboard () {
     cd /tmp/
 
     rm -rf /tmp/wl-clipboard
-    gclonecd git@github.com:bugaevc/wl-clipboard.git
+    gclonecd https://github.com/bugaevc/wl-clipboard.git
     meson build
     cd build
     sudo ninja install
@@ -42,7 +42,7 @@ install__swaylock_effects () {
     cd /tmp/
 
     rm -rf /tmp/swaylock-effects
-    gclonecd git@github.com:mortie/swaylock-effects.git
+    gclonecd https://github.com/mortie/swaylock-effects.git
     meson build
     ninja -C build
     sudo ninja -C build install
