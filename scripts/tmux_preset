@@ -44,7 +44,7 @@ proj_open () {
     tmux send-keys -t "$SESSION_NAME" " sleep 1 && nvim" C-m C-n F8
 
     tmux new-window -t "$SESSION_NAME" -n build
-    tmux send-keys -t "$SESSION_NAME" " dockerun.sh $1" C-m
+    tmux send-keys -t "$SESSION_NAME" " dockerun.sh $1"
     tmux split-window -h -t "$SESSION_NAME"
     tmux send-keys -t "$SESSION_NAME" " sleep 1 && ranger" C-m
     if [[ "$PROJECT_NAME" == "MA4000_1" || "$PROJECT_NAME" == "MA4000_2" ]]; then

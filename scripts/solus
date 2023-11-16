@@ -100,6 +100,7 @@ install__google_chrome () {
     # Go to chrome://flags
     # Search "Preferred Ozone platform"
     # Set it to "Wayland"
+    # And 'Use system title bar and borders' - on
 }
 
 install__spotify () {
@@ -144,7 +145,7 @@ init () {
         xsel docker blueman pavucontrol doxygen cppcheck font-awesome-ttf \
         net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev openjdk-8 \
         ghex picocom golang nmap maim fzf fd stress-ng valgrind virt-viewer \
-        sway waybar grim
+        sway waybar grim jq
 
     # sudo eopkg it gdm
     # https://github.com/fairyglade/ly

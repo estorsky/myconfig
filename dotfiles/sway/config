@@ -226,23 +226,23 @@ bindsym button2 kill
 bindsym Control+Shift+space exec dunstctl close
 
 bindsym --to-code $mod+x exec ~/myconfig/scripts/swaylock.sh
-# bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/swaylock.sh && systemctl suspend
+bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/suspend.sh
 
 bindsym $mod+Control+Shift+greater move container to output right
 bindsym $mod+Control+Shift+less move container to output left
 bindsym $mod+Control+greater move workspace to output right
 bindsym $mod+Control+less move workspace to output left
 
-workspace number 1  output HDMI-A-1 eDP-1 DP-1
-workspace number 2  output HDMI-A-1 eDP-1 DP-1
-workspace number 3  output HDMI-A-1 eDP-1 DP-1
-workspace number 4  output HDMI-A-1 eDP-1 DP-1
-workspace number 5  output HDMI-A-1 eDP-1 DP-1
-workspace number 6  output eDP-1 DP-1 HDMI-A-1
-workspace number 7  output eDP-1 DP-1 HDMI-A-1
-workspace number 8  output eDP-1 DP-1 HDMI-A-1
-workspace number 9  output eDP-1 DP-1 HDMI-A-1
-workspace number 10 output eDP-1 DP-1 HDMI-A-1
+workspace 1 output HDMI-A-1 eDP-1 DP-1
+workspace 2 output HDMI-A-1 eDP-1 DP-1
+workspace 3 output HDMI-A-1 eDP-1 DP-1
+workspace 4 output HDMI-A-1 eDP-1 DP-1
+workspace 5 output HDMI-A-1 eDP-1 DP-1
+workspace 6 output eDP-1 DP-1 HDMI-A-1
+workspace 7 output eDP-1 DP-1 HDMI-A-1
+workspace 8 output eDP-1 DP-1 HDMI-A-1
+workspace 9 output eDP-1 DP-1 HDMI-A-1
+workspace 10 output eDP-1 DP-1 HDMI-A-1
 
 ### Music
 bindsym --to-code $mod+p exec playerctl play-pause
@@ -275,6 +275,7 @@ exec sleep 5 && telegram-desktop
 exec sleep 5 && dropbox start
 exec sleep 5 && nm-tray
 exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
+# exec ~/myconfig/scripts/swayidle.sh
 
 assign [instance="Mail"] 9
 assign [app_id="pavucontrol"] 9
