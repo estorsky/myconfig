@@ -2,6 +2,10 @@
 
 if ! pgrep -x swaylock &>/dev/null; then
 
+    swaymsg input "1:1:AT_Translated_Set_2_keyboard" xkb_switch_layout 0
+
+    dunstctl close-all
+
     playerctl --all-players --no-messages pause
 
     /usr/local/bin/swaylock \
