@@ -15,7 +15,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'aacunningham/vim-fuzzy-stash'
 Plug 'airblade/vim-gitgutter'
 Plug 'cohama/agit.vim', { 'on': ['Agit', 'AgitFile'] }
-Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
+" Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
 Plug 'jpalardy/vim-slime', { 'for':  ['py'] }
 Plug 'w0rp/ale' "it shellcheck
 Plug 'ludovicchabant/vim-gutentags'
@@ -206,7 +206,7 @@ hi ALEWarningSign ctermfg=178 ctermbg=NONE
 hi ALEInfoSign ctermfg=075 ctermbg=NONE
 
 " CVim
-let g:C_Ctrl_j   = 'off'
+" let g:C_Ctrl_j   = 'off'
 
 " Slime
 let g:slime_target = "tmux"
