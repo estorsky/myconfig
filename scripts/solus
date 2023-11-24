@@ -138,7 +138,7 @@ init () {
         vlc mpv htop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks \
         llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
         linux-current-headers lm_sensors qbittorrent wireshark xkill \
-        vim neovim mtr python3-ipython i3lock krita ranger cmus cava etcher \
+        vim neovim helix mtr python3-ipython i3lock krita ranger cmus cava etcher \
         speedtest-cli cmatrix highlight curl-gnutls iotop iftop \
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
         openvpn intel-microcode i3blocks i3 lxappearance dunst kitty \
