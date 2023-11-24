@@ -318,8 +318,8 @@ nnoremap <silent> <Leader>q :call ConfirmQuit(0)<CR>
 vnoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
 inoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
 map <BS> X
-nmap <C-c> ^v$h"+y<CR>
-vmap <C-c> "+y<CR>
+nmap <C-c> ^v$h"+y
+vmap <C-c> "+y
 
 " vnoremap p "_dp
 " vnoremap p "_dP"
