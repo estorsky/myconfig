@@ -304,3 +304,16 @@ input type:keyboard {
 # TODO
 # exec autorandr default
 include ~/.config/sway/default_monitor_preset
+
+set $opacity 0.95
+for_window [class=".*"] opacity $opacity
+for_window [app_id=".*"] opacity $opacity
+
+corner_radius 5
+
+blur enable
+blur_xray disable
+# blur_passes 2
+# blur_radius 5
+
+layer_effects "waybar" blur enable; shadows enable

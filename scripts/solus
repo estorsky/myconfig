@@ -36,6 +36,18 @@ install__wl_clipboard () {
     sudo ninja install
 }
 
+install__swayfx () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/swayfx
+    gclonecd https://github.com/WillPower3309/swayfx
+    meson build/
+    ninja -C build/
+    sudo ninja -C build/ install
+}
+
 install__swaylock_effects () {
     set -x
 
@@ -198,6 +210,9 @@ init () {
     sudo eopkg it -y wayland-devel wayland-protocols-devel # (optional)
     install__wl_clipboard
 
+    sudo eopkg it wlroots wlroots-devel json-c-devel pango-devel libevdev-devel scdoc gdk-pixbuf-devel
+    install__swayfx
+
     sudo eopkg it libxkbcommon-devel libcairo-devel
     install__swaylock_effects
 
@@ -233,6 +248,7 @@ update () {
     install__nm_tray
     install__wl_clipboard
     install__swaylock_effects
+    install__swayfx
     # ~/.tmux/plugins/tpm/bin/update_plugins all
 }
 
