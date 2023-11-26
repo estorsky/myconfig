@@ -232,6 +232,7 @@ update () {
     install__xkb_switch i3
     install__nm_tray
     install__wl_clipboard
+    install__swaylock_effects
     # ~/.tmux/plugins/tpm/bin/update_plugins all
 }
 
