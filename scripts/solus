@@ -135,7 +135,7 @@ init () {
     sudo eopkg up -y
 
     sudo eopkg it -y screenfetch telegram discord dropbox nautilus-dropbox git tmux \
-        vlc mpv htop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks \
+        vlc mpv htop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks meld\
         llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
         linux-current-headers lm_sensors qbittorrent wireshark xkill \
         vim neovim helix mtr python3-ipython i3lock krita ranger cmus cava etcher \
