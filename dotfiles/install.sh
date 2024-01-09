@@ -27,6 +27,7 @@ mv ~/.config/rofi/config.rasi       ~/dotfiles_old/
 mv ~/.config/feh/themes             ~/dotfiles_old/
 mv ~/.config/i3/config              ~/dotfiles_old/
 mv ~/.config/sway/config            ~/dotfiles_old/
+mv ~/.config/sway/default_monitor_preset ~/dotfiles_old/
 mv ~/.config/waybar/config          ~/dotfiles_old/
 mv ~/.config/waybar/style.css       ~/dotfiles_old/
 mv ~/.config/kitty/kitty.conf       ~/dotfiles_old/
@@ -35,6 +36,7 @@ mv ~/.config/ranger/rc.conf         ~/dotfiles_old/
 mv ~/.zshrc                         ~/dotfiles_old/
 mv ~/.ignore                        ~/dotfiles_old/
 mv ~/.gitconfig                     ~/dotfiles_old/
+mv ~/.git_funcs.sh                  ~/dotfiles_old/
 mv ~/.config/autorandr              ~/dotfiles_old/
 
 #CREATE DIRS
