@@ -101,6 +101,7 @@ install__google_chrome () {
     # Search "Preferred Ozone platform"
     # Set it to "Wayland"
     # And 'Use system title bar and borders' - on
+    # Vulkan -> enable
 }
 
 install__spotify () {
