@@ -5,7 +5,7 @@
 }
 
 window#waybar {
-    background-color: rgba(43, 48, 59, 0.5);
+    background-color: rgba(0, 0, 0, 0.6);
     /* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
     color: #ffffff;
     transition-property: background-color;
@@ -111,18 +111,26 @@ button:hover {
     /* background-color: #64727D; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
 #battery {
-    background-color: #ffffff;
-    color: #000000;
+    /* background-color: #ffffff; */
+    /* color: #000000; */
+
+    font-weight: bold;
+    /* background: rgba(0, 0, 0, 0.6); */
+    color: #dbdbdb;
 }
 
 #battery.charging, #battery.plugged {
-    color: #ffffff;
-    background-color: #26A65B;
+    /* color: #ffffff; */
+    /* background-color: #26A65B; */
+
+    /* font-weight: bold; */
+    /* background: rgba(0, 0, 0, 0.6); */
+    color: #dbdbdb;
 }
 
 @keyframes blink {
@@ -133,13 +141,17 @@ button:hover {
 }
 
 #battery.critical:not(.charging) {
-    background-color: #f53c3c;
-    color: #ffffff;
+    /* background-color: #f53c3c; */
+    /* color: #ffffff; */
     animation-name: blink;
     animation-duration: 0.5s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     animation-direction: alternate;
+
+    /* font-weight: bold; */
+    /* background: rgba(0, 0, 0, 0.6); */
+    color: #dbdbdb;
 }
 
 label:focus {
@@ -151,7 +163,7 @@ label:focus {
     /* color: #000000; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
@@ -159,7 +171,7 @@ label:focus {
     /* background-color: #9b59b6; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
@@ -175,7 +187,7 @@ label:focus {
     /* background-color: #2980b9; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
@@ -183,7 +195,7 @@ label:focus {
     /* background-color: #f53c3c; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
@@ -192,7 +204,7 @@ label:focus {
     /* color: #000000; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
@@ -201,7 +213,7 @@ label:focus {
     /* color: #2a5c45; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
@@ -232,7 +244,7 @@ label:focus {
     /* background-color: #f0932b; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
@@ -248,7 +260,7 @@ label:focus {
     /* background-color: #2980b9; */
 
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
+    /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
 }
 
@@ -288,12 +300,15 @@ label:focus {
 }
 
 #language {
-    font-weight: bold;
-    background: rgba(0, 0, 0, 0.6);
-    color: #dbdbdb;
+    /* background: #00b093; */
+    /* color: #740864; */
     padding: 0 5px;
     margin: 0 5px;
     min-width: 16px;
+
+    font-weight: bold;
+    /* background: rgba(0, 0, 0, 0.6); */
+    color: #dbdbdb;
 }
 
 #keyboard-state {
