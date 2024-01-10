@@ -108,7 +108,11 @@ button:hover {
 }
 
 #clock {
-    background-color: #64727D;
+    /* background-color: #64727D; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #battery {
@@ -143,12 +147,20 @@ label:focus {
 }
 
 #cpu {
-    background-color: #2ecc71;
-    color: #000000;
+    /* background-color: #2ecc71; */
+    /* color: #000000; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #memory {
-    background-color: #9b59b6;
+    /* background-color: #9b59b6; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #disk {
@@ -160,21 +172,37 @@ label:focus {
 }
 
 #network {
-    background-color: #2980b9;
+    /* background-color: #2980b9; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #network.disconnected {
-    background-color: #f53c3c;
+    /* background-color: #f53c3c; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #pulseaudio {
-    background-color: #f1c40f;
-    color: #000000;
+    /* background-color: #f1c40f; */
+    /* color: #000000; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #pulseaudio.muted {
-    background-color: #90b1b1;
-    color: #2a5c45;
+    /* background-color: #90b1b1; */
+    /* color: #2a5c45; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #wireplumber {
@@ -201,15 +229,27 @@ label:focus {
 }
 
 #temperature {
-    background-color: #f0932b;
+    /* background-color: #f0932b; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #temperature.critical {
-    background-color: #eb4d4b;
+    /* background-color: #eb4d4b; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #tray {
-    background-color: #2980b9;
+    /* background-color: #2980b9; */
+
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
 }
 
 #tray > .passive {
@@ -248,8 +288,9 @@ label:focus {
 }
 
 #language {
-    background: #00b093;
-    color: #740864;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.6);
+    color: #dbdbdb;
     padding: 0 5px;
     margin: 0 5px;
     min-width: 16px;
