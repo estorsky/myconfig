@@ -151,7 +151,7 @@ button:hover {
 
     /* font-weight: bold; */
     /* background: rgba(0, 0, 0, 0.6); */
-    color: #dbdbdb;
+    color: #eb4d4b;
 }
 
 label:focus {
@@ -167,12 +167,20 @@ label:focus {
     color: #dbdbdb;
 }
 
+#cpu.critical {
+    color: #eb4d4b;
+}
+
 #memory {
     /* background-color: #9b59b6; */
 
     font-weight: bold;
     /* background: rgba(0, 0, 0, 0.6); */
     color: #dbdbdb;
+}
+
+#memory.critical {
+    color: #eb4d4b;
 }
 
 #disk {
@@ -196,7 +204,7 @@ label:focus {
 
     font-weight: bold;
     /* background: rgba(0, 0, 0, 0.6); */
-    color: #dbdbdb;
+    color: #eb4d4b;
 }
 
 #pulseaudio {

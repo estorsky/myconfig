@@ -88,11 +88,17 @@
     },
     "cpu": {
         "interval": 5,
+        "states": {
+            "critical": 85
+        },
         "format": "{usage:2}% ",
         "tooltip": false
     },
     "memory": {
         "interval": 5,
+        "states": {
+            "critical": 85
+        },
         "format": "{}% "
     },
     "temperature": {
