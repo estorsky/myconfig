@@ -188,7 +188,10 @@ label:focus {
 }
 
 #backlight {
-    background-color: #90b1b1;
+    /* background-color: #90b1b1; */
+
+    font-weight: bold;
+    color: #dbdbdb;
 }
 
 #network {
