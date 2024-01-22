@@ -5,8 +5,12 @@ case "$1" in
         cd ~/Dropbox/work/vpn/
         sudo ~/Dropbox/work/vpn/vpn.sh
         exit;;
+    jp)
+        cd ~/Dropbox/other/vpn/
+        sudo openvpn jp-free-152003.protonvpn.udp.ovpn
+        exit;;
     *)
-        cd ~/Dropbox/other/
+        cd ~/Dropbox/other/vpn/
         sudo openvpn node-us-56.protonvpn.net.udp.ovpn
         exit;;
 esac
