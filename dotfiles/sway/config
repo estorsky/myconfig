@@ -228,10 +228,10 @@ bindsym Control+Shift+space exec dunstctl close
 bindsym --to-code $mod+x exec ~/myconfig/scripts/swaylock.sh
 bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/suspend.sh
 
-bindsym $mod+Control+Shift+greater move container to output right
-bindsym $mod+Control+Shift+less move container to output left
-bindsym $mod+Control+greater move workspace to output right
-bindsym $mod+Control+less move workspace to output left
+bindsym --to-code $mod+Shift+Period move container to output right
+bindsym --to-code $mod+Shift+Comma move container to output left
+bindsym --to-code $mod+Control+Period move workspace to output right
+bindsym --to-code $mod+Control+Comma move workspace to output left
 
 workspace 1 output HDMI-A-1 eDP-1 DP-1
 workspace 2 output HDMI-A-1 eDP-1 DP-1
