@@ -318,3 +318,6 @@ https://i3wm.org/docs/refcard.html
         "/usr/lib64/python3.10/site-packages/"
     ]
 }
+
+### clangd
+:CocCommand workspace.showOutput
