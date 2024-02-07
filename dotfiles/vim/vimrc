@@ -10,7 +10,6 @@ Plug 'axelf4/vim-strip-trailing-whitespace'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install()  }  } "it fzf ripgrep
 Plug 'junegunn/fzf.vim' " it bat (for highlighting)
 Plug 'dyng/ctrlsf.vim'
-Plug 'easymotion/vim-easymotion'
 Plug 'tpope/vim-fugitive'
 Plug 'aacunningham/vim-fuzzy-stash'
 Plug 'airblade/vim-gitgutter'
@@ -45,9 +44,12 @@ Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn in
 Plug 'godlygeek/tabular'
 Plug 'lyokha/vim-xkbswitch' " it libxkbfile-devel (https://github.com/grwlf/xkb-switch)
 " Plug 'qpkorr/vim-bufkill'
+
 if has('nvim')
-" Plug 'rbgrouleff/bclose.vim'
+    " Plug 'rbgrouleff/bclose.vim'
+    Plug 'phaazon/hop.nvim'
 else
+    Plug 'easymotion/vim-easymotion'
 endif
 call plug#end()
 
@@ -117,7 +119,13 @@ let g:localvimrc_sandbox = 0
 let g:localvimrc_ask = 0
 
 " Coc
-let g:coc_global_extensions = ['coc-json', 'coc-explorer', 'coc-calc', 'coc-clangd', 'coc-sh', 'coc-pyright']
+let g:coc_global_extensions = [
+            \ 'coc-json', 'coc-explorer', 'coc-calc', 'coc-clangd',
+            \ 'coc-sh', 'coc-pyright', 'coc-vimlsp']
+hi CocErrorSign ctermfg=167 ctermbg=none
+hi CocWarningSign ctermfg=208 ctermbg=none
+hi CocInfoSign ctermfg=214 ctermbg=none
+hi CocHintSign ctermfg=109 ctermfg=214 ctermbg=none
 
 " NERDTree
 let NERDTreeMinimalUI=1
@@ -160,9 +168,6 @@ let g:airline#extensions#tabline#left_alt_sep = ''
 let g:airline#extensions#tabline#right_sep = ''
 let g:airline#extensions#tabline#right_alt_sep = ''
 " let g:airline#extensions#whitespace#enabled = 0
-
-" EasyMotion
-let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnmfj'
 
 " FZF
 let g:fzf_layout = { 'down': '~50%' }
@@ -288,10 +293,6 @@ imap оо <Esc>
 " vmap <silent> <C-n> <esc>:NERDTreeTabsToggle<CR>
 map <silent> <C-n> :CocCommand explorer --sources=buffer-,file+<CR>
 vmap <silent> <C-n> <esc>:CocCommand explorer --sources=buffer-,file+<CR>
-map <Leader> <Plug>(easymotion-prefix)
-nmap <Space> <Plug>(easymotion-s)
-" map <Space> <Plug>(easymotion-s2)
-" nmap <Space> <Plug>(easymotion-overwin-f2)
 nmap <C-_> <plug>NERDCommenterToggle
 vmap <C-_> <plug>NERDCommenterToggle
 map <silent> <C-p> :Files<CR>
@@ -396,7 +397,7 @@ nnoremap <silent> <leader>ge :Gedit<CR>
 nnoremap <silent> <leader>gr :Gread<CR>
 nnoremap <silent> <leader>gw :Gwrite<CR><CR>
 nnoremap <silent> <leader>gl :Git log<CR>
-nnoremap <silent> <leader>gll :Git log .<CR>
+nnoremap <silent> <leader>g% :Git log -- %<CR>
 nnoremap <silent> <leader>gp :Ggrep<Space>
 nnoremap <silent> <leader>gm :GMove<Space>
 nnoremap <silent> <leader>gb :Git branch<Space>
@@ -486,15 +487,15 @@ endfunction
 
 " Mappings for CoCList
 " Show all diagnostics
-nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+" nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
 " Manage extensions
 " nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
 " Show commands
 " nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
 " Find symbol of current document
-nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+" nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 " Search workspace symbols
-nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+" nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
 " Do default action for next item
 " nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
 " Do default action for previous item
@@ -550,3 +551,20 @@ for d in glob('~/.vim/spell/*.add', 1, 1)
     endif
 endfor
 
+
+if has('nvim')
+    set signcolumn=auto:3
+
+    " Hop
+    lua require'hop'.setup { keys = 'asdghklqwertyuiopzxcvbnmfj' }
+
+    nmap <Space> :HopChar1<CR>
+else
+    " EasyMotion
+    let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnmfj'
+
+    map <Leader> <Plug>(easymotion-prefix)
+    nmap <Space> <Plug>(easymotion-s)
+    " map <Space> <Plug>(easymotion-s2)
+    " nmap <Space> <Plug>(easymotion-overwin-f2)
+endif
