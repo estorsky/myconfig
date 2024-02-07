@@ -145,7 +145,7 @@ init () {
         openvpn intel-microcode i3blocks i3 lxappearance dunst kitty \
         xsel docker blueman pavucontrol doxygen cppcheck font-awesome-ttf \
         net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev openjdk-8 \
-        ghex picocom golang nmap maim fzf fd stress-ng valgrind virt-viewer \
+        ghex picocom golang cargo nmap maim fzf fd stress-ng valgrind virt-viewer \
         sway waybar grim jq
 
     # sudo eopkg it gdm

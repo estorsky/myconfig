@@ -43,8 +43,8 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn install'} "sudo npm -g install instant-markdown-d yarn
 Plug 'godlygeek/tabular'
 Plug 'lyokha/vim-xkbswitch' " it libxkbfile-devel (https://github.com/grwlf/xkb-switch)
+Plug 'khaser/sway-vim-kbswitch' , {'do': 'cargo build -r'} " it cargo
 " Plug 'qpkorr/vim-bufkill'
-
 if has('nvim')
     " Plug 'rbgrouleff/bclose.vim'
     Plug 'phaazon/hop.nvim'
@@ -261,6 +261,7 @@ let g:DoxygenToolkit_licenseTag='Copyright (C) 2023 ООО "Предприяти
 
 " XKBSWITCH
 let g:XkbSwitchEnabled = 1
+let g:XkbSwitchLib = expand('~/.vim/plugged/sway-vim-kbswitch/target/release/libswaykbswitch.so')
 
 if has('nvim')
     " nmap <BS> <C-h>
