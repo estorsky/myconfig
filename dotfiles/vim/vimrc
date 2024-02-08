@@ -168,6 +168,11 @@ let g:airline#extensions#tabline#left_alt_sep = ''
 let g:airline#extensions#tabline#right_sep = ''
 let g:airline#extensions#tabline#right_alt_sep = ''
 " let g:airline#extensions#whitespace#enabled = 0
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+let g:airline_symbols.dirty='🗲 '
+let g:airline_symbols.crypt = ''
 
 " FZF
 let g:fzf_layout = { 'down': '~50%' }
@@ -206,9 +211,9 @@ let g:ale_sign_warning = '•'
 let g:ale_linters = {'c': ['clang'], 'cpp': ['clang']}
 let g:ale_cpp_gcc_options="-Wall -Wextra -pedantic -std=c99"
 let g:ale_c_parse_makefile = 1
-hi ALEErrorSign ctermfg=160 ctermbg=NONE
-hi ALEWarningSign ctermfg=178 ctermbg=NONE
-hi ALEInfoSign ctermfg=075 ctermbg=NONE
+hi ALEErrorSign ctermfg=160 ctermbg=none
+hi ALEWarningSign ctermfg=178 ctermbg=none
+hi ALEInfoSign ctermfg=075 ctermbg=none
 
 " CVim
 " let g:C_Ctrl_j   = 'off'
@@ -219,10 +224,15 @@ let g:slime_python_ipython = 1
 
 " Gitgutter
 set updatetime=100
-hi GitGutterAdd ctermfg=106 guibg=NONE
-hi GitGutterChange ctermfg=172 guibg=NONE
-hi GitGutterDelete ctermfg=160 guibg=NONE
-hi GitGutterChangeDelete ctermfg=172 guibg=NONE
+hi GitGutterAdd guibg=none
+hi GitGutterChange guibg=none
+hi GitGutterDelete guibg=none
+hi GitGutterChangeDelete guibg=none
+let g:gitgutter_sign_added = '▌'
+let g:gitgutter_sign_modified = '▌'
+let g:gitgutter_sign_removed = '▌'
+let g:gitgutter_sign_removed_first_line = '▌'
+let g:gitgutter_sign_modified_removed = '▌'
 
 " Tagbar
 let g:tagbar_compact = 1
@@ -265,7 +275,7 @@ let g:XkbSwitchLib = expand('~/.vim/plugged/sway-vim-kbswitch/target/release/lib
 
 if has('nvim')
     " nmap <BS> <C-h>
-    autocmd bufnewfile,bufread * hi Normal guibg=NONE ctermbg=NONE
+    autocmd bufnewfile,bufread * hi Normal guibg=none ctermbg=none
 else
     set timeoutlen=1000 ttimeoutlen=0
     set wildmode=longest,list,full
