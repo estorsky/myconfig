@@ -7,9 +7,9 @@ trap 'exit' INT
 LINK="https://raw.githubusercontent.com/getsolus/3rd-party/master"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source $DIR/common_funcs.sh
+source "${DIR}/common_funcs.sh"
 
-run_with_root $1
+run_with_root "$1"
 
 install__nm_tray () {
     set -x
