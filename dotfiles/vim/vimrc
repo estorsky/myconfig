@@ -224,10 +224,10 @@ let g:slime_python_ipython = 1
 
 " Gitgutter
 set updatetime=100
-hi GitGutterAdd guibg=none
-hi GitGutterChange guibg=none
-hi GitGutterDelete guibg=none
-hi GitGutterChangeDelete guibg=none
+hi GitGutterAdd guibg=NONE
+hi GitGutterChange guibg=NONE
+hi GitGutterDelete guibg=NONE
+hi GitGutterChangeDelete guibg=NONE
 let g:gitgutter_sign_added = '▌'
 let g:gitgutter_sign_modified = '▌'
 let g:gitgutter_sign_removed = '▌'
