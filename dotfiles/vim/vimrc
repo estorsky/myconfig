@@ -415,7 +415,7 @@ nnoremap <silent> <leader>gb :Git branch<Space>
 nnoremap <silent> <leader>go :Git checkout<Space>
 nnoremap <silent> <leader>gps :Git push<CR>
 nnoremap <silent> <leader>gpl :Git pull<CR>
-nnoremap <silent> <leader>gbl :Git blame<CR>
+nnoremap <silent> <leader>gbl :Git blame --date=format:'%Y-%m-%d'<CR>
 nnoremap <silent> <leader>gsl :GStashList<CR>
 
 nmap ]c <Plug>(GitGutterNextHunk)zz
