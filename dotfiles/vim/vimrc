@@ -294,8 +294,15 @@ map <silent> <2-LeftMouse> :set hlsearch<CR>:let @/=expand('<cword>')<CR>
 map <silent> <3-LeftMouse> :let @/ = ""<CR>
 imap <2-LeftMouse> <c-o>*
 " imap <C-f> <plug>(fzf-complete-line)
-vmap <Leader>sf <Plug>CtrlSFVwordExec
-nmap <Leader>sf <Plug>CtrlSFCCwordPath
+" vmap <Leader>sf <Plug>CtrlSFVwordExec
+" nmap <Leader>sf <Plug>CtrlSFCCwordPath
+nmap <Leader>sf :CocSearch <C-r><C-w><CR>
+
+autocmd BufRead,BufNewFile __coc_refactor__*
+            \ setlocal nonumber
+            \| wincmd J
+            \| horizontal resize 40
+
 " nnoremap * *``
 nnoremap * :keepjumps normal! mi*`i<CR>
 imap jj <Esc>
