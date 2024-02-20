@@ -18,7 +18,7 @@ Plug 'cohama/agit.vim', { 'on': ['Agit', 'AgitFile'] }
 Plug 'jpalardy/vim-slime', { 'for':  ['py'] }
 Plug 'w0rp/ale' "it shellcheck
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'majutsushi/tagbar', { 'on':  'TagbarToggle' } "it ctags
+Plug 'majutsushi/tagbar' ", { 'on':  'TagbarToggle' } it ctags
 Plug 'liuchengxu/vista.vim'
 " Plug 'xolox/vim-misc'
 " Plug 'xolox/vim-easytags'
@@ -257,8 +257,8 @@ let g:instant_markdown_open_to_the_world = 1
 
 " Gutentags
 let g:gutentags_ctags_exclude = [
-            \ 'external', 'linux', 'toolchain', 'bootloader', 'prebuilt',
-            \'compilation_branch__*' ]
+            \ 'external', 'linux', 'toolchain', 'bootloader', 'prebuilt', 'compilation_branch__*',
+            \ 'sdk', 'kernel', 'module', 'loader', 'make', 'build_sys', '*.js']
 
 " Doxygen
 let g:DoxygenToolkit_briefTag_pre="@Synopsis  "
@@ -267,7 +267,7 @@ let g:DoxygenToolkit_returnTag="@Returns   "
 let g:DoxygenToolkit_blockHeader="-------------------------------"
 let g:DoxygenToolkit_blockFooter="---------------------------------"
 let g:DoxygenToolkit_authorName="Dmitry Privalov"
-let g:DoxygenToolkit_licenseTag='Copyright (C) 2023 ООО "Предприятие "Элтекс"'
+let g:DoxygenToolkit_licenseTag='Copyright (C) 2024 ООО "Предприятие "Элтекс"'
 
 " XKBSWITCH
 let g:XkbSwitchEnabled = 1
