@@ -258,7 +258,7 @@ let g:instant_markdown_open_to_the_world = 1
 " Gutentags
 let g:gutentags_ctags_exclude = [
             \ 'external', 'linux', 'toolchain', 'bootloader', 'prebuilt', 'compilation_branch__*',
-            \ 'sdk', 'kernel', 'module', 'loader', 'make', 'build_sys', '*.js']
+            \ 'sdk', 'kernel', 'module', 'loader', 'make', 'build_sys', '*.js', '*.html', '*.htm']
 
 " Doxygen
 let g:DoxygenToolkit_briefTag_pre="@Synopsis  "
