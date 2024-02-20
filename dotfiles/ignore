@@ -27,6 +27,6 @@ modules/pmchal/pmclib_1_2_561/
 
 /* iss */
 kernel/
-opensource
+/* opensource */
 loader/
 *.js
