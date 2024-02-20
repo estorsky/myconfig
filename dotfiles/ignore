@@ -25,7 +25,7 @@ modules/pmchal/pmclib_1_2_561/
 /* mkcontainer.sh */
 /* fastmkcontainer.sh */
 
-/* iss */
+/* ISS */
 kernel/
 /* opensource */
 loader/
