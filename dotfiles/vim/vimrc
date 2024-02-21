@@ -168,6 +168,11 @@ let g:airline#extensions#tabline#left_alt_sep = ''
 let g:airline#extensions#tabline#right_sep = ''
 let g:airline#extensions#tabline#right_alt_sep = ''
 " let g:airline#extensions#whitespace#enabled = 0
+let g:airline#extensions#whitespace#trailing_format = '[%s]t'
+let g:airline#extensions#whitespace#mixed_indent_format = '[%s]mi'
+let g:airline#extensions#whitespace#long_format = '[%s]l'
+let g:airline#extensions#whitespace#mixed_indent_file_format = '[%s]mif'
+let g:airline#extensions#whitespace#conflicts_format = '[%s]c'
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
 endif
