@@ -28,5 +28,10 @@ modules/pmchal/pmclib_1_2_561/
 /* ISS */
 kernel/
 /* opensource */
+module/
 loader/
+sdk/
 *.js
+*.html
+*.htl
+suppress_base.json
