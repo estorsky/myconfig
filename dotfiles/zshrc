@@ -107,7 +107,8 @@ stty -ixon -echoctl
 setopt inc_append_history
 setopt share_history
 
-export VISUAL=vim
+export QT_QPA_PLATFORM=wayland
+export VISUAL=neovim
 export TERMINAL=kitty
 export EDITOR="$VISUAL"
 export PATH=$PATH:/home/$USER/myconfig/scripts
