@@ -5,6 +5,9 @@
   "diagnostic.infoSign": "•",
   "diagnostic.hintSign": "•",
 
+  "refactor.showMenu": "m",
+  "tree.key.actions": "m",
+
   "clangd.arguments": [
     "--header-insertion=never",
     "-j=4"
