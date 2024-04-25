@@ -27,6 +27,7 @@ mv ~/.config/rofi/config.rasi       ~/dotfiles_old/
 mv ~/.config/feh/themes             ~/dotfiles_old/
 mv ~/.config/i3/config              ~/dotfiles_old/
 mv ~/.config/sway/config            ~/dotfiles_old/
+mv ~/.config/sway/default_monitor_preset ~/dotfiles_old/
 mv ~/.config/waybar/config          ~/dotfiles_old/
 mv ~/.config/waybar/style.css       ~/dotfiles_old/
 mv ~/.config/kitty/kitty.conf       ~/dotfiles_old/
@@ -35,6 +36,7 @@ mv ~/.config/ranger/rc.conf         ~/dotfiles_old/
 mv ~/.zshrc                         ~/dotfiles_old/
 mv ~/.ignore                        ~/dotfiles_old/
 mv ~/.gitconfig                     ~/dotfiles_old/
+mv ~/.git_funcs.sh                  ~/dotfiles_old/
 mv ~/.config/autorandr              ~/dotfiles_old/
 
 #CREATE DIRS
@@ -76,10 +78,7 @@ echo -n -e "${RED}"
 
 #TMUX
 ln -s "$SCRIPT_DIR/tmux.conf" ~/.tmux.conf
-
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-
-~/.tmux/plugins/tpm/bin/install_plugins
 
 #ALBERT
 # if ! [ -d ~/.config/albert ]; then
@@ -114,6 +113,11 @@ if ! [ -d ~/.config/sway ]; then
     mkdir ~/.config/sway
 fi
 ln -s "$SCRIPT_DIR/sway/config" ~/.config/sway/config
+if ! [ -d ~/work ]; then
+    ln -s "$SCRIPT_DIR/sway/default_monitor_preset" ~/.config/sway/default_monitor_preset
+else
+    ln -s "$SCRIPT_DIR/sway/work_monitor_preset" ~/.config/sway/default_monitor_preset
+fi
 
 #WAYBAR
 if ! [ -d ~/.config/waybar ]; then

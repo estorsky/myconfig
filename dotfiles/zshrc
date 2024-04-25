@@ -107,7 +107,8 @@ stty -ixon -echoctl
 setopt inc_append_history
 setopt share_history
 
-export VISUAL=vim
+export QT_QPA_PLATFORM=wayland
+export VISUAL=neovim
 export TERMINAL=kitty
 export EDITOR="$VISUAL"
 export PATH=$PATH:/home/$USER/myconfig/scripts
@@ -139,7 +140,7 @@ alias weather="curl wttr.in"
 alias ag="ag --color-match '1;33' --color-line-number '0;34'"
 alias rg="rg -F"
 alias tmux="tmux -u"
-alias UP="vim +PlugUpdate +CocUpdateSync +qa && solus up"
+alias UP="vim +PlugUpgrade +PlugUpdate +CocUpdateSync +qa && solus up"
 alias beep="notify-send beep"
 
 alias lock="~/myconfig/lockscreen/lock.sh"

@@ -23,7 +23,9 @@ nnoremap <buffer> <Enter> i
 vnoremap <buffer> <Enter> <Esc>i
 tnoremap <buffer> <Esc> <C-\><C-n>
 tnoremap <buffer> jj <C-\><C-n>
-setlocal scrollback=100000
-setlocal redrawtime=10000
+" setlocal scrollback=100000
+setlocal scrollback=-1
+" setlocal redrawtime=10000
+autocmd BufEnter term://* startinsert
 
 let b:strip_trailing_whitespace_enabled = 0

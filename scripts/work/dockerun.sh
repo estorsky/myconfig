@@ -14,8 +14,8 @@ ma4000 () {
         -v ~/.ssh/:/home/user/.ssh \
         -v /home/"${USER}"/projects:/home/user/projects \
         -v /home/"${USER}"/shared:/home/user/shared \
-        -v /home/"${USER}"/myconfig/scripts/work/ma/:/home/user/projects/$PROJECT_NAME/scripts \
-        -w /home/user/projects/$PROJECT_NAME \
+        -v /home/"${USER}"/myconfig/scripts/work/ma/:/home/user/projects/${PROJECT_NAME}/scripts \
+        -w /home/user/projects/${PROJECT_NAME} \
         xpon-ng.eltex.loc:5000/builders/ltp-x:latest \
         $CMD
         # -v /home/$USER/projects/toolchains/:/opt/toolchains \
@@ -26,7 +26,7 @@ ltpx () {
         -v ~/.ssh/:/home/user/.ssh \
         -v /home/"${USER}"/projects:/home/user/projects \
         -v /home/"${USER}"/shared:/home/user/shared \
-        -w /home/user/projects/$PROJECT_NAME \
+        -w /home/user/projects/${PROJECT_NAME} \
         xpon-ng.eltex.loc:5000/builders/ltp-x:latest \
         $CMD
         # -v /home/$USER/projects/toolchains/:/opt/toolchains \
@@ -36,16 +36,15 @@ ltpn () {
     docker run -t -i --rm --privileged \
         -v ~/.gitconfig:/home/user/.gitconfig \
         -v ~/.ssh/:/home/user/.ssh \
-        -v /home/"${USER}"/projects/realtek_iss:/home/user/projects \
+        -v /home/${USER}/projects/${PROJECT_NAME}:/home/user/projects \
         -w /home/user/projects \
         xpon-ng.eltex.loc:5000/builders/ltp-n:latest \
         $CMD
 }
 
 iss () {
-    docker run -t -i --rm --privileged \
-        -v /home/"${USER}"/projects/$PROJECT_NAME:/home/user/projects \
-        -v ${PROJECT_NAME}_opt:/opt \
+    docker run -t -i --rm --privileged --network=host \
+        -v /home/"${USER}"/projects/${PROJECT_NAME}:/home/user/projects \
         -w /home/user/projects \
         gitlab.eltex.loc:4567/ethernet-switches/realtek_iss/builder:18.04 \
         $CMD

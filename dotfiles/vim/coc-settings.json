@@ -1,5 +1,12 @@
 {
   "semanticTokens.enable": true,
+  "diagnostic.errorSign": "•",
+  "diagnostic.warningSign": "•",
+  "diagnostic.infoSign": "•",
+  "diagnostic.hintSign": "•",
+
+  "refactor.showMenu": "m",
+  "tree.key.actions": "m",
 
   "clangd.arguments": [
     "--header-insertion=never",
