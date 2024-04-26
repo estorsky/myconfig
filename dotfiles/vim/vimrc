@@ -18,7 +18,7 @@ Plug 'cohama/agit.vim', { 'on': ['Agit', 'AgitFile'] }
 Plug 'jpalardy/vim-slime', { 'for':  ['py'] }
 Plug 'w0rp/ale' "it shellcheck
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'majutsushi/tagbar' ", { 'on':  'TagbarToggle' } it ctags
+Plug 'majutsushi/tagbar', { 'on':  'TagbarToggle' } "it ctags
 Plug 'liuchengxu/vista.vim'
 " Plug 'xolox/vim-misc'
 " Plug 'xolox/vim-easytags'
