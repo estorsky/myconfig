@@ -121,7 +121,7 @@ let g:localvimrc_ask = 0
 " Coc
 let g:coc_global_extensions = [
             \ 'coc-json', 'coc-explorer', 'coc-calc', 'coc-clangd',
-            \ 'coc-sh', 'coc-pyright', 'coc-vimlsp']
+            \ 'coc-sh', 'coc-pyright', 'coc-vimlsp', 'coc-yaml']
 hi CocErrorSign ctermfg=167 ctermbg=none
 hi CocWarningSign ctermfg=208 ctermbg=none
 hi CocInfoSign ctermfg=214 ctermbg=none
