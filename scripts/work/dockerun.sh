@@ -62,18 +62,8 @@ do
             build_ltpx=true
             shift
             ;;
-        ltp-x_2|ltpx2|x2)
-            PROJECT_NAME="ltp-x_2"
-            build_ltpx=true
-            shift
-            ;;
         MA4000_1|m1|ma|m)
             PROJECT_NAME="MA4000_1"
-            build_ma4000=true
-            shift
-            ;;
-        MA4000_2|m2)
-            PROJECT_NAME="MA4000_2"
             build_ma4000=true
             shift
             ;;
