@@ -244,6 +244,8 @@ workspace 8 output eDP-1 DP-1 HDMI-A-1
 workspace 9 output eDP-1 DP-1 HDMI-A-1
 workspace 10 output eDP-1 DP-1 HDMI-A-1
 
+bindsym --to-code $mod+m Output eDP-1 toggle
+
 ### Music
 bindsym --to-code $mod+p exec playerctl play-pause
 bindsym --to-code $mod+bracketleft exec playerctl previous
@@ -317,6 +319,4 @@ input type:keyboard {
     xkb_options grp:alt_shift_toggle,ctrl:nocaps
 }
 
-# TODO
-# exec autorandr default
 include ~/.config/sway/default_monitor_preset
