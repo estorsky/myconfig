@@ -1,4 +1,10 @@
 {
+    "registry-mirrors": ["https://nexus.eltex.loc"],
     "dns": ["172.16.0.250", "172.16.0.100", "8.8.8.8"],
-    "insecure-registries" : ["xpon-ng.eltex.loc:5000", "gitlab.eltex.loc:4567"]
+    "insecure-registries" : [
+        "xpon-ng.eltex.loc:5000",
+        "gitlab.eltex.loc:4567",
+        "gitlab2.eltex.loc:4567",
+        "nexus.eltex.loc"
+    ]
 }
