@@ -143,6 +143,7 @@ alias rg="rg -F"
 alias tmux="tmux -u"
 alias UP="neovim +PlugUpgrade +PlugUpdate +CocUpdateSync +qa && solus up"
 alias beep="notify-send beep"
+alias rv="sed -i -e 's/release-cursor=shift+f12/release-cursor=ctrl+alt/g' ~/Downloads/console.vv && remote-viewer ~/Downloads/console.vv"
 
 alias lock="~/myconfig/lockscreen/lock.sh"
 alias suspend="~/myconfig/lockscreen/lock.sh -s"
