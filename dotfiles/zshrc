@@ -115,6 +115,7 @@ export PATH=$PATH:/home/$USER/myconfig/scripts
 export PATH=/home/$USER/Dropbox/bin:$PATH
 export PATH=$PATH:/home/$USER/.cargo/bin
 export PATH=$PATH:/home/$USER/go/bin
+export PATH=$PATH:/home/$USER/.local/bin
 
 export LESS_TERMCAP_mb=$'\e[1;94m'
 export LESS_TERMCAP_md=$'\e[1;94m'
