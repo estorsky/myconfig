@@ -42,12 +42,16 @@ ltpn () {
         $CMD
 }
 
+        # -v ${PROJECT_NAME}_opt_z:/opt:z \
+        # -v /home/"${USER}"/opt/${PROJECT_NAME}_Z:/opt:Z \
+        # -v /home/"${USER}"/.opt/${PROJECT_NAME}_Z:/opt:Z \
 iss () {
     docker run -t -i --rm --privileged --network=host \
         -v /home/"${USER}"/projects/${PROJECT_NAME}:/home/user/projects \
         -w /home/user/projects \
-        gitlab.eltex.loc:4567/ethernet-switches/realtek_iss/builder:18.04 \
+        gitlab2.eltex.loc:4567/ethernet-switches/realtek_iss/builder:18.04 \
         $CMD
+        # gitlab.eltex.loc:4567/ethernet-switches/realtek_iss/builder-pvs:18.04 \
 }
 
 
