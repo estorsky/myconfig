@@ -186,6 +186,11 @@ PROMPT='$(prompt_color)%2~ %B>%b %F{default}'
 if [ -d ~/work ]; then
     export PATH=$PATH:/home/$USER/myconfig/scripts/work
     export TMUX_MAIN_COLOUR=colour113
+
+    # Source the workspace environment setup
+    if [ -f ~/Downloads/workspace_secure/workspace_env.sh ]; then
+        source ~/Downloads/workspace_secure/workspace_env.sh
+    fi
 else
     export TMUX_MAIN_COLOUR=colour105
 

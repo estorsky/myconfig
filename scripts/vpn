@@ -11,7 +11,7 @@ case "$1" in
         exit;;
     *)
         cd ~/Dropbox/other/vpn/
-        sudo openvpn node-us-56.protonvpn.net.udp.ovpn
+        sudo openvpn nl-free-101117.protonvpn.udp.ovpn
         exit;;
 esac
 
