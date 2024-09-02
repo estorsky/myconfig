@@ -180,16 +180,16 @@ mode "resize" {
     # right will grow the containers width
     # up will shrink the containers height
     # down will grow the containers height
-    bindsym --to-code $left resize shrink width 20px
-    bindsym --to-code $down resize grow height 20px
-    bindsym --to-code $up resize shrink height 20px
-    bindsym --to-code $right resize grow width 20px
+    bindsym --to-code $left resize shrink width 50px
+    bindsym --to-code $down resize grow height 50px
+    bindsym --to-code $up resize shrink height 50px
+    bindsym --to-code $right resize grow width 50px
 
     # Ditto, with arrow keys
-    bindsym Left resize shrink width 20px
-    bindsym Down resize grow height 20px
-    bindsym Up resize shrink height 20px
-    bindsym Right resize grow width 20px
+    bindsym Left resize shrink width 50px
+    bindsym Down resize grow height 50px
+    bindsym Up resize shrink height 50px
+    bindsym Right resize grow width 50px
 
     # Return to default mode
     bindsym Return mode "default"
@@ -215,6 +215,7 @@ include /etc/sway/config.d/*
 font pango: Roboto Bold 9
 # for_window [class=".*"] title_format "  %title"
 workspace_layout tabbed
+output * bg ~/Dropbox/images/alena-aenami-eternity-1080px.jpg fill
 
 bindsym $mod+Tab workspace next
 bindsym $mod+Shift+Tab workspace prev
@@ -224,13 +225,26 @@ bindsym button2 kill
 
 bindsym Control+Shift+space exec dunstctl close
 
-#TODO: https://github.com/mortie/swaylock-effects
-# bindsym --to-code $mod+Shift+s exec swaylock -f -c 000000 && systemctl suspend
+bindsym --to-code $mod+x exec ~/myconfig/scripts/swaylock.sh
+bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/suspend.sh
 
-set $background ~/Dropbox/images/alena-aenami-eternity-1080px.jpg
-output * bg $background fill
-bindsym --to-code $mod+x exec swaylock -f -i $background
-bindsym --to-code $mod+Shift+x exec swaylock -f -i $background && systemctl suspend
+bindsym --to-code $mod+Shift+Period move container to output right
+bindsym --to-code $mod+Shift+Comma move container to output left
+bindsym --to-code $mod+Control+Period move workspace to output right
+bindsym --to-code $mod+Control+Comma move workspace to output left
+
+workspace 1 output HDMI-A-1 eDP-1 DP-1
+workspace 2 output HDMI-A-1 eDP-1 DP-1
+workspace 3 output HDMI-A-1 eDP-1 DP-1
+workspace 4 output HDMI-A-1 eDP-1 DP-1
+workspace 5 output HDMI-A-1 eDP-1 DP-1
+workspace 6 output eDP-1 DP-1 HDMI-A-1
+workspace 7 output eDP-1 DP-1 HDMI-A-1
+workspace 8 output eDP-1 DP-1 HDMI-A-1
+workspace 9 output eDP-1 DP-1 HDMI-A-1
+workspace 10 output eDP-1 DP-1 HDMI-A-1
+
+bindsym --to-code $mod+m Output eDP-1 toggle
 
 ### Music
 bindsym --to-code $mod+p exec playerctl play-pause
@@ -248,8 +262,9 @@ bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym --to-code $mod+t exec ~/myconfig/scripts/translate.sh
 bindsym --to-code $mod+n exec kitty -e ranger
 bindsym --to-code $mod+c exec gnome-calculator
+bindsym --to-code $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
+bindsym Print exec grim - | wl-copy && wl-paste > "Screenshot_$(date +%F_%H-%M-%S).png"
 bindsym Control+Shift+Escape exec gnome-system-monitor
-for_window [instance="gnome-calculator"] floating enable
 
 ########## Autolaunch ##########
 
@@ -257,44 +272,35 @@ exec sway-xkb-switcher
 exec blueman-applet
 exec dunst
 exec thunderbird
+exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
+exec pavucontrol
+exec blueman-manager
 exec sleep 5 && telegram-desktop
 exec sleep 5 && dropbox start
-
-#TODO maybe set settings in another place
-# exec pavucontrol
-exec pactl set-source-volume 2 20%
-# exec --no-startup-id /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
-
-# TODO
-# exec autorandr default
-
-# exec_always --no-startup-id nm-applet --indicator
-# sudo eopkg it networkmanager-qt-devel
-# git clone git@github.com:palinek/nm-tray.git
-# cd nm-tray
-# mkdir build
-# cd build
-# cmake ..
-# make
-# ./nm-tray
-exec sleep 60 && QT_QPA_PLATFORMTHEME=gtk2 nm-tray
-
-
-# sudo eopkg it wayland-devel wayland-protocols-devel (optional)
-# git clone git@github.com:bugaevc/wl-clipboard.git
-# cd wl-clipboard
-# meson build
-# cd build
-# ninja
-# sudo ninja install
-bindsym --to-code $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
-bindsym Print exec grim - | wl-copy && wl-paste > "Screenshot_$(date +%F_%H-%M-%S).png"
+# exec sleep 5 && QT_QPA_PLATFORMTHEME=gtk3 nm-tray
+exec nm-applet
+exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
+# exec ~/myconfig/scripts/swayidle.sh
 
 assign [instance="Mail"] 9
+assign [instance="Spotify"] 9
+assign [app_id="net.thunderbird.Thunderbird"] 9
 assign [app_id="pavucontrol"] 9
+assign [app_id="blueman-manager"] 9
 assign [app_id="org.telegram.desktop"] 10
-
-#TODO setting bar
+for_window [app_id="org.gnome.Calculator"] floating enable
+for_window [title="Media viewer"] floating enable
+for_window [app_id="electrum"] floating enable
+for_window [instance="feather"] floating enable
+for_window [app_id="waybar" floating] {
+    move position cursor
+    move down 25px
+}
+# for_window [app_id="nm-tray"] {
+    # floating enable
+    # move position mouse
+    # border none
+# }
 
 set $bg-color            #222222
 set $inactive-bg-color   #3E3E46
@@ -315,4 +321,4 @@ input type:keyboard {
     xkb_options grp:alt_shift_toggle,ctrl:nocaps
 }
 
-include ~/myconfig/dotfiles/sway/default_monitor_preset
+include ~/.config/sway/default_monitor_preset

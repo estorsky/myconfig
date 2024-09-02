@@ -61,13 +61,14 @@ iss () {
     # build
     if ! [ "$FLAG__BEAR" = true ]
     then
-        # dockerun.sh $PROJECT_NAME -c "./build_9300.sh -C -R" 2>&1 | tee $LOG_FILE
-        dockerun.sh $PROJECT_NAME -c "./build_9300.sh" 2>&1 | tee $LOG_FILE
+        dockerun.sh $PROJECT_NAME -c "./build_9300.sh -C -R" 2>&1 | tee $LOG_FILE
+        # dockerun.sh $PROJECT_NAME -c "./build_9300.sh" 2>&1 | tee $LOG_FILE
         # dockerun.sh $PROJECT_NAME -c "./build_9300.sh -R" 2>&1 | tee $LOG_FILE
         notif_check $? "[$PROJECT_NAME] build done!" "[$PROJECT_NAME] build fail!"
     else
         # git clean -fdx
-        dockerun.sh $PROJECT_NAME -c "bear ./build_9300.sh" 2>&1 | tee $LOG_FILE
+        dockerun.sh $PROJECT_NAME -c "bear ./build_9300.sh -C -R" 2>&1 | tee $LOG_FILE
+        # dockerun.sh $PROJECT_NAME -c "bear ./build_9300.sh" 2>&1 | tee $LOG_FILE
         notif_check $? "[$PROJECT_NAME] build done!" "[$PROJECT_NAME] build fail!"
         realtek_iss_bear_replace.sh
         notif_check $? "[$PROJECT_NAME] replace paths done!" "[$PROJECT_NAME] replace paths fail!"

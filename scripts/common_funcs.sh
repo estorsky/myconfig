@@ -65,7 +65,8 @@ check_git () {
 check_connection () {
     set +e
     echo -n "Checking internet connection..."
-    wget -q --spider http://google.com
+    # wget -q --spider http://google.com
+    ping -q -c 1 google.com &> /dev/null
     if [ $? -ne 0 ]; then
         echo "off"
         exit

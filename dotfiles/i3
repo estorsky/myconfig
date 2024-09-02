@@ -363,6 +363,22 @@ bar {
 }
 
 bar {
+    output HDMI-1-1
+    tray_output primary
+    tray_padding 4
+    status_command i3blocks -c ~/myconfig/dotfiles/i3blocks.conf
+        position top
+        colors {
+        background $bg-color
+        statusline $text-color
+        separator #757575
+        focused_workspace  $border          $border            $text-color
+        inactive_workspace $bg-color        $bg-color          $inactive-text-color
+        urgent_workspace   $urgent-bg-color $urgent-bg-color   $text-color
+    }
+}
+
+bar {
     output eDP-1-1
     tray_padding 4
     tray_output primary

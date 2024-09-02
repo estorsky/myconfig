@@ -107,13 +107,17 @@ stty -ixon -echoctl
 setopt inc_append_history
 setopt share_history
 
-export VISUAL=vim
+export QT_QPA_PLATFORM=wayland
+export VISUAL=neovim
 export TERMINAL=kitty
 export EDITOR="$VISUAL"
+export PATH=$PATH:/usr/local/bin
+export PATH=$PATH:/usr/sbin/
 export PATH=$PATH:/home/$USER/myconfig/scripts
 export PATH=/home/$USER/Dropbox/bin:$PATH
 export PATH=$PATH:/home/$USER/.cargo/bin
 export PATH=$PATH:/home/$USER/go/bin
+export PATH=$PATH:/home/$USER/.local/bin
 
 export LESS_TERMCAP_mb=$'\e[1;94m'
 export LESS_TERMCAP_md=$'\e[1;94m'
@@ -139,8 +143,9 @@ alias weather="curl wttr.in"
 alias ag="ag --color-match '1;33' --color-line-number '0;34'"
 alias rg="rg -F"
 alias tmux="tmux -u"
-alias UP="vim +PlugUpdate +CocUpdateSync +qa && solus up"
+alias UP="neovim +PlugUpgrade +PlugUpdate +CocUpdateSync +qa && solus up"
 alias beep="notify-send beep"
+alias rv="sed -i -e 's/release-cursor=shift+f12/release-cursor=ctrl+alt/g' ~/Downloads/console.vv && remote-viewer ~/Downloads/console.vv"
 
 alias lock="~/myconfig/lockscreen/lock.sh"
 alias suspend="~/myconfig/lockscreen/lock.sh -s"
@@ -181,6 +186,11 @@ PROMPT='$(prompt_color)%2~ %B>%b %F{default}'
 if [ -d ~/work ]; then
     export PATH=$PATH:/home/$USER/myconfig/scripts/work
     export TMUX_MAIN_COLOUR=colour113
+
+    # Source the workspace environment setup
+    if [ -f ~/Downloads/workspace_secure/workspace_env.sh ]; then
+        source ~/Downloads/workspace_secure/workspace_env.sh
+    fi
 else
     export TMUX_MAIN_COLOUR=colour105
 

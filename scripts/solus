@@ -7,9 +7,46 @@ trap 'exit' INT
 LINK="https://raw.githubusercontent.com/getsolus/3rd-party/master"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source $DIR/common_funcs.sh
+source "${DIR}/common_funcs.sh"
 
-run_with_root $1
+run_with_root "$1"
+
+install__nm_tray () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/nm-tray
+    gclonecd https://github.com/palinek/nm-tray.git
+    mkdir build
+    cd build
+    cmake ..
+    sudo make install
+}
+
+install__wl_clipboard () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/wl-clipboard
+    gclonecd https://github.com/bugaevc/wl-clipboard.git
+    meson build
+    cd build
+    sudo ninja install
+}
+
+install__swaylock_effects () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/swaylock-effects
+    gclonecd https://github.com/mortie/swaylock-effects.git
+    meson build
+    ninja -C build
+    sudo ninja -C build install
+}
 
 install__earlyoom () {
     set -x
@@ -55,9 +92,18 @@ install__xkb_switch () {
 
 install__google_chrome () {
     sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
+    sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-beta/pspec.xml
     sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
 
     # sudo sed -i '/Exec/s/$/ --force-dark-mode/' /usr/share/applications/google-chrome.desktop
+    # --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu
+
+    # for Wayland
+    # Go to chrome://flags
+    # Search "Preferred Ozone platform"
+    # Set it to "Wayland"
+    # And 'Use system title bar and borders' - on
+    # Vulkan -> enable
 }
 
 install__spotify () {
@@ -91,18 +137,18 @@ init () {
 
     sudo eopkg up -y
 
-    sudo eopkg it -y screenfetch telegram discord dropbox nautilus-dropbox git vim tmux \
-        vlc mpv htop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks \
+    sudo eopkg it -y screenfetch telegram discord dropbox nautilus-dropbox git tmux \
+        vlc mpv htop btop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks meld \
         llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
         linux-current-headers lm_sensors qbittorrent wireshark xkill \
-        neovim mtr python3-ipython i3lock krita ranger cmus cava etcher \
-        speedtest-cli cmatrix highlight curl-gnutls iotop iftop sshfs-fuse \
+        vim neovim helix mtr python3-ipython i3lock krita ranger cmus cava etcher \
+        speedtest-cli cmatrix highlight curl-gnutls iotop iftop \
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
         openvpn intel-microcode i3blocks i3 lxappearance dunst kitty \
-        xsel docker pavucontrol doxygen cppcheck font-awesome-ttf \
-        net-snmp expect qemu dnsmasq openssh-server xev openjdk-8 \
-        ghex picocom golang nmap maim fzf fd stress-ng valgrind virt-viewer \
-        sway waybar grim
+        xsel docker blueman pavucontrol doxygen cppcheck font-awesome-ttf \
+        net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev openjdk-8 \
+        ghex picocom golang cargo nmap maim fzf fd stress-ng valgrind virt-viewer \
+        sway waybar grim jq
 
     # sudo eopkg it gdm
     # https://github.com/fairyglade/ly
@@ -135,7 +181,9 @@ init () {
     # systemctl status lockscreen.service
 
     # need for work Fkeys
-    # echo "options hid_apple fnmode=0" | sudo tee -a /etc/modprobe.d/hid_apple.conf
+    echo 0 | sudo tee /sys/module/hid_apple/parameters/fnmode
+    echo "options hid_apple fnmode=0" | sudo tee -a /etc/modprobe.d/hid_apple.conf
+    sudo clr-boot-manager update
 
     install__google_chrome
     install__spotify
@@ -148,6 +196,17 @@ init () {
     sudo eopkg it -y jsoncpp-devel libsigc++-devel i3-devel libx11-devel libxkbfile-devel
     install__xkb_switch i3
     setxkbmap -layout us,ru -option grp:alt_shift_toggle -option ctrl:nocaps
+
+    # sudo eopkg it -y networkmanager-qt-devel
+    # install__nm_tray
+
+    sudo eopkg it -y wayland-devel wayland-protocols-devel # (optional)
+    install__wl_clipboard
+
+    sudo eopkg it libxkbcommon-devel libcairo-devel
+    install__swaylock_effects
+
+    # ~/.tmux/plugins/tpm/bin/install_plugins
 
     # sudo eopkg it -y pandoc
     # install__earlyoom
@@ -167,13 +226,25 @@ init () {
 
     # sudo groupadd docker
     # sudo usermod -aG docker ${USER}
+    # sudo usermod -aG wireshark $USER
+
+    # install_dns_vpn_resolver.sh
 }
 
 update () {
+    # TODO: pip packagees update
+
     sudo eopkg up -y
     sudo eopkg3p up -y
-    install__xkb_switch i3
-    ~/.tmux/plugins/tpm/bin/update_plugins all
+    # install__xkb_switch i3
+    # install__nm_tray
+    install__wl_clipboard
+    install__swaylock_effects
+    # ~/.tmux/plugins/tpm/bin/update_plugins all
+
+    sudo clr-boot-manager update
+
+    sudo eopkg it https://packages.getsol.us/shannon/n/neovim/neovim-0.9.5-41-1-x86_64.eopkg
 }
 
 clean () {

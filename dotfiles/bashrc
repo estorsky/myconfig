@@ -42,6 +42,8 @@ stty -ixon -echoctl
 export VISUAL=vim
 export TERMINAL=kitty
 export EDITOR="$VISUAL"
+export PATH=$PATH:/usr/local/bin
+export PATH=$PATH:/usr/sbin/
 export PATH=$PATH:/home/$USER/myconfig/scripts
 export PATH=$PATH:/home/$USER/.cargo/bin
 export PATH=$PATH:/home/$USER/Dropbox/bin

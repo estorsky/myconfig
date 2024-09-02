@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sleep $(shuf -i 0-6 -n 1)
+sleep "$(shuf -i 1-5 -n 1)"
 ~/go/bin/gitmux "$1"

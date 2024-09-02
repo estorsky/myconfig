@@ -10,12 +10,11 @@ Plug 'axelf4/vim-strip-trailing-whitespace'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install()  }  } "it fzf ripgrep
 Plug 'junegunn/fzf.vim' " it bat (for highlighting)
 Plug 'dyng/ctrlsf.vim'
-Plug 'easymotion/vim-easymotion'
 Plug 'tpope/vim-fugitive'
 Plug 'aacunningham/vim-fuzzy-stash'
 Plug 'airblade/vim-gitgutter'
 Plug 'cohama/agit.vim', { 'on': ['Agit', 'AgitFile'] }
-Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
+" Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
 Plug 'jpalardy/vim-slime', { 'for':  ['py'] }
 Plug 'w0rp/ale' "it shellcheck
 Plug 'ludovicchabant/vim-gutentags'
@@ -44,10 +43,13 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn install'} "sudo npm -g install instant-markdown-d yarn
 Plug 'godlygeek/tabular'
 Plug 'lyokha/vim-xkbswitch' " it libxkbfile-devel (https://github.com/grwlf/xkb-switch)
+Plug 'khaser/sway-vim-kbswitch' , {'do': 'cargo build -r'} " it cargo
 " Plug 'qpkorr/vim-bufkill'
 if has('nvim')
-" Plug 'rbgrouleff/bclose.vim'
+    " Plug 'rbgrouleff/bclose.vim'
+    Plug 'phaazon/hop.nvim'
 else
+    Plug 'easymotion/vim-easymotion'
 endif
 call plug#end()
 
@@ -66,7 +68,7 @@ set gdefault
 set incsearch
 set ignorecase
 set smartcase
-" set clipboard=unnamedplus
+set clipboard+=unnamedplus
 set noswapfile
 set nobackup
 set splitright
@@ -83,6 +85,7 @@ set autoread
 set number
 syntax on
 colorscheme gruvbox
+set background=dark
 set shortmess+=O
 set noshowmode
 set cursorline
@@ -105,7 +108,7 @@ au BufNewFile,BufRead Jenkinsfile* setf groovy
 au BufNewFile,BufRead gitconfig setf gitconfig
 au BufNewFile,BufRead *dotfiles/i3 setf i3config
 au BufNewFile,BufRead *waybar/config setf jsonc
-au BufNewFile,BufRead default_monitor_preset setf swayconfig
+au BufNewFile,BufRead *_monitor_preset setf swayconfig
 au BufNewFile,BufRead *.def set syntax=c
 
 
@@ -116,7 +119,13 @@ let g:localvimrc_sandbox = 0
 let g:localvimrc_ask = 0
 
 " Coc
-let g:coc_global_extensions = ['coc-json', 'coc-explorer', 'coc-calc', 'coc-clangd', 'coc-sh', 'coc-pyright']
+let g:coc_global_extensions = [
+            \ 'coc-json', 'coc-explorer', 'coc-calc', 'coc-clangd',
+            \ 'coc-sh', 'coc-pyright', 'coc-vimlsp', 'coc-yaml']
+hi CocErrorSign ctermfg=167 ctermbg=none
+hi CocWarningSign ctermfg=208 ctermbg=none
+hi CocInfoSign ctermfg=214 ctermbg=none
+hi CocHintSign ctermfg=109 ctermfg=214 ctermbg=none
 
 " NERDTree
 let NERDTreeMinimalUI=1
@@ -159,9 +168,16 @@ let g:airline#extensions#tabline#left_alt_sep = ''
 let g:airline#extensions#tabline#right_sep = ''
 let g:airline#extensions#tabline#right_alt_sep = ''
 " let g:airline#extensions#whitespace#enabled = 0
-
-" EasyMotion
-let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnmfj'
+let g:airline#extensions#whitespace#trailing_format = '[%s]t'
+let g:airline#extensions#whitespace#mixed_indent_format = '[%s]mi'
+let g:airline#extensions#whitespace#long_format = '[%s]l'
+let g:airline#extensions#whitespace#mixed_indent_file_format = '[%s]mif'
+let g:airline#extensions#whitespace#conflicts_format = '[%s]c'
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+let g:airline_symbols.dirty='🗲 '
+let g:airline_symbols.crypt = ''
 
 " FZF
 let g:fzf_layout = { 'down': '~50%' }
@@ -200,12 +216,12 @@ let g:ale_sign_warning = '•'
 let g:ale_linters = {'c': ['clang'], 'cpp': ['clang']}
 let g:ale_cpp_gcc_options="-Wall -Wextra -pedantic -std=c99"
 let g:ale_c_parse_makefile = 1
-hi ALEErrorSign ctermfg=160 ctermbg=NONE
-hi ALEWarningSign ctermfg=178 ctermbg=NONE
-hi ALEInfoSign ctermfg=075 ctermbg=NONE
+hi ALEErrorSign ctermfg=160 ctermbg=none
+hi ALEWarningSign ctermfg=178 ctermbg=none
+hi ALEInfoSign ctermfg=075 ctermbg=none
 
 " CVim
-let g:C_Ctrl_j   = 'off'
+" let g:C_Ctrl_j   = 'off'
 
 " Slime
 let g:slime_target = "tmux"
@@ -213,10 +229,15 @@ let g:slime_python_ipython = 1
 
 " Gitgutter
 set updatetime=100
-hi GitGutterAdd ctermfg=106 guibg=NONE
-hi GitGutterChange ctermfg=172 guibg=NONE
-hi GitGutterDelete ctermfg=160 guibg=NONE
-hi GitGutterChangeDelete ctermfg=172 guibg=NONE
+hi GitGutterAdd guibg=NONE
+hi GitGutterChange guibg=NONE
+hi GitGutterDelete guibg=NONE
+hi GitGutterChangeDelete guibg=NONE
+let g:gitgutter_sign_added = '▌'
+let g:gitgutter_sign_modified = '▌'
+let g:gitgutter_sign_removed = '▌'
+let g:gitgutter_sign_removed_first_line = '▌'
+let g:gitgutter_sign_modified_removed = '▌'
 
 " Tagbar
 let g:tagbar_compact = 1
@@ -241,8 +262,8 @@ let g:instant_markdown_open_to_the_world = 1
 
 " Gutentags
 let g:gutentags_ctags_exclude = [
-            \ 'external', 'linux', 'toolchain', 'bootloader', 'prebuilt',
-            \'compilation_branch__*' ]
+            \ 'external', 'linux', 'toolchain', 'bootloader', 'prebuilt', 'compilation_branch__*',
+            \ 'sdk', 'kernel', 'module', 'loader', 'make', 'build_sys', '*.js', '*.html', '*.htm']
 
 " Doxygen
 let g:DoxygenToolkit_briefTag_pre="@Synopsis  "
@@ -251,14 +272,15 @@ let g:DoxygenToolkit_returnTag="@Returns   "
 let g:DoxygenToolkit_blockHeader="-------------------------------"
 let g:DoxygenToolkit_blockFooter="---------------------------------"
 let g:DoxygenToolkit_authorName="Dmitry Privalov"
-let g:DoxygenToolkit_licenseTag='Copyright (C) 2023 ООО "Предприятие "Элтекс"'
+let g:DoxygenToolkit_licenseTag='Copyright (C) 2024 ООО "Предприятие "Элтекс"'
 
 " XKBSWITCH
 let g:XkbSwitchEnabled = 1
+let g:XkbSwitchLib = expand('~/.vim/plugged/sway-vim-kbswitch/target/release/libswaykbswitch.so')
 
 if has('nvim')
     " nmap <BS> <C-h>
-    autocmd bufnewfile,bufread * hi Normal guibg=NONE ctermbg=NONE
+    autocmd bufnewfile,bufread * hi Normal guibg=none ctermbg=none
 else
     set timeoutlen=1000 ttimeoutlen=0
     set wildmode=longest,list,full
@@ -272,24 +294,28 @@ endif
 
 
 " BINDS
-nnoremap <silent> <CR> :set hlsearch<CR>:let @/=expand('<cword>')<CR><CR>
+" nnoremap <silent> <CR> :set hlsearch<CR>:let @/=expand('<cword>')<CR><CR>
 map <silent> <2-LeftMouse> :set hlsearch<CR>:let @/=expand('<cword>')<CR>
 map <silent> <3-LeftMouse> :let @/ = ""<CR>
 imap <2-LeftMouse> <c-o>*
 " imap <C-f> <plug>(fzf-complete-line)
-vmap <Leader>sf <Plug>CtrlSFVwordExec
-nmap <Leader>sf <Plug>CtrlSFCCwordPath
+" vmap <Leader>sf <Plug>CtrlSFVwordExec
+" nmap <Leader>sf <Plug>CtrlSFCCwordPath
+nmap <Leader>sf :CocSearch <C-r><C-w><CR>
+
+autocmd BufRead,BufNewFile __coc_refactor__*
+            \ setlocal nonumber
+            \| wincmd J
+            \| horizontal resize 40
+
 " nnoremap * *``
+nnoremap * :keepjumps normal! mi*`i<CR>
 imap jj <Esc>
 imap оо <Esc>
 " map <silent> <C-n> :NERDTreeTabsToggle<CR>
 " vmap <silent> <C-n> <esc>:NERDTreeTabsToggle<CR>
 map <silent> <C-n> :CocCommand explorer --sources=buffer-,file+<CR>
 vmap <silent> <C-n> <esc>:CocCommand explorer --sources=buffer-,file+<CR>
-map <Leader> <Plug>(easymotion-prefix)
-nmap <Space> <Plug>(easymotion-s)
-" map <Space> <Plug>(easymotion-s2)
-" nmap <Space> <Plug>(easymotion-overwin-f2)
 nmap <C-_> <plug>NERDCommenterToggle
 vmap <C-_> <plug>NERDCommenterToggle
 map <silent> <C-p> :Files<CR>
@@ -317,8 +343,8 @@ nnoremap <silent> <Leader>q :call ConfirmQuit(0)<CR>
 vnoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
 inoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
 map <BS> X
-nmap <C-c> ^v$h"+y<CR>
-vmap <C-c> "+y<CR>
+nmap <C-c> ^v$h"+y
+vmap <C-c> "+y
 
 " vnoremap p "_dp
 " vnoremap p "_dP"
@@ -394,14 +420,14 @@ nnoremap <silent> <leader>ge :Gedit<CR>
 nnoremap <silent> <leader>gr :Gread<CR>
 nnoremap <silent> <leader>gw :Gwrite<CR><CR>
 nnoremap <silent> <leader>gl :Git log<CR>
-nnoremap <silent> <leader>gll :Git log .<CR>
+nnoremap <silent> <leader>g% :Git log -- %<CR>
 nnoremap <silent> <leader>gp :Ggrep<Space>
 nnoremap <silent> <leader>gm :GMove<Space>
 nnoremap <silent> <leader>gb :Git branch<Space>
 nnoremap <silent> <leader>go :Git checkout<Space>
 nnoremap <silent> <leader>gps :Git push<CR>
 nnoremap <silent> <leader>gpl :Git pull<CR>
-nnoremap <silent> <leader>gbl :Git blame<CR>
+nnoremap <silent> <leader>gbl :Git blame --date=format:'%Y-%m-%d'<CR>
 nnoremap <silent> <leader>gsl :GStashList<CR>
 
 nmap ]c <Plug>(GitGutterNextHunk)zz
@@ -465,6 +491,8 @@ nmap <silent> gdt :vsp<CR><Plug>(coc-definition)<C-W>T
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+nmap <silent> gh :call CocAction("showIncomingCalls")<CR>
+               " :call CocAction("showOutgoingCalls")<CR>
 
 inoremap <silent><expr> <TAB>
       \ coc#pum#visible() ? coc#pum#next(1):
@@ -482,15 +510,15 @@ endfunction
 
 " Mappings for CoCList
 " Show all diagnostics
-nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+" nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
 " Manage extensions
 " nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
 " Show commands
 " nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
 " Find symbol of current document
-nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+" nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 " Search workspace symbols
-nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+" nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
 " Do default action for next item
 " nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
 " Do default action for previous item
@@ -546,3 +574,20 @@ for d in glob('~/.vim/spell/*.add', 1, 1)
     endif
 endfor
 
+
+if has('nvim')
+    set signcolumn=auto:3
+
+    " Hop
+    lua require'hop'.setup { keys = 'asdghklqwertyuiopzxcvbnmfj' }
+
+    nmap <Space> :HopChar1<CR>
+else
+    " EasyMotion
+    let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnmfj'
+
+    map <Leader> <Plug>(easymotion-prefix)
+    nmap <Space> <Plug>(easymotion-s)
+    " map <Space> <Plug>(easymotion-s2)
+    " nmap <Space> <Plug>(easymotion-overwin-f2)
+endif

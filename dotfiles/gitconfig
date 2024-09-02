@@ -10,11 +10,12 @@
 [oh-my-zsh]
 	hide-status = 1
 [alias]
+	ri = !bash -c 'source ~/.git_funcs.sh && rebase_interactive \"$@\"' -
 	sync = !bash -c 'source ~/.git_funcs.sh && sync \"$@\"' -
 	stat = !bash -c 'source ~/.git_funcs.sh && stat \"$@\"' -
 	squash = !bash -c 'source ~/.git_funcs.sh && squash \"$@\"' -
 	update = !bash -c 'source ~/.git_funcs.sh && update \"$@\"' -
-	remove-all-files = !bash -c 'source ~/.git_funcs.sh && remove-all-files \"$@\"' -
-	remove-old-branches = !bash -c 'source ~/.git_funcs.sh && remove-old-branches \"$@\"' -
+	remove-all-files = !bash -c 'source ~/.git_funcs.sh && remove_all_files \"$@\"' -
+	remove-old-branches = !bash -c 'source ~/.git_funcs.sh && remove_old_branches \"$@\"' -
 [include]
 	path = ~/work/.gitconfig
