@@ -2,6 +2,8 @@
 
 set -x
 
+source ~/myconfig/scripts/common_funcs.sh
+
 get_curr_image_date() {
     eltex-vc list | awk '/curr_image_iss/ {print $NF, $(NF-1), $(NF-2)}' | sed 's/│//g' | xargs
 }
@@ -12,7 +14,7 @@ download_curr_image() {
 
 reboot_board() {
     board_iss_auto_enter_password.sh board_iss_firmware_install.sh
-    dunstify -u normal -t 10000 -r 2 "$(basename $0)" "Reboot board"
+    notif "Reboot board"
 }
 
 DELAY=20
