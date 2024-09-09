@@ -321,3 +321,19 @@ https://i3wm.org/docs/refcard.html
 
 ### clangd
 :CocCommand workspace.showOutput
+
+
+TREE KEY MAPPINGS 					*coc-tree-mappings*
+
+Default key-mappings are provided for 'coctree' buffer, which can be changed
+by configuration |coc-config-tree|.
+
+<space> - Select/unselect item, configured by `"tree.key.toggleSelection"`.
+<tab> 	- Invoke actions of current item, configured by `"tree.key.actions"`.
+<esc>   - Close tree window, configured by `"tree.key.close"`.
+<cr>    - Invoke command of current item,  configured by `"tree.key.invoke"`.
+<C-o>   - Move cursor to original window.
+f 	- Activate filter, configured by `"tree.key.activeFilter"`.
+t 	- Trigger key to toggle expand state of tree node, configured by
+	`tree.key.toggle`.
+M 	- Collapse all tree node, configured by `"tree.key.collapseAll"`.
