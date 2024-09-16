@@ -284,6 +284,7 @@ exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 
 assign [instance="Mail"] 9
 assign [instance="Spotify"] 9
+assign [title="Spotify Premium"] 9
 assign [app_id="net.thunderbird.Thunderbird"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="blueman-manager"] 9
