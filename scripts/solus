@@ -91,8 +91,8 @@ install__xkb_switch () {
 }
 
 install__google_chrome () {
-    sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
-    sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-beta/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-beta/pspec.xml
     sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
 
     # sudo sed -i '/Exec/s/$/ --force-dark-mode/' /usr/share/applications/google-chrome.desktop
@@ -107,28 +107,28 @@ install__google_chrome () {
 }
 
 install__spotify () {
-    sudo eopkg bi --ignore-safety $LINK/multimedia/music/spotify/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/multimedia/music/spotify/pspec.xml
     sudo eopkg it -y spotify*.eopkg; sudo rm spotify*.eopkg
 }
 
 install__sublime_text_3 () {
-    sudo eopkg bi --ignore-safety $LINK/programming/sublime-text-3/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/programming/sublime-text-3/pspec.xml
     sudo eopkg it -y sublime*.eopkg; sudo rm sublime*.eopkg
 }
 
 install__team_viewer () {
-    sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/network/util/teamviewer/pspec.xml
     sudo eopkg it -y teamviewer*.eopkg; sudo rm teamviewer*.eopkg
     sudo systemctl start teamviewerd.service
 }
 
 install__ms_fonts () {
-    sudo eopkg bi --ignore-safety $LINK/desktop/font/mscorefonts/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/desktop/font/mscorefonts/pspec.xml
     sudo eopkg it -y mscorefonts*.eopkg; sudo rm mscorefonts*.eopkg
 }
 
 install__anydesk () {
-    sudo eopkg bi --ignore-safety $LINK/network/util/anydesk/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/network/util/anydesk/pspec.xml
     sudo eopkg it -y anydesk*.eopkg; sudo rm anydesk*.eopkg
 }
 
