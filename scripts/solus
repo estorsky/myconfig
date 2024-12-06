@@ -42,7 +42,7 @@ install__swaylock_effects () {
     cd /tmp/
 
     rm -rf /tmp/swaylock-effects
-    gclonecd https://github.com/mortie/swaylock-effects.git
+    gclonecd https://github.com/jirutka/swaylock-effects.git
     meson build
     ninja -C build
     sudo ninja -C build install
