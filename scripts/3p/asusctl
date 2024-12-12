@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# https://asus-linux.org/
 # https://gitlab.com/asus-linux/asusctl
 
 # set -e
