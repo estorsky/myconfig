@@ -26,6 +26,8 @@
 # rm -rf /tmp/asusctl
 # gclonecd https://gitlab.com/asus-linux/asusctl
 # make
+# sudo make install
+# systemctl daemon-reload && systemctl restart asusd
 
 # cp
 
