@@ -234,7 +234,10 @@ init () {
 update () {
     # TODO: pip packagees update
 
-    sudo eopkg up -y
+    sudo eopkg up -y \
+        -x neovim \
+        -x waybar
+
     sudo eopkg3p up -y
     # install__xkb_switch i3
     # install__nm_tray
@@ -244,7 +247,8 @@ update () {
 
     sudo clr-boot-manager update
 
-    sudo eopkg it https://packages.getsol.us/shannon/n/neovim/neovim-0.9.5-41-1-x86_64.eopkg
+    # sudo eopkg it https://packages.getsol.us/shannon/n/neovim/neovim-0.9.5-41-1-x86_64.eopkg
+    # sudo eopkg it https://packages.getsol.us/shannon/w/waybar/waybar-0.10.4-15-1-x86_64.eopkg
 }
 
 clean () {
