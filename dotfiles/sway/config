@@ -208,7 +208,7 @@ bar {
     swaybar_command waybar
 }
 
-include /etc/sway/config.d/*
+include /usr/share/defaults/sway/config.d/*
 
 
 
@@ -233,18 +233,18 @@ bindsym --to-code $mod+Shift+Comma move container to output left
 bindsym --to-code $mod+Control+Period move workspace to output right
 bindsym --to-code $mod+Control+Comma move workspace to output left
 
-workspace 1 output HDMI-A-1 eDP-1 DP-1
-workspace 2 output HDMI-A-1 eDP-1 DP-1
-workspace 3 output HDMI-A-1 eDP-1 DP-1
-workspace 4 output HDMI-A-1 eDP-1 DP-1
-workspace 5 output HDMI-A-1 eDP-1 DP-1
-workspace 6 output eDP-1 DP-1 HDMI-A-1
-workspace 7 output eDP-1 DP-1 HDMI-A-1
-workspace 8 output eDP-1 DP-1 HDMI-A-1
-workspace 9 output eDP-1 DP-1 HDMI-A-1
-workspace 10 output eDP-1 DP-1 HDMI-A-1
+workspace  1 output HDMI-A-1 DP-2  eDP-1 DP-1
+workspace  2 output HDMI-A-1 DP-2  eDP-1 DP-1
+workspace  3 output HDMI-A-1 DP-2  eDP-1 DP-1
+workspace  4 output HDMI-A-1 DP-2  eDP-1 DP-1
+workspace  5 output HDMI-A-1 DP-2  eDP-1 DP-1
+workspace  6 output eDP-1 DP-1  HDMI-A-1 DP-2
+workspace  7 output eDP-1 DP-1  HDMI-A-1 DP-2
+workspace  8 output eDP-1 DP-1  HDMI-A-1 DP-2
+workspace  9 output eDP-1 DP-1  HDMI-A-1 DP-2
+workspace 10 output eDP-1 DP-1  HDMI-A-1 DP-2
 
-bindsym --to-code $mod+m Output eDP-1 toggle
+bindsym --to-code --release $mod+m exec ~/myconfig/scripts/sway_outputs_toggle.sh
 
 ### Music
 bindsym --to-code $mod+p exec playerctl play-pause
@@ -271,7 +271,6 @@ bindsym Control+Shift+Escape exec gnome-system-monitor
 exec sway-xkb-switcher
 exec blueman-applet
 exec dunst
-exec thunderbird
 exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
 exec pavucontrol
 exec blueman-manager
@@ -284,6 +283,7 @@ exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 
 assign [instance="Mail"] 9
 assign [instance="Spotify"] 9
+assign [title="Spotify Premium"] 9
 assign [app_id="net.thunderbird.Thunderbird"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="blueman-manager"] 9
@@ -321,4 +321,4 @@ input type:keyboard {
     xkb_options grp:alt_shift_toggle,ctrl:nocaps
 }
 
-include ~/.config/sway/default_monitor_preset
+include ~/.config/sway/device/*

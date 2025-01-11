@@ -1,0 +1,3 @@
+exec thunderbird
+# exec asusctl profile --profile-set Balanced
+# echo 0 | sudo tee /sys/devices/system/cpu/cpufreq/boost

@@ -1,0 +1,58 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 8b3df94..0dc1571 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -32,7 +32,7 @@ default-members = [
+     "asusd",
+     "asusd-user",
+     "cpuctl",
+-    "rog-control-center",
++    # "rog-control-center",
+ ]
+ 
+ [workspace.dependencies]
+diff --git a/Makefile b/Makefile
+index 0c52134..403a362 100644
+--- a/Makefile
++++ b/Makefile
+@@ -23,10 +23,10 @@ STRIP_BINARIES ?= 0
+ 
+ DEBUG ?= 0
+ ifeq ($(DEBUG),0)
+-	ARGS += --release --features "rog-control-center/x11"
++	ARGS += --release # --features "rog-control-center/x11"
+ 	TARGET = release
+ else
+-	ARGS += --profile dev --features "rog-control-center/x11"
++	ARGS += --profile dev #--features "rog-control-center/x11"
+ 	TARGET = debug
+ endif
+ 
+@@ -44,15 +44,15 @@ distclean:
+ 	rm -rf .cargo vendor vendor.tar.xz
+ 
+ install-program:
+-	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_ROG)" "$(DESTDIR)$(bindir)/$(BIN_ROG)"
++	# $(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_ROG)" "$(DESTDIR)$(bindir)/$(BIN_ROG)"
+ 
+ 	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_C)" "$(DESTDIR)$(bindir)/$(BIN_C)"
+ 	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_D)" "$(DESTDIR)$(bindir)/$(BIN_D)"
+ 	$(INSTALL_PROGRAM) "./target/$(TARGET)/$(BIN_U)" "$(DESTDIR)$(bindir)/$(BIN_U)"
+ 
+ install-data:
+-	$(INSTALL_DATA) "./rog-control-center/data/$(BIN_ROG).desktop" "$(DESTDIR)$(datarootdir)/applications/$(BIN_ROG).desktop"
+-	$(INSTALL_DATA) "./rog-control-center/data/$(BIN_ROG).png" "$(DESTDIR)$(datarootdir)/icons/hicolor/512x512/apps/$(BIN_ROG).png"
++	# $(INSTALL_DATA) "./rog-control-center/data/$(BIN_ROG).desktop" "$(DESTDIR)$(datarootdir)/applications/$(BIN_ROG).desktop"
++	# $(INSTALL_DATA) "./rog-control-center/data/$(BIN_ROG).png" "$(DESTDIR)$(datarootdir)/icons/hicolor/512x512/apps/$(BIN_ROG).png"
+ 	cd rog-aura/data/layouts && find . -type f -name "*.ron" -exec $(INSTALL_DATA) "{}" "$(DESTDIR)$(datarootdir)/rog-gui/layouts/{}" \;
+ 
+ 	$(INSTALL_DATA) "./data/$(BIN_D).rules" "$(DESTDIR)$(libdir)/udev/rules.d/99-$(BIN_D).rules"
+@@ -137,7 +137,7 @@ ifneq ($(STRIP_BINARIES),0)
+ 	strip -s ./target/$(TARGET)/$(BIN_C)
+ 	strip -s ./target/$(TARGET)/$(BIN_D)
+ 	strip -s ./target/$(TARGET)/$(BIN_U)
+-	strip -s ./target/$(TARGET)/$(BIN_ROG)
++	# strip -s ./target/$(TARGET)/$(BIN_ROG)
+ endif
+ 
+ 

@@ -1,0 +1,36 @@
+# [14:     wl_keyboard] key: serial: 41178; time: 103111906; key: 179; state: 1 (pressed)
+#                       sym: XF86Tools    (269025153), utf8: ''
+# [14:     wl_keyboard] key: serial: 41179; time: 103112050; key: 179; state: 0 (released)
+#                       sym: XF86Tools    (269025153), utf8: ''
+# [14:     wl_keyboard] key: serial: 41180; time: 103121570; key: 173; state: 1 (pressed)
+#                       sym: XF86AudioPrev (269025046), utf8: ''
+# [14:     wl_keyboard] key: serial: 41181; time: 103121674; key: 173; state: 0 (released)
+#                       sym: XF86AudioPrev (269025046), utf8: ''
+# [14:     wl_keyboard] key: serial: 41182; time: 103122378; key: 171; state: 1 (pressed)
+#                       sym: XF86AudioNext (269025047), utf8: ''
+# [14:     wl_keyboard] key: serial: 41183; time: 103122482; key: 171; state: 0 (released)
+#                       sym: XF86AudioNext (269025047), utf8: ''
+# [14:     wl_keyboard] key: serial: 41184; time: 103123290; key: 172; state: 1 (pressed)
+#                       sym: XF86AudioPlay (269025044), utf8: ''
+# [14:     wl_keyboard] key: serial: 41185; time: 103123410; key: 172; state: 0 (released)
+#                       sym: XF86AudioPlay (269025044), utf8: ''
+# [14:     wl_keyboard] key: serial: 41186; time: 103124090; key: 174; state: 1 (pressed)
+#                       sym: XF86AudioStop (269025045), utf8: ''
+# [14:     wl_keyboard] key: serial: 41187; time: 103124202; key: 174; state: 0 (released)
+#                       sym: XF86AudioStop (269025045), utf8: ''
+# [14:     wl_keyboard] key: serial: 41188; time: 103125154; key: 180; state: 1 (pressed)
+#                       sym: XF86HomePage (269025048), utf8: ''
+# [14:     wl_keyboard] key: serial: 41189; time: 103125298; key: 180; state: 0 (released)
+#                       sym: XF86HomePage (269025048), utf8: ''
+# [14:     wl_keyboard] key: serial: 41190; time: 103125930; key: 163; state: 1 (pressed)
+#                       sym: XF86Mail     (269025049), utf8: ''
+# [14:     wl_keyboard] key: serial: 41191; time: 103126050; key: 163; state: 0 (released)
+#                       sym: XF86Mail     (269025049), utf8: ''
+# [14:     wl_keyboard] key: serial: 41192; time: 103126546; key: 152; state: 1 (pressed)
+#                       sym: XF86Explorer (269025117), utf8: ''
+# [14:     wl_keyboard] key: serial: 41193; time: 103126650; key: 152; state: 0 (released)
+#                       sym: XF86Explorer (269025117), utf8: ''
+# [14:     wl_keyboard] key: serial: 41194; time: 103127042; key: 164; state: 1 (pressed)
+#                       sym: XF86Favorites (269025072), utf8: ''
+# [14:     wl_keyboard] key: serial: 41195; time: 103127122; key: 164; state: 0 (released)
+#                       sym: XF86Favorites (269025072), utf8: ''
