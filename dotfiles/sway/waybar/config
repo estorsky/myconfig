@@ -211,9 +211,10 @@
                 // "menu-file": "$HOME/.config/waybar/power_menu.xml", // Menu file in resources folder
 		"menu-file": "/home/dmitry/.config/waybar/power_menu.xml",
 		"menu-actions": {
+			"lock": "~/myconfig/scripts/swaylock.sh",
 			"shutdown": "shutdown",
 			"reboot": "reboot",
-			"suspend": "systemctl suspend",
+			"suspend": "~/myconfig/scripts/suspend.sh -l",
 			"hibernate": "systemctl hibernate"
 		}
     }
