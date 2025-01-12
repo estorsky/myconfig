@@ -176,6 +176,11 @@ init () {
     # systemctl status autostart_root.service
     # sudo chattr +i ../../.myconfig/scripts/autostart_root.sh
 
+    # sudo cp ~/.myconfig/systemd/logitech_wakeup_off.service /etc/systemd/system/
+    # systemctl enable logitech_wakeup_off.service
+    # systemctl start logitech_wakeup_off.service
+    # systemctl status logitech_wakeup_off.service
+
     # lockscreen unit
     # sudo cp ../../myconfig/systemd/lockscreen.service /etc/systemd/system/
     # systemctl enable lockscreen.service
