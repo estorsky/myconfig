@@ -226,7 +226,7 @@ bindsym button2 kill
 bindsym Control+Shift+space exec dunstctl close
 
 bindsym --to-code $mod+x exec ~/myconfig/scripts/swaylock.sh
-bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/suspend.sh
+bindsym --to-code $mod+Shift+x exec ~/myconfig/scripts/swaylock.sh && ~/myconfig/scripts/suspend.sh
 
 bindsym --to-code $mod+Shift+Period move container to output right
 bindsym --to-code $mod+Shift+Comma move container to output left
@@ -276,7 +276,6 @@ exec pavucontrol
 exec blueman-manager
 exec sleep 5 && telegram-desktop
 exec sleep 5 && dropbox start
-# exec sleep 5 && QT_QPA_PLATFORMTHEME=gtk3 nm-tray
 exec nm-applet
 exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 exec ~/myconfig/scripts/swayidle.sh
@@ -296,11 +295,6 @@ for_window [app_id="waybar" floating] {
     move position cursor
     move down 25px
 }
-# for_window [app_id="nm-tray"] {
-    # floating enable
-    # move position mouse
-    # border none
-# }
 
 set $bg-color            #222222
 set $inactive-bg-color   #3E3E46

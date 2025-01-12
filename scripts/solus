@@ -22,6 +22,14 @@ install__nm_tray () {
     cd build
     cmake ..
     sudo make install
+
+    # sway
+    # exec sleep 5 && QT_QPA_PLATFORMTHEME=gtk3 nm-tray
+    # for_window [app_id="nm-tray"] {
+        # floating enable
+        # move position mouse
+        # border none
+    # }
 }
 
 install__wl_clipboard () {
