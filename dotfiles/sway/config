@@ -279,7 +279,7 @@ exec sleep 5 && dropbox start
 # exec sleep 5 && QT_QPA_PLATFORMTHEME=gtk3 nm-tray
 exec nm-applet
 exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
-# exec ~/myconfig/scripts/swayidle.sh
+exec ~/myconfig/scripts/swayidle.sh
 
 assign [instance="Mail"] 9
 assign [instance="Spotify"] 9
