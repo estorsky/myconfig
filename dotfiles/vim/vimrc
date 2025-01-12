@@ -194,10 +194,14 @@ let g:fzf_action = {
   \ 'ctrl-x': 'split',
   \ 'ctrl-v': 'vsplit' }
 
+command! -bang -nargs=* Rg
+        \ call fzf#vim#grep("rga --column --line-number --no-heading --color=always --smart-case -- ".fzf#shellescape(<q-args>),
+        \ fzf#vim#with_preview(), <bang>0)
+
 "off search in filename in Rg
 " command! -bang -nargs=* Rg
-      " \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>),
-      " \ 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
+        " \ call fzf#vim#grep("rga --column --line-number --no-heading --color=always --smart-case -- ".fzf#shellescape(<q-args>),
+        " \ fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}), <bang>0)
 
 " Ctrlsf
 let g:ctrlsf_follow_symlinks = 0

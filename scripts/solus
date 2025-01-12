@@ -158,7 +158,7 @@ init () {
     # sudo eopkg it -y iw aircrack-ng libpcap-devel hashcat bzip2-devel
     # sudo eopkg it -y curl-devel
     sudo eopkg it -y -c system.devel
-    sudo eopkg it -y silver-searcher ctags ripgrep  # for vim
+    sudo eopkg it -y silver-searcher ctags ripgrep ripgrep-all # for vim
     # sudo eopkg it -y yad  # for i3blocks
     sudo eopkg remove -y firefox hexchat transmission
 
