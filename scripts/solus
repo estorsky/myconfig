@@ -104,7 +104,7 @@ install__google_chrome () {
     sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
 
     # sudo sed -i '/Exec/s/$/ --force-dark-mode/' /usr/share/applications/google-chrome.desktop
-    # sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu/' /usr/share/applications/google-chrome-beta.desktop
+    # sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome-beta.desktop
 
     # for Wayland
     # Go to chrome://flags

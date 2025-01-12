@@ -1,1 +1,1 @@
-exec asusctl profile --profile-set Quiet
+# exec asusctl profile --profile-set Quiet
