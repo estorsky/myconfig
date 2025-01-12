@@ -125,6 +125,7 @@ if ! [ -d ~/.config/waybar ]; then
 fi
 ln -s "$SCRIPT_DIR/sway/waybar/config" ~/.config/waybar/config
 ln -s "$SCRIPT_DIR/sway/waybar/style.css" ~/.config/waybar/style.css
+ln -s "$SCRIPT_DIR/sway/waybar/power_menu.xml" ~/.config/waybar/power_menu.xml
 
 #KITTY
 if ! [ -d ~/.config/kitty ]; then
