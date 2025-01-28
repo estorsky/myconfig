@@ -2,7 +2,9 @@
 
 if ! pgrep -x swaylock &>/dev/null; then
 
-    swaymsg input "1:1:AT_Translated_Set_2_keyboard" xkb_switch_layout 0
+    KEYBOARD="$(swaymsg -t get_inputs | jq -r '.[].identifier' | grep -i keyboard | head -n 1)"
+
+    swaymsg input "${KEYBOARD}" xkb_switch_layout 0
 
     dunstctl close-all
 
