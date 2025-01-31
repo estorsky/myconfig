@@ -1,6 +1,7 @@
 #!/bin/bash
 
 FLAG__PIPE=false
+NOTIF_TITLE="Translator"
 
 params () {
     case "$1" in
@@ -51,6 +52,6 @@ trans_text="$(trans -b "$text" -t $target_text_code)"
 
 if [ "$trans_text" ]; then
     # notify-send "$(basename $0)" "$trans_text"
-    dunstify -u low -t 20000 -r 1 "$(basename $0)" "$trans_text"
+    dunstify -u low -t 20000 -r 1 "${NOTIF_TITLE}" "$trans_text"
 fi
 
