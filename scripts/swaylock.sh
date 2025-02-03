@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if ! pgrep -x swaylock &>/dev/null; then
+source ~/myconfig/scripts/common_envs.sh
 
-    KEYBOARD="$(swaymsg -t get_inputs | jq -r '.[].identifier' | grep -i keyboard | head -n 1)"
+if ! pgrep -x swaylock &>/dev/null; then
 
     swaymsg input "${KEYBOARD}" xkb_switch_layout 0
 
