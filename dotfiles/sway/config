@@ -287,6 +287,7 @@ assign [app_id="net.thunderbird.Thunderbird"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="blueman-manager"] 9
 assign [app_id="org.telegram.desktop"] 10
+
 for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [title="Media viewer"] floating enable
 for_window [title="TelegramDesktop"] floating enable
@@ -304,10 +305,10 @@ set $inactive-text-color #DEDEDE
 set $urgent-bg-color     #8A2725
 set $border              #355F90
 
-client.focused          $bg-color  $border            $text-color          #00ff00
-client.focused_inactive $bg-color  $inactive-bg-color $text-color          #00ff00
-client.unfocused        $bg-color  $inactive-bg-color $inactive-text-color #00ff00
-client.urgent           $bg-color  $urgent-bg-color   $text-color          #00ff00
+client.focused          $bg-color  $border            $text-color          $border
+client.focused_inactive $bg-color  $inactive-bg-color $text-color          $border
+client.unfocused        $bg-color  $inactive-bg-color $inactive-text-color $border
+client.urgent           $bg-color  $urgent-bg-color   $text-color          $border
 
 hide_edge_borders smart
 
