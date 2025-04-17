@@ -31,8 +31,10 @@ Plug 'tpope/vim-eunuch'
 " Plug 'terryma/vim-multiple-cursors'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'rhysd/vim-clang-format'
 Plug 'gcmt/taboo.vim'
-Plug 'morhetz/gruvbox'
+" Plug 'morhetz/gruvbox'
+Plug 'ararslan/gruvbox', {'branch': 'aa/nvim-0.11'}
 Plug 'mhartington/oceanic-next'
 Plug 'bfrg/vim-cpp-modern'
 Plug 'mtdl9/vim-log-highlighting'
@@ -92,7 +94,7 @@ set cursorline
 " Colors
 hi VertSplit ctermbg=none
 set fillchars+=vert:│
-hi SignColumn ctermbg=none
+hi SignColumn guibg=NONE ctermbg=NONE
 hi TabLineFill ctermfg=gray ctermbg=black
 hi TabLineSel cterm=bold ctermfg=black ctermbg=blue
 hi TabLine cterm=bold ctermfg=gray ctermbg=black
@@ -103,7 +105,7 @@ hi Visual cterm=none
 let g:load_doxygen_syntax=1
 au FileType gitcommit setlocal tw=90
 au FileType markdown setlocal colorcolumn=120
-au FileType c,cpp setlocal colorcolumn=90
+au FileType c,cpp setlocal colorcolumn=80
 au BufNewFile,BufRead Jenkinsfile* setf groovy
 au BufNewFile,BufRead gitconfig setf gitconfig
 au BufNewFile,BufRead *dotfiles/i3 setf i3config
