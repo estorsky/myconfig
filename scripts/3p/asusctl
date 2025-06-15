@@ -17,7 +17,7 @@
 # sudo eopkg it seatd-devel
 # sudo eopkg it libinput-devel
 #
-# git checkout 6.0.12
+# git checkout 6.1.12
 
 # ? sudo eopkg it egl-gbm-devel
 

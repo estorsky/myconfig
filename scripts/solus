@@ -254,9 +254,9 @@ init () {
 update () {
     # TODO: pip packagees update
 
-    sudo eopkg up -y \
-        -x neovim \
-        -x waybar
+    sudo eopkg up -y #\
+        # -x neovim \
+        # -x waybar
 
     sudo eopkg3p up -y
     sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome.desktop
