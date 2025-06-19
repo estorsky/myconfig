@@ -274,7 +274,7 @@ exec dunst
 exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
 exec pavucontrol
 exec blueman-manager
-exec sleep 5 && telegram-desktop
+exec sleep 5 && Telegram
 exec sleep 5 && dropbox start
 exec nm-applet
 exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
