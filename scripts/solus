@@ -258,6 +258,8 @@ update () {
         # -x neovim \
         # -x waybar
 
+    # sudo vim /usr/lib/python3.12/site-packages/eopkg3p/consts.py
+    # EOPKG = _find_executable("eopkg.py3")
     sudo eopkg3p up -y
     sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome.desktop
     sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome-beta.desktop
