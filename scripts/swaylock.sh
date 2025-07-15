@@ -23,7 +23,5 @@ if ! pgrep -x swaylock &>/dev/null; then
         --effect-vignette 0.5:0.5 \
         --line-color 00000000 \
         --inside-color 00000088 \
-        --separator-color 00000000 \
-        --grace 2 \
-        --grace-no-mouse
+        --separator-color 00000000
 fi
