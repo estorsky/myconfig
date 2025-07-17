@@ -11,6 +11,7 @@ if ! pgrep -x swaylock &>/dev/null; then
     playerctl --all-players --no-messages pause
 
     /usr/local/bin/swaylock \
+        --color 000000 \
         --daemonize \
         --screenshots \
         --clock \
