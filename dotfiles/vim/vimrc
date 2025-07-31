@@ -1,7 +1,8 @@
 " PLAGINS
 call plug#begin('~/.vim/plugged')
 Plug 'embear/vim-localvimrc'
-" Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeToggle', 'NERDTreeFind','NERDTreeTabsToggle']} Plug 'jistr/vim-nerdtree-tabs'
+" Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeToggle', 'NERDTreeFind','NERDTreeTabsToggle']}
+" Plug 'jistr/vim-nerdtree-tabs'
 Plug 'scrooloose/nerdcommenter'
 Plug 'jiangmiao/auto-pairs'
 Plug 'axelf4/vim-strip-trailing-whitespace'
