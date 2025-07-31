@@ -178,6 +178,20 @@
 | m               | menu                          |
 | cd              | change dir                    |
 
+### tree key mappings
+    *coc-tree-mappings*
+    Default key-mappings are provided for 'coctree' buffer, which can be changed
+    by configuration |coc-config-tree|.
+
+    <space> - Select/unselect item, configured by `"tree.key.toggleSelection"`.
+    <tab> 	- Invoke actions of current item, configured by `"tree.key.actions"`.
+    <esc>   - Close tree window, configured by `"tree.key.close"`.
+    <cr>    - Invoke command of current item,  configured by `"tree.key.invoke"`.
+    <C-o>   - Move cursor to original window.
+    f 	- Activate filter, configured by `"tree.key.activeFilter"`.
+    t 	- Trigger key to toggle expand state of tree node, configured by `tree.key.toggle`.
+    M 	- Collapse all tree node, configured by `"tree.key.collapseAll"`.
+
 ### fzf
 
 | Command           | List                                                                     |
@@ -312,12 +326,13 @@ type in multiple search terms delimited by spaces. e.g. `^music .mp3$ sbtrkt
 https://i3wm.org/docs/refcard.html
 
 ### pyrightconfig.json
-{
-    "extraPaths": [
-        "/home/estor/.local/lib/python3.10/site-packages/",
-        "/usr/lib64/python3.10/site-packages/"
-    ]
-}
+    {
+        "extraPaths": [
+            "/home/estor/.local/lib/python3.10/site-packages/",
+            "/usr/lib64/python3.10/site-packages/"
+        ]
+    }
 
 ### clangd
-:CocCommand workspace.showOutput
+    :CocCommand workspace.showOutput
+

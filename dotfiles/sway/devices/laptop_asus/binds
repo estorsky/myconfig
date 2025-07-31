@@ -1,0 +1,118 @@
+bindsym XF86KbdBrightnessDown exec asusctl --prev-kbd-bright
+bindsym XF86KbdBrightnessUp exec asusctl --next-kbd-bright
+bindsym XF86MonBrightnessDown exec light -U 10
+bindsym XF86MonBrightnessUp exec light -A 10
+bindsym XF86Launch3 exec asusctl led-mode -n
+bindsym XF86Launch4 exec asusctl profile -n
+bindsym XF86TouchpadToggle exec swaymsg input 2362:12305:ASUP1208:00_093A:3011_Touchpad events toggle
+
+# cpupower frequency-set
+# sudo echo 0 | sudo tee /sys/devices/system/cpu/cpufreq/boost
+
+# [14:     wl_keyboard] key: serial: 312; time: 160007; key: 237; state: 1 (pressed)
+                      # sym: XF86KbdBrightnessDown (269025030), utf8: ''
+# [14:     wl_keyboard] key: serial: 313; time: 160138; key: 237; state: 0 (released)
+                      # sym: XF86KbdBrightnessDown (269025030), utf8: ''
+# [14:     wl_keyboard] key: serial: 314; time: 161354; key: 238; state: 1 (pressed)
+                      # sym: XF86KbdBrightnessUp (269025029), utf8: ''
+# [14:     wl_keyboard] key: serial: 315; time: 161470; key: 238; state: 0 (released)
+                      # sym: XF86KbdBrightnessUp (269025029), utf8: ''
+# [14:     wl_keyboard] key: serial: 316; time: 162402; key: 210; state: 1 (pressed)
+                      # sym: XF86Launch3  (269025091), utf8: ''
+# [14:     wl_keyboard] key: serial: 317; time: 162526; key: 210; state: 0 (released)
+                      # sym: XF86Launch3  (269025091), utf8: ''
+# [14:     wl_keyboard] key: serial: 318; time: 165642; key: 211; state: 1 (pressed)
+                      # sym: XF86Launch4  (269025092), utf8: ''
+# [14:     wl_keyboard] key: serial: 319; time: 165746; key: 211; state: 0 (released)
+                      # sym: XF86Launch4  (269025092), utf8: ''
+# [14:     wl_keyboard] key: serial: 320; time: 166490; key: 133; state: 1 (pressed)
+                      # sym: Super_L      (65515), utf8: ''
+# [14:     wl_keyboard] modifiers: serial: 0; group: 0
+                      # depressed: 00000040: Mod4
+                      # latched: 00000000
+                      # locked: 00000000
+# [14:     wl_keyboard] key: serial: 322; time: 166494; key: 62; state: 1 (pressed)
+                      # sym: Shift_R      (65506), utf8: ''
+# [14:     wl_keyboard] modifiers: serial: 0; group: 0
+                      # depressed: 00000041: Shift Mod4
+                      # latched: 00000000
+                      # locked: 00000000
+# [14:     wl_keyboard] key: serial: 324; time: 166506; key: 62; state: 0 (released)
+                      # sym: Shift_R      (65506), utf8: ''
+# [14:     wl_keyboard] modifiers: serial: 0; group: 0
+                      # depressed: 00000040: Mod4
+                      # latched: 00000000
+                      # locked: 00000000
+# [14:     wl_keyboard] key: serial: 326; time: 166510; key: 133; state: 0 (released)
+                      # sym: Super_L      (65515), utf8: ''
+# [14:     wl_keyboard] modifiers: serial: 0; group: 0
+                      # depressed: 00000000
+                      # latched: 00000000
+                      # locked: 00000000
+# [14:     wl_keyboard] leave: serial: 334; surface: 3
+# [13:      wl_pointer] leave: surface: 3
+# [13:      wl_pointer] frame
+# [10:    xdg_toplevel] configure: width: 640; height: 480
+# [09:     xdg_surface] configure: serial: 335
+# [13:      wl_pointer] enter: serial: 357; surface: 3, x, y: 3.468750, 476.648438
+# [13:      wl_pointer] frame
+# [14:     wl_keyboard] enter: serial: 362; surface: 3
+                      # sym: Escape       (65307), utf8: '\e'
+# [14:     wl_keyboard] modifiers: serial: 0; group: 0
+                      # depressed: 00000000
+                      # latched: 00000000
+                      # locked: 00000000
+# [11:  wl_data_device] selection: (cleared)
+# [10:    xdg_toplevel] configure: width: 640; height: 480
+                      # activated
+# [09:     xdg_surface] configure: serial: 360
+# [14:     wl_keyboard] key: serial: 366; time: 170285; key: 9; state: 0 (released)
+                      # sym: Escape       (65307), utf8: ''
+# [11:  wl_data_device] data_offer: id: 4278190080
+# [4278190080:   wl_data_offer] offer: mime_type: text/plain
+# [4278190080:   wl_data_offer] offer: mime_type: text/plain;charset=utf-8
+# [4278190080:   wl_data_offer] offer: mime_type: TEXT
+# [4278190080:   wl_data_offer] offer: mime_type: STRING
+# [4278190080:   wl_data_offer] offer: mime_type: UTF8_STRING
+# [11:  wl_data_device] selection: id: 4278190080
+# [14:     wl_keyboard] key: serial: 368; time: 173897; key: 232; state: 1 (pressed)
+                      # sym: XF86MonBrightnessDown (269025027), utf8: ''
+# [14:     wl_keyboard] key: serial: 369; time: 174029; key: 232; state: 0 (released)
+                      # sym: XF86MonBrightnessDown (269025027), utf8: ''
+# [14:     wl_keyboard] key: serial: 370; time: 174681; key: 233; state: 1 (pressed)
+                      # sym: XF86MonBrightnessUp (269025026), utf8: ''
+# [14:     wl_keyboard] key: serial: 371; time: 174793; key: 233; state: 0 (released)
+                      # sym: XF86MonBrightnessUp (269025026), utf8: ''
+# [14:     wl_keyboard] key: serial: 372; time: 175533; key: 133; state: 1 (pressed)
+                      # sym: Super_L      (65515), utf8: ''
+# [14:     wl_keyboard] modifiers: serial: 0; group: 0
+                      # depressed: 00000040: Mod4
+                      # latched: 00000000
+                      # locked: 00000000
+# [14:     wl_keyboard] key: serial: 380; time: 180832; key: 199; state: 1 (pressed)
+                      # sym: XF86TouchpadToggle (269025193), utf8: ''
+# [14:     wl_keyboard] key: serial: 381; time: 180900; key: 199; state: 0 (released)
+                      # sym: XF86TouchpadToggle (269025193), utf8: ''
+# [14:     wl_keyboard] key: serial: 385; time: 193524; key: 133; state: 0 (released)
+                      # sym: Super_L      (65515), utf8: ''
+# [14:     wl_keyboard] modifiers: serial: 0; group: 0
+                      # depressed: 00000000
+                      # latched: 00000000
+                      # locked: 00000000
+
+# [14:     wl_keyboard] key: serial: 1686; time: 705817; key: 256; state: 1 (pressed)
+                      # sym: XF86AudioMicMute (269025202), utf8: ''
+# [14:     wl_keyboard] key: serial: 1687; time: 705957; key: 256; state: 0 (released)
+                      # sym: XF86AudioMicMute (269025202), utf8: ''
+# [14:     wl_keyboard] key: serial: 1688; time: 706357; key: 156; state: 1 (pressed)
+                      # sym: XF86Launch1  (269025089), utf8: ''
+# [14:     wl_keyboard] key: serial: 1689; time: 706477; key: 156; state: 0 (released)
+                      # sym: XF86Launch1  (269025089), utf8: ''
+# [14:     wl_keyboard] key: serial: 1690; time: 710314; key: 37; state: 1 (pressed)
+                      # sym: Control_L    (65507), utf8: ''
+
+# swaymsg input 2362:12305:ASUP1208:00_093A:3011_Touchpad events toggle
+# swaymsg input 2362:12305:ASUP1208:00_093A:3011_Touchpad events disabled
+# swaymsg input 2362:12305:ASUP1208:00_093A:3011_Touchpad events enabled
+
+# swaymsg -t get_inputs

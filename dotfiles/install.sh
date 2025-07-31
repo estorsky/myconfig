@@ -27,7 +27,6 @@ mv ~/.config/rofi/config.rasi       ~/dotfiles_old/
 mv ~/.config/feh/themes             ~/dotfiles_old/
 mv ~/.config/i3/config              ~/dotfiles_old/
 mv ~/.config/sway/config            ~/dotfiles_old/
-mv ~/.config/sway/default_monitor_preset ~/dotfiles_old/
 mv ~/.config/waybar/config          ~/dotfiles_old/
 mv ~/.config/waybar/style.css       ~/dotfiles_old/
 mv ~/.config/kitty/kitty.conf       ~/dotfiles_old/
@@ -114,9 +113,9 @@ if ! [ -d ~/.config/sway ]; then
 fi
 ln -s "$SCRIPT_DIR/sway/config" ~/.config/sway/config
 if ! [ -d ~/work ]; then
-    ln -s "$SCRIPT_DIR/sway/default_monitor_preset" ~/.config/sway/default_monitor_preset
+    ln -s "$SCRIPT_DIR/sway/devices/laptop_asus" ~/.config/sway/device
 else
-    ln -s "$SCRIPT_DIR/sway/work_monitor_preset" ~/.config/sway/default_monitor_preset
+    ln -s "$SCRIPT_DIR/sway/devices/desktop_work" ~/.config/sway/device
 fi
 
 #WAYBAR
@@ -125,6 +124,7 @@ if ! [ -d ~/.config/waybar ]; then
 fi
 ln -s "$SCRIPT_DIR/sway/waybar/config" ~/.config/waybar/config
 ln -s "$SCRIPT_DIR/sway/waybar/style.css" ~/.config/waybar/style.css
+ln -s "$SCRIPT_DIR/sway/waybar/power_menu.xml" ~/.config/waybar/power_menu.xml
 
 #KITTY
 if ! [ -d ~/.config/kitty ]; then

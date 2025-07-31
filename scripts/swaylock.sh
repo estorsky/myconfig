@@ -1,14 +1,17 @@
 #!/bin/bash
 
+source ~/myconfig/scripts/common_envs.sh
+
 if ! pgrep -x swaylock &>/dev/null; then
 
-    swaymsg input "1:1:AT_Translated_Set_2_keyboard" xkb_switch_layout 0
+    swaymsg input "${KEYBOARD}" xkb_switch_layout 0
 
     dunstctl close-all
 
     playerctl --all-players --no-messages pause
 
     /usr/local/bin/swaylock \
+        --color 000000 \
         --daemonize \
         --screenshots \
         --clock \
@@ -21,7 +24,5 @@ if ! pgrep -x swaylock &>/dev/null; then
         --effect-vignette 0.5:0.5 \
         --line-color 00000000 \
         --inside-color 00000088 \
-        --separator-color 00000000 \
-        --grace 2 \
-        --fade-in 0.2
+        --separator-color 00000000
 fi
