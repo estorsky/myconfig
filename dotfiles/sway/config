@@ -233,16 +233,16 @@ bindsym --to-code $mod+Shift+Comma move container to output left
 bindsym --to-code $mod+Control+Period move workspace to output right
 bindsym --to-code $mod+Control+Comma move workspace to output left
 
-workspace  1 output HDMI-A-1 DP-2  eDP-1 DP-1
-workspace  2 output HDMI-A-1 DP-2  eDP-1 DP-1
-workspace  3 output HDMI-A-1 DP-2  eDP-1 DP-1
-workspace  4 output HDMI-A-1 DP-2  eDP-1 DP-1
-workspace  5 output HDMI-A-1 DP-2  eDP-1 DP-1
-workspace  6 output eDP-1 DP-1  HDMI-A-1 DP-2
-workspace  7 output eDP-1 DP-1  HDMI-A-1 DP-2
-workspace  8 output eDP-1 DP-1  HDMI-A-1 DP-2
-workspace  9 output eDP-1 DP-1  HDMI-A-1 DP-2
-workspace 10 output eDP-1 DP-1  HDMI-A-1 DP-2
+workspace  1 output HDMI-A-1 DP-2 DP-9  eDP-1 DP-1 DP-10
+workspace  2 output HDMI-A-1 DP-2 DP-9  eDP-1 DP-1 DP-10
+workspace  3 output HDMI-A-1 DP-2 DP-9  eDP-1 DP-1 DP-10
+workspace  4 output HDMI-A-1 DP-2 DP-9  eDP-1 DP-1 DP-10
+workspace  5 output HDMI-A-1 DP-2 DP-9  eDP-1 DP-1 DP-10
+workspace  6 output eDP-1 DP-1 DP-10  HDMI-A-1 DP-2 DP-9
+workspace  7 output eDP-1 DP-1 DP-10  HDMI-A-1 DP-2 DP-9
+workspace  8 output eDP-1 DP-1 DP-10  HDMI-A-1 DP-2 DP-9
+workspace  9 output eDP-1 DP-1 DP-10  HDMI-A-1 DP-2 DP-9
+workspace 10 output eDP-1 DP-1 DP-10  HDMI-A-1 DP-2 DP-9
 
 bindsym --to-code --release $mod+m exec ~/myconfig/scripts/sway_outputs_toggle.sh
 
