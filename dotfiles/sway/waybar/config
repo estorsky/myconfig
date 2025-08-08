@@ -130,6 +130,7 @@
         "format-icons": ["", "", "", "", ""]
     },
     "backlight": {
+        "scroll-step": 10,
         // "device": "acpi_video1",
         "format": "{percent}% {icon}",
         "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
@@ -206,16 +207,16 @@
     },
     "custom/power": {
         "format" : "⏻   ",
-		"tooltip": false,
-		"menu": "on-click",
-                // "menu-file": "$HOME/.config/waybar/power_menu.xml", // Menu file in resources folder
-		"menu-file": "/home/dmitry/.config/waybar/power_menu.xml",
-		"menu-actions": {
-			"lock": "~/myconfig/scripts/swaylock.sh",
-			"shutdown": "shutdown",
-			"reboot": "reboot",
-			"suspend": "~/myconfig/scripts/suspend.sh -l",
-			"hibernate": "systemctl hibernate"
-		}
+        "tooltip": false,
+        "menu": "on-click",
+        // "menu-file": "$HOME/.config/waybar/power_menu.xml", // Menu file in resources folder
+        "menu-file": "/home/dmitry/.config/waybar/power_menu.xml",
+        "menu-actions": {
+            "lock": "~/myconfig/scripts/swaylock.sh",
+            "shutdown": "shutdown",
+            "reboot": "reboot",
+            "suspend": "~/myconfig/scripts/suspend.sh -l",
+            "hibernate": "systemctl hibernate"
+        }
     }
 }
