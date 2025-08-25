@@ -274,6 +274,7 @@ exec dunst
 exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
 exec pavucontrol
 exec blueman-manager
+exec thunderbird
 exec sleep 5 && Telegram
 exec sleep 5 && dropbox start
 exec nm-applet
