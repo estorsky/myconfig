@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# set -e
+#
+# source ~/myconfig/scripts/common_funcs.sh
+#
+# set -x
+
+# gclonecd https://github.com/jwrdegoede/wev.git
+# make
+# make install

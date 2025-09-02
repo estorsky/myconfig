@@ -1,0 +1,24 @@
+output HDMI-A-1 {
+    position 0,0
+    mode 2560x1440@143.998Hz
+}
+
+output DP-2 {
+    position 0,0
+    mode 2560x1440@144.000Hz
+}
+
+output DP-9 {
+    position 0,0
+    mode 1920x1080@60.000Hz
+}
+
+output DP-10 {
+    position 1920,0
+    mode 1920x1080@60.000Hz
+}
+
+output eDP-1 {
+    position 2560,0
+    mode 2880x1800@120.000Hz
+}

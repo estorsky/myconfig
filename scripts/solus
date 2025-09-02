@@ -22,6 +22,14 @@ install__nm_tray () {
     cd build
     cmake ..
     sudo make install
+
+    # sway
+    # exec sleep 5 && QT_QPA_PLATFORMTHEME=gtk3 nm-tray
+    # for_window [app_id="nm-tray"] {
+        # floating enable
+        # move position mouse
+        # border none
+    # }
 }
 
 install__wl_clipboard () {
@@ -42,7 +50,7 @@ install__swaylock_effects () {
     cd /tmp/
 
     rm -rf /tmp/swaylock-effects
-    gclonecd https://github.com/mortie/swaylock-effects.git
+    gclonecd https://github.com/jirutka/swaylock-effects.git
     meson build
     ninja -C build
     sudo ninja -C build install
@@ -62,6 +70,20 @@ install__earlyoom () {
     # sudo vim /etc/default/earlyoom
     # EARLYOOM_ARGS="-m 2 -s 100,100 -r 0" # -n
     # sudo journalctl -u earlyoom | grep sending
+}
+
+# sudo eopkg it pango-devel libjpeg-turbo-devel hyprutils-devel hyprwayland-scanner
+install__hyprpicker () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/hyprpicker
+    gclonecd https://github.com/hyprwm/hyprpicker.git
+
+    cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
+    cmake --build ./build --config Release --target hyprpicker -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF`
+    sudo cmake --install ./build
 }
 
 install__xkb_switch () {
@@ -91,12 +113,12 @@ install__xkb_switch () {
 }
 
 install__google_chrome () {
-    sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
-    sudo eopkg bi --ignore-safety $LINK/network/web/browser/google-chrome-beta/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-beta/pspec.xml
     sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
 
-    # sudo sed -i '/Exec/s/$/ --force-dark-mode/' /usr/share/applications/google-chrome.desktop
-    # --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu
+    sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome.desktop
+    sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome-beta.desktop
 
     # for Wayland
     # Go to chrome://flags
@@ -107,28 +129,28 @@ install__google_chrome () {
 }
 
 install__spotify () {
-    sudo eopkg bi --ignore-safety $LINK/multimedia/music/spotify/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/multimedia/music/spotify/pspec.xml
     sudo eopkg it -y spotify*.eopkg; sudo rm spotify*.eopkg
 }
 
 install__sublime_text_3 () {
-    sudo eopkg bi --ignore-safety $LINK/programming/sublime-text-3/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/programming/sublime-text-3/pspec.xml
     sudo eopkg it -y sublime*.eopkg; sudo rm sublime*.eopkg
 }
 
 install__team_viewer () {
-    sudo eopkg bi --ignore-safety $LINK/network/util/teamviewer/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/network/util/teamviewer/pspec.xml
     sudo eopkg it -y teamviewer*.eopkg; sudo rm teamviewer*.eopkg
     sudo systemctl start teamviewerd.service
 }
 
 install__ms_fonts () {
-    sudo eopkg bi --ignore-safety $LINK/desktop/font/mscorefonts/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/desktop/font/mscorefonts/pspec.xml
     sudo eopkg it -y mscorefonts*.eopkg; sudo rm mscorefonts*.eopkg
 }
 
 install__anydesk () {
-    sudo eopkg bi --ignore-safety $LINK/network/util/anydesk/pspec.xml
+    sudo eopkg bi -q --ignore-safety $LINK/network/util/anydesk/pspec.xml
     sudo eopkg it -y anydesk*.eopkg; sudo rm anydesk*.eopkg
 }
 
@@ -144,25 +166,27 @@ init () {
         vim neovim helix mtr python3-ipython i3lock krita ranger cmus cava etcher \
         speedtest-cli cmatrix highlight curl-gnutls iotop iftop \
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
-        openvpn intel-microcode i3blocks i3 lxappearance dunst kitty \
+        openvpn i3blocks i3 lxappearance dunst kitty \
         xsel docker blueman pavucontrol doxygen cppcheck font-awesome-ttf \
-        net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev openjdk-8 \
-        ghex picocom golang cargo nmap maim fzf fd stress-ng valgrind virt-viewer \
-        sway waybar grim jq
+        net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev \
+        ghex picocom golang rust zig nmap maim fzf fd stress-ng valgrind virt-viewer \
+        sway waybar grim jq evtest
+        # openjdk-8 cargo intel-microcode
 
     # sudo eopkg it gdm
     # https://github.com/fairyglade/ly
+    # https://github.com/fairyglade/ly/issues/718
 
     # sudo eopkg it -y iw aircrack-ng libpcap-devel hashcat bzip2-devel
     # sudo eopkg it -y curl-devel
     sudo eopkg it -y -c system.devel
-    sudo eopkg it -y silver-searcher ctags ripgrep  # for vim
-    sudo eopkg it -y yad  # for i3blocks
+    sudo eopkg it -y silver-searcher ctags ripgrep ripgrep-all # for vim
+    # sudo eopkg it -y yad  # for i3blocks
     sudo eopkg remove -y firefox hexchat transmission
 
     sudo eopkg it -y pip
     sudo pip3 install eopkg3p
-    sudo pip2 install autorandr
+    # sudo pip2 install autorandr
 
     gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
     gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
@@ -174,6 +198,11 @@ init () {
     # systemctl status autostart_root.service
     # sudo chattr +i ../../.myconfig/scripts/autostart_root.sh
 
+    # sudo cp ~/.myconfig/systemd/logitech_wakeup_off.service /etc/systemd/system/
+    # systemctl enable logitech_wakeup_off.service
+    # systemctl start logitech_wakeup_off.service
+    # systemctl status logitech_wakeup_off.service
+
     # lockscreen unit
     # sudo cp ../../myconfig/systemd/lockscreen.service /etc/systemd/system/
     # systemctl enable lockscreen.service
@@ -181,20 +210,21 @@ init () {
     # systemctl status lockscreen.service
 
     # need for work Fkeys
-    echo 0 | sudo tee /sys/module/hid_apple/parameters/fnmode
-    echo "options hid_apple fnmode=0" | sudo tee -a /etc/modprobe.d/hid_apple.conf
-    sudo clr-boot-manager update
+    # echo 0 | sudo tee /sys/module/hid_apple/parameters/fnmode
+    # sudo mkdir -p /etc/modprobe.d
+    # echo "options hid_apple fnmode=0" | sudo tee -a /etc/modprobe.d/hid_apple.conf
+    # sudo clr-boot-manager update
 
     install__google_chrome
     install__spotify
-    install__sublime_text_3
+    # install__sublime_text_3
     install__ms_fonts
 
     pip3 install sway-xkb-switcher
     go install github.com/arl/gitmux@latest
 
-    sudo eopkg it -y jsoncpp-devel libsigc++-devel i3-devel libx11-devel libxkbfile-devel
-    install__xkb_switch i3
+    # sudo eopkg it -y jsoncpp-devel libsigc++-devel i3-devel libx11-devel libxkbfile-devel
+    # install__xkb_switch i3
     setxkbmap -layout us,ru -option grp:alt_shift_toggle -option ctrl:nocaps
 
     # sudo eopkg it -y networkmanager-qt-devel
@@ -205,6 +235,9 @@ init () {
 
     sudo eopkg it libxkbcommon-devel libcairo-devel
     install__swaylock_effects
+
+    # sudo eopkg it pango-devel libjpeg-turbo-devel hyprutils-devel hyprwayland-scanner
+    # install__hyprpicker
 
     # ~/.tmux/plugins/tpm/bin/install_plugins
 
@@ -218,11 +251,15 @@ init () {
 
     # chsh -s /bin/zsh
     # dropbox start -i
-    # lxappearance
     # timedatectl set-local-rtc 1
     # sudo ln -sf /usr/share/zoneinfo/Asia/Novosibirsk /etc/localtime
     # sudo passwd
     # systemctl enable systemd-timesyncd
+
+    # lxappearance
+    # gsettings set org.gnome.desktop.interface gtk-theme Materia-dark-compact
+    # gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark
+    # sudo sed -i 's/breeze_cursors/Adwaita/g' /usr/share/icons/default/index.theme
 
     # sudo groupadd docker
     # sudo usermod -aG docker ${USER}
@@ -234,17 +271,25 @@ init () {
 update () {
     # TODO: pip packagees update
 
-    sudo eopkg up -y
+    sudo eopkg up -y #\
+        # -x neovim \
+        # -x waybar
+
+    # sudo vim /usr/lib/python3.12/site-packages/eopkg3p/consts.py
+    # EOPKG = _find_executable("eopkg.py3")
     sudo eopkg3p up -y
+    sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome.desktop
+    sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome-beta.desktop
     # install__xkb_switch i3
     # install__nm_tray
     install__wl_clipboard
     install__swaylock_effects
     # ~/.tmux/plugins/tpm/bin/update_plugins all
 
-    sudo clr-boot-manager update
+    # sudo clr-boot-manager update
 
-    sudo eopkg it https://packages.getsol.us/shannon/n/neovim/neovim-0.9.5-41-1-x86_64.eopkg
+    # sudo eopkg it https://packages.getsol.us/shannon/n/neovim/neovim-0.9.5-41-1-x86_64.eopkg
+    # sudo eopkg it https://packages.getsol.us/shannon/w/waybar/waybar-0.10.4-15-1-x86_64.eopkg
 }
 
 clean () {

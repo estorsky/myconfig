@@ -114,6 +114,7 @@ export EDITOR="$VISUAL"
 export PATH=$PATH:/usr/local/bin
 export PATH=$PATH:/usr/sbin/
 export PATH=$PATH:/home/$USER/myconfig/scripts
+export PATH=$PATH:/home/$USER/.config/sway/device/scripts
 export PATH=/home/$USER/Dropbox/bin:$PATH
 export PATH=$PATH:/home/$USER/.cargo/bin
 export PATH=$PATH:/home/$USER/go/bin

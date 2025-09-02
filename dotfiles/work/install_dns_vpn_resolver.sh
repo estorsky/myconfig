@@ -1,14 +1,18 @@
 #!/bin/bash
 
 set -e
+set -x
 
 trap 'exit' INT
+
+source ~/myconfig/scripts/common_funcs.sh
 
 # Check - https://github.com/jonathanio/update-systemd-resolved
 
 # 1) Download and install script for intagration openvpn with systemd-resolved:
-git clone https://github.com/jonathanio/update-systemd-resolved.git
-cd update-systemd-resolved
+cd /tmp/
+rm -rf /tmp/update-systemd-resolved
+gclonecd https://github.com/jonathanio/update-systemd-resolved.git
 sudo make
 
 
@@ -25,9 +29,9 @@ sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 # 4) Add command in .ovpn or '--config /usr/bin/update-systemd-resolved.conf':
 # script-security 2
 # setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-# up /usr/bin/update-systemd-resolved
+# up /usr/local/libexec/openvpn/update-systemd-resolved
 # up-restart
-# down /usr/bin/update-systemd-resolved
+# down /usr/local/libexec/openvpn/update-systemd-resolved
 # down-pre
 
 

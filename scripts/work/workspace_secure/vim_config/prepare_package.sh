@@ -22,5 +22,5 @@ sudo cp -rL ~/.config/nvim "$BACKUP_DIR/"
 
 # Copy directories from output to their respective locations
 cp -rL "$OUTPUT_DIR/.vim" ~/
-cp -rL "$OUTPUT_DIR/.config/coc" ~/.config/
-cp -rL "$OUTPUT_DIR/.config/nvim" ~/.config/
+cp -rL "$OUTPUT_DIR/coc" ~/.config/
+cp -rL "$OUTPUT_DIR/nvim" ~/.config/

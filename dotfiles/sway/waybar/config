@@ -5,13 +5,32 @@
     // "width": 1280, // Waybar width
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
-    "modules-left": ["sway/workspaces", "sway/mode", "sway/scratchpad"],
-    // "modules-center": ["sway/window"],
-    "modules-right": ["sway/language", "pulseaudio", "network", "cpu", "memory", "temperature", "backlight", "battery", "clock", "tray"],
+    "modules-left": [
+        "sway/workspaces",
+        "sway/mode",
+        "sway/scratchpad"
+    ],
+    // "modules-center": [
+        // "sway/window"
+    // ],
+    "modules-right": [
+        "sway/language",
+        "pulseaudio",
+        "network",
+        "cpu",
+        "memory",
+        "temperature",
+        "backlight",
+        "battery",
+        "clock",
+        "tray",
+        "custom/power"
+    ],
     // Modules configuration
     // "sway/workspaces": {
     //     "disable-scroll": true,
     //     "all-outputs": true,
+    //     "warp-on-scroll": false,
     //     "format": "{name}: {icon}",
     //     "format-icons": {
     //         "1": "",
@@ -48,7 +67,7 @@
         "format-disconnected": "Disconnected ",
         "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
         "unknown-tag": "N/A",
-        "interval": 2,
+        "interval": 5,
         "consume-icons": {
             "on": " "
         },
@@ -82,8 +101,7 @@
     },
     "clock": {
         // "timezone": "America/New_York",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><big>{calendar}</big></tt>",
-        "tooltip": false,
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format-alt": "{:%Y-%m-%d}"
     },
     "cpu": {
@@ -112,6 +130,7 @@
         "format-icons": ["", "", "", "", ""]
     },
     "backlight": {
+        "scroll-step": 10,
         // "device": "acpi_video1",
         "format": "{percent}% {icon}",
         "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
@@ -124,6 +143,7 @@
             "critical": 15
         },
         "format": "{capacity}% {icon}",
+        "format-full": "{capacity}% {icon}",
         "format-charging": "{capacity}% ",
         "format-plugged": "{capacity}% ",
         "format-alt": "{time} {icon}",
@@ -133,6 +153,17 @@
     },
     "battery#bat2": {
         "bat": "BAT2"
+    },
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": "",
+        "performance": "",
+        "balanced": "",
+        "power-saver": ""
+      }
     },
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface
@@ -173,6 +204,19 @@
         "escape": true,
         "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
         // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+    },
+    "custom/power": {
+        "format" : "⏻   ",
+        "tooltip": false,
+        "menu": "on-click",
+        // "menu-file": "$HOME/.config/waybar/power_menu.xml", // Menu file in resources folder
+        "menu-file": "/home/dmitry/.config/waybar/power_menu.xml",
+        "menu-actions": {
+            "lock": "~/myconfig/scripts/swaylock.sh",
+            "shutdown": "shutdown",
+            "reboot": "reboot",
+            "suspend": "~/myconfig/scripts/suspend.sh -l",
+            "hibernate": "systemctl hibernate"
+        }
     }
 }
-

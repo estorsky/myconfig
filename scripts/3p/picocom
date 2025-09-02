@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+source ~/myconfig/scripts/common_funcs.sh
+
+set -x
+
+cd /tmp/
+
+rm -rf /tmp/picocom
+gclonecd https://github.com/fengyichui/picocom
+make
+
+cp /tmp/picocom/picocom ~/Dropbox/bin
+

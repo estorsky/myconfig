@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# https://asus-linux.org/
+# https://gitlab.com/asus-linux/asusctl
+
+# set -e
+#
+# source ~/myconfig/scripts/common_funcs.sh
+#
+# set -x
+
+# sudo eopkg it clang-devel
+# sudo eopkg it fontconfig-devel
+# sudo eopkg it cmake
+# sudo eopkg it libxkbcommon-devel
+# sudo eopkg it rust
+# sudo eopkg it seatd-devel
+# sudo eopkg it libinput-devel
+#
+# git checkout 6.1.12
+
+# ? sudo eopkg it egl-gbm-devel
+
+# cd /tmp/
+
+# rm -rf /tmp/asusctl
+# gclonecd https://gitlab.com/asus-linux/asusctl
+# apply patch !
+# make
+# sudo make install
+# systemctl daemon-reload && systemctl restart asusd
+
+# cp
+
+
+ # > supergfxctl -S
+# off
+ # > supergfxctl -g
+# Integrated
+
+# ~ > cat /etc/supergfxd.conf
+# {
+  # "mode": "Integrated",
+  # "vfio_enable": false,
+  # "vfio_save": false,
+  # "always_reboot": false,
+  # "no_logind": false,
+  # "logout_timeout_s": 180,
+  # "hotplug_type": "Std"
+# }

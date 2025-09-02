@@ -1,28 +1,27 @@
 " PLAGINS
 call plug#begin('~/.vim/plugged')
 Plug 'embear/vim-localvimrc'
-" Plug 'scrooloose/nerdtree', { 'on':  ['NERDTreeToggle', 'NERDTreeFind','NERDTreeTabsToggle']}
+" Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeToggle', 'NERDTreeFind','NERDTreeTabsToggle']}
 " Plug 'jistr/vim-nerdtree-tabs'
 Plug 'scrooloose/nerdcommenter'
-Plug 'vim-scripts/DoxygenToolkit.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'axelf4/vim-strip-trailing-whitespace'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install()  }  } "it fzf ripgrep
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } "it fzf ripgrep
 Plug 'junegunn/fzf.vim' " it bat (for highlighting)
 Plug 'dyng/ctrlsf.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'aacunningham/vim-fuzzy-stash'
 Plug 'airblade/vim-gitgutter'
 Plug 'cohama/agit.vim', { 'on': ['Agit', 'AgitFile'] }
-" Plug 'vim-scripts/c.vim', { 'for':  ['c', 'cpp'] }
-Plug 'jpalardy/vim-slime', { 'for':  ['py'] }
+" Plug 'vim-scripts/c.vim', { 'for': ['c', 'cpp'] }
+Plug 'jpalardy/vim-slime', { 'for': ['py'] }
 Plug 'w0rp/ale' "it shellcheck
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'majutsushi/tagbar', { 'on':  'TagbarToggle' } "it ctags
+Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' } "it ctags
 Plug 'liuchengxu/vista.vim'
 " Plug 'xolox/vim-misc'
 " Plug 'xolox/vim-easytags'
-Plug 'rrethy/vim-illuminate', { 'for':  ['py', 'c', 'cpp', 'sh'] }
+Plug 'rrethy/vim-illuminate', { 'for': ['py', 'c', 'cpp', 'sh'] }
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'francoiscabrol/ranger.vim' "it ranger
 Plug 'tpope/vim-unimpaired'
@@ -31,13 +30,13 @@ Plug 'tpope/vim-eunuch'
 " Plug 'terryma/vim-multiple-cursors'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'rhysd/vim-clang-format'
 Plug 'gcmt/taboo.vim'
-Plug 'morhetz/gruvbox'
 Plug 'mhartington/oceanic-next'
 Plug 'bfrg/vim-cpp-modern'
 Plug 'mtdl9/vim-log-highlighting'
 Plug 'hjson/vim-hjson'
-" Plug 'yggdroot/indentline', { 'for':  ['c', 'cpp'] }
+" Plug 'yggdroot/indentline', { 'for': ['c', 'cpp'] }
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn install'} "sudo npm -g install instant-markdown-d yarn
@@ -47,8 +46,11 @@ Plug 'khaser/sway-vim-kbswitch' , {'do': 'cargo build -r'} " it cargo
 " Plug 'qpkorr/vim-bufkill'
 if has('nvim')
     " Plug 'rbgrouleff/bclose.vim'
+    " Plug 'ararslan/gruvbox', {'branch': 'aa/nvim-0.11'}
+    Plug 'ellisonleao/gruvbox.nvim'
     Plug 'phaazon/hop.nvim'
 else
+    Plug 'morhetz/gruvbox'
     Plug 'easymotion/vim-easymotion'
 endif
 call plug#end()
@@ -82,6 +84,20 @@ set autoread
 
 
 " CUSTOMIZATION
+if has('nvim')
+lua << EOF
+    require("gruvbox").setup({
+        italic = {
+            strings = false,
+            emphasis = false,
+            comments = false,
+            operators = false,
+            folds = false,
+        },
+    })
+EOF
+endif
+
 set number
 syntax on
 colorscheme gruvbox
@@ -92,27 +108,31 @@ set cursorline
 " Colors
 hi VertSplit ctermbg=none
 set fillchars+=vert:│
-hi SignColumn ctermbg=none
+hi SignColumn guibg=NONE ctermbg=NONE
 hi TabLineFill ctermfg=gray ctermbg=black
 hi TabLineSel cterm=bold ctermfg=black ctermbg=blue
 hi TabLine cterm=bold ctermfg=gray ctermbg=black
-hi Search ctermfg=110 ctermbg=none cterm=bold
+hi Search ctermfg=110 ctermbg=none cterm=bold guifg=#87AFD7 guibg=NONE gui=bold
+hi link CurSearch Search
 " hi Visual ctermfg=Black ctermbg=110 cterm=bold
 " hi Visual cterm=bold
 hi Visual cterm=none
 let g:load_doxygen_syntax=1
 au FileType gitcommit setlocal tw=90
 au FileType markdown setlocal colorcolumn=120
-au FileType c,cpp setlocal colorcolumn=90
+au FileType c,cpp setlocal colorcolumn=80
 au BufNewFile,BufRead Jenkinsfile* setf groovy
 au BufNewFile,BufRead gitconfig setf gitconfig
 au BufNewFile,BufRead *dotfiles/i3 setf i3config
 au BufNewFile,BufRead *waybar/config setf jsonc
-au BufNewFile,BufRead *_monitor_preset setf swayconfig
+au BufNewFile,BufRead *dotfiles/sway/* setf swayconfig
 au BufNewFile,BufRead *.def set syntax=c
 
 
 " PLUGINS SETTINGS
+
+" illuminate
+let g:Illuminate_useDeprecated = 1
 
 " localvimrc
 let g:localvimrc_sandbox = 0
@@ -122,10 +142,10 @@ let g:localvimrc_ask = 0
 let g:coc_global_extensions = [
             \ 'coc-json', 'coc-explorer', 'coc-calc', 'coc-clangd',
             \ 'coc-sh', 'coc-pyright', 'coc-vimlsp', 'coc-yaml']
-hi CocErrorSign ctermfg=167 ctermbg=none
-hi CocWarningSign ctermfg=208 ctermbg=none
-hi CocInfoSign ctermfg=214 ctermbg=none
-hi CocHintSign ctermfg=109 ctermfg=214 ctermbg=none
+hi link CocErrorSign CocDiagnosticsError
+hi link CocWarningSign CocDiagnosticsWarning
+hi link CocInfoSign CocDiagnosticsInfo
+hi link CocHintSign CocDiagnosticsHint
 
 " NERDTree
 let NERDTreeMinimalUI=1
@@ -194,10 +214,14 @@ let g:fzf_action = {
   \ 'ctrl-x': 'split',
   \ 'ctrl-v': 'vsplit' }
 
+command! -bang -nargs=* Rg
+        \ call fzf#vim#grep("rga --column --line-number --no-heading --color=always --smart-case -- ".fzf#shellescape(<q-args>),
+        \ fzf#vim#with_preview(), <bang>0)
+
 "off search in filename in Rg
 " command! -bang -nargs=* Rg
-      " \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>),
-      " \ 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
+        " \ call fzf#vim#grep("rga --column --line-number --no-heading --color=always --smart-case -- ".fzf#shellescape(<q-args>),
+        " \ fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}), <bang>0)
 
 " Ctrlsf
 let g:ctrlsf_follow_symlinks = 0
@@ -221,7 +245,7 @@ hi ALEWarningSign ctermfg=178 ctermbg=none
 hi ALEInfoSign ctermfg=075 ctermbg=none
 
 " CVim
-" let g:C_Ctrl_j   = 'off'
+" let g:C_Ctrl_j = 'off'
 
 " Slime
 let g:slime_target = "tmux"
@@ -229,10 +253,9 @@ let g:slime_python_ipython = 1
 
 " Gitgutter
 set updatetime=100
-hi GitGutterAdd guibg=NONE
-hi GitGutterChange guibg=NONE
-hi GitGutterDelete guibg=NONE
-hi GitGutterChangeDelete guibg=NONE
+hi link GitGutterAdd CocDiagnosticsHint
+hi link GitGutterChange CocDiagnosticsWarning
+hi link GitGutterDelete CocDiagnosticsError
 let g:gitgutter_sign_added = '▌'
 let g:gitgutter_sign_modified = '▌'
 let g:gitgutter_sign_removed = '▌'
@@ -262,17 +285,9 @@ let g:instant_markdown_open_to_the_world = 1
 
 " Gutentags
 let g:gutentags_ctags_exclude = [
+            \ 'scripts/work/workspace_secure/*/output',
             \ 'external', 'linux', 'toolchain', 'bootloader', 'prebuilt', 'compilation_branch__*',
             \ 'sdk', 'kernel', 'module', 'loader', 'make', 'build_sys', '*.js', '*.html', '*.htm']
-
-" Doxygen
-let g:DoxygenToolkit_briefTag_pre="@Synopsis  "
-let g:DoxygenToolkit_paramTag_pre="@Param "
-let g:DoxygenToolkit_returnTag="@Returns   "
-let g:DoxygenToolkit_blockHeader="-------------------------------"
-let g:DoxygenToolkit_blockFooter="---------------------------------"
-let g:DoxygenToolkit_authorName="Dmitry Privalov"
-let g:DoxygenToolkit_licenseTag='Copyright (C) 2024 ООО "Предприятие "Элтекс"'
 
 " XKBSWITCH
 let g:XkbSwitchEnabled = 1
@@ -339,9 +354,9 @@ nnoremap <Leader>re :%s/\<<C-r><C-w>\>/<C-r><C-w>
 vnoremap <Leader>re :s/\<<C-r><C-w>\>/<C-r><C-w>
 nnoremap <Leader>a :%y+<CR>
 " nnoremap <Leader>dif :diffthis<CR>
-nnoremap <silent> <Leader>q :call ConfirmQuit(0)<CR>
-vnoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
-inoremap <silent> <Leader>q <Esc>:call ConfirmQuit(0)<CR>
+nnoremap <silent> <leader>q :call ConfirmQuit(0)<CR>
+vnoremap <silent> <leader>q <Esc>:call ConfirmQuit(0)<CR>
+inoremap <silent> <leader>q <Esc>:call ConfirmQuit(0)<CR>
 map <BS> X
 nmap <C-c> ^v$h"+y
 vmap <C-c> "+y
