@@ -1,1 +1,2 @@
 # exec asusctl profile --profile-set Quiet
+exec ~/myconfig/scripts/sway_auto_display_manager.sh
