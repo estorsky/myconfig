@@ -167,7 +167,7 @@ init () {
         speedtest-cli cmatrix highlight curl-gnutls iotop iftop \
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
         openvpn i3blocks i3 lxappearance dunst kitty \
-        xsel docker blueman pavucontrol doxygen cppcheck font-awesome-ttf \
+        xsel docker blueman solaar pavucontrol doxygen cppcheck font-awesome-ttf \
         net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev \
         ghex picocom golang rust zig nmap maim fzf fd stress-ng valgrind virt-viewer \
         sway waybar grim jq evtest
