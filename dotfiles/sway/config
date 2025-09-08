@@ -275,6 +275,7 @@ exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
 exec pavucontrol
 exec blueman-manager
 exec thunderbird
+exec ~/Dropbox/bin/obsidian
 exec sleep 5 && Telegram
 exec sleep 5 && dropbox start
 exec nm-applet
@@ -282,6 +283,7 @@ exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 exec ~/myconfig/scripts/swayidle.sh
 
 assign [app_id="net.thunderbird.Thunderbird"] 8
+assign [instance="obsidian"] 8
 assign [app_id="spotify"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="blueman-manager"] 9
