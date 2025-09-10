@@ -1,2 +1,3 @@
 exec solaar --window=hide
+exec rog-control-center
 exec ~/myconfig/scripts/sway_auto_display_manager.sh
