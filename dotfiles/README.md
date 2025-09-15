@@ -44,6 +44,7 @@
 | prefix +  { / }  | move pane left/right          |
 | prefix + z       | fullsize win                  |
 | prefix + /       | serach                        |
+| prefix + $       | rename session                |
 | prefix + ,       | rename window                 |
 | prefix w         | win list                      |
 | prefix !         | pane on new window            |
