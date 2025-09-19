@@ -39,5 +39,6 @@ while true; do
     log_message "Waiting for Sway event..."
     swaymsg -t subscribe '["output"]' > /dev/null
     log_message "Event received, processing..."
+    sleep 2
     check_and_manage_displays
 done
