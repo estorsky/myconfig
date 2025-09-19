@@ -203,6 +203,10 @@ init () {
     # systemctl start logitech_wakeup_off.service
     # systemctl status logitech_wakeup_off.service
 
+    # for asus
+    # sudo cp ~/myconfig/systemd/pci-power-fix.service /etc/systemd/system/
+    # sudo systemctl enable --now pci-power-fix.service
+
     # lockscreen unit
     # sudo cp ../../myconfig/systemd/lockscreen.service /etc/systemd/system/
     # systemctl enable lockscreen.service
