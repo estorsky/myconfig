@@ -2,16 +2,15 @@
 
 set -e
 
-monitors=$(swaymsg -t get_outputs | jq -c '.[] | select(.power == false)' | jq -r -c '.name')
+enabled_not_focused=$(swaymsg -t get_outputs | jq -c '.[] | select(.focused == false) | select(.power == true)' | jq -r -c '.name')
 
-if [[ -n "$monitors" ]]; then
-    for monitor in $monitors; do
-        swaymsg output "${monitor}" enable
+if [[ -n "$enabled_not_focused" ]]; then
+    for monitor in $enabled_not_focused; do
+        swaymsg output "${monitor}" disable
     done
 else
-    monitors=$(swaymsg -t get_outputs | jq -c '.[] | select(.focused == false) | select(.id)' | jq -r -c '.name')
-
-    for monitor in $monitors; do
-        swaymsg output "${monitor}" disable
+    all_monitors=$(swaymsg -t get_outputs | jq -r -c '.[] | .name')
+    for monitor in $all_monitors; do
+        swaymsg output "${monitor}" enable
     done
 fi
