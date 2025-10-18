@@ -44,6 +44,37 @@ install__wl_clipboard () {
     sudo ninja install
 }
 
+install__rofi_wayland () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/rofi-wayland
+    gclonecd https://github.com/in0ni/rofi-wayland.git
+    meson setup build
+    ninja -C build
+    sudo ninja -C build install
+}
+
+install__rofi_calc () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/rofi-calc
+    gclonecd https://github.com/svenstaro/rofi-calc.git
+
+    if [ -f "${DIR}/../patches/rofi-calc/combi.patch" ]; then
+        git apply "${DIR}/../patches/rofi-calc/combi.patch"
+    fi
+
+    export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH
+    meson setup build
+    meson compile -C build/
+    cd build
+    sudo meson install
+}
+
 install__swaylock_effects () {
     set -x
 
@@ -113,6 +144,7 @@ install__xkb_switch () {
 }
 
 install__google_chrome () {
+    # Use secure DNS (Add custom DNS service provider): https://dns.comss.one/dns-query
     sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
     sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-beta/pspec.xml
     sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
@@ -237,6 +269,12 @@ init () {
     sudo eopkg it -y wayland-devel wayland-protocols-devel # (optional)
     install__wl_clipboard
 
+    sudo eopkg it -y gdk-pixbuf-devel xcb-util-devel xcb-util-wm-devel xcb-util-cursor-devel libstartup-notification-devel
+    install__rofi_wayland
+
+    sudo eopkg it libqalculate
+    install__rofi_calc
+
     sudo eopkg it libxkbcommon-devel libcairo-devel
     install__swaylock_effects
 
@@ -287,6 +325,8 @@ update () {
     # install__xkb_switch i3
     # install__nm_tray
     install__wl_clipboard
+    install__rofi_wayland
+    install__rofi_calc
     install__swaylock_effects
     # ~/.tmux/plugins/tpm/bin/update_plugins all
 
