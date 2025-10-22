@@ -145,6 +145,11 @@ install__xkb_switch () {
 
 install__google_chrome () {
     # Use secure DNS (Add custom DNS service provider): https://dns.comss.one/dns-query
+    #
+    # Or --proxy-server="socks5://127.0.0.1:12334"
+    # https://github.com/hiddify/hiddify-app
+    # ./Hiddify-Linux-x64.AppImage --appimage-extract
+
     sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
     sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-beta/pspec.xml
     sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
