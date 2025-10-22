@@ -281,7 +281,9 @@ exec sleep 5 && dropbox start
 exec nm-applet
 exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 exec ~/myconfig/scripts/swayidle.sh
+exec ~/Dropbox/bin/hiddify.sh
 
+assign [app_id="hiddify"] 5
 assign [app_id="rog-control-center"] 5
 assign [app_id="net.thunderbird.Thunderbird"] 8
 assign [instance="obsidian"] 8
