@@ -191,6 +191,55 @@ install__anydesk () {
     sudo eopkg it -y anydesk*.eopkg; sudo rm anydesk*.eopkg
 }
 
+is_asus_zephyrus_g14 () {
+    if [ -f /sys/class/dmi/id/product_name ]; then
+        local product_name=$(cat /sys/class/dmi/id/product_name)
+        if [[ "$product_name" == *"Zephyrus G14"* ]]; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# sudo eopkg it clang-devel fontconfig-devel cmake libxkbcommon-devel rust seatd-devel libinput-devel
+install__asusctl () {
+    set -x
+
+    if ! is_asus_zephyrus_g14; then
+        return 0
+    fi
+
+    cd /tmp/
+
+    rm -rf /tmp/asusctl
+    gclonecd https://gitlab.com/asus-linux/asusctl.git
+
+    make
+    sudo make install
+    sudo systemctl daemon-reload
+    sudo systemctl restart asusd
+}
+
+install__supergfxctl () {
+    set -x
+
+    if ! is_asus_zephyrus_g14; then
+        return 0
+    fi
+
+    cd /tmp/
+
+    rm -rf /tmp/supergfxctl
+    gclonecd https://gitlab.com/asus-linux/supergfxctl.git
+
+    make
+    sudo make install
+
+    sudo systemctl enable supergfxd.service --now
+    sudo systemctl daemon-reload
+    sudo systemctl restart asusd
+}
+
 init () {
     cd "$DIR"
 
@@ -243,6 +292,8 @@ init () {
     # for asus
     # sudo cp ~/myconfig/systemd/pci-power-fix.service /etc/systemd/system/
     # sudo systemctl enable --now pci-power-fix.service
+    install__asusctl
+    install__supergfxctl
 
     # lockscreen unit
     # sudo cp ../../myconfig/systemd/lockscreen.service /etc/systemd/system/
@@ -333,6 +384,8 @@ update () {
     install__rofi_wayland
     install__rofi_calc
     install__swaylock_effects
+    install__asusctl
+    install__supergfxctl
     # ~/.tmux/plugins/tpm/bin/update_plugins all
 
     # sudo clr-boot-manager update
