@@ -2,16 +2,16 @@
 
 case "$1" in
     work|eltex)
-        cd ~/Dropbox/work/vpn/
-        sudo ~/Dropbox/work/vpn/vpn.sh
+        (cd ~/Dropbox/work/vpn/ && \
+            sudo ~/Dropbox/work/vpn/vpn.sh)
         exit;;
     jp)
-        cd ~/Dropbox/other/vpn/
-        sudo openvpn jp-free-152003.protonvpn.udp.ovpn
+        (cd ~/Dropbox/other/vpn/ && \
+            sudo openvpn jp-free-152003.protonvpn.udp.ovpn)
         exit;;
     *)
-        cd ~/Dropbox/other/vpn/
-        sudo openvpn nl-free-101117.protonvpn.udp.ovpn
+        (cd ~/Dropbox/other/vpn/ && \
+            sudo openvpn nl-free-101117.protonvpn.udp.ovpn)
         exit;;
 esac
 
