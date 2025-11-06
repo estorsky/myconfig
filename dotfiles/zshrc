@@ -108,6 +108,10 @@ setopt inc_append_history
 setopt share_history
 
 export QT_QPA_PLATFORM=wayland
+export ELECTRON_OZONE_PLATFORM_HINT=wayland
+export ELECTRON_ENABLE_WAYLAND=1
+export GDK_BACKEND=wayland,x11
+
 export VISUAL=neovim
 export TERMINAL=kitty
 export EDITOR="$VISUAL"
@@ -200,3 +204,17 @@ else
     }
 fi
 
+
+# autoload -Uz compinit
+# zstyle ':completion:*' menu select
+# fpath+=~/.zfunc
+# compinit -D
+
+autoload -Uz compinit
+fpath+=~/.zfunc
+compinit
+
+
+
+
+# eval "$(starship init zsh)"
