@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/alex-courtis/way-displays/refs/heads/master/schema/cfg-1.1.0.yaml
+
+## Конфигурация way-displays для ноутбука ASUS
+## Автоматическое управление мониторами в Sway
+
+## Расположение мониторов в ряд слева направо
+ARRANGE: ROW
+
+## Выравнивание по верхнему краю
+ALIGN: TOP
+
+## Порядок мониторов (для офиса): первый ASUS, второй ASUS, потом остальные
+## Мониторы идентифицируются по серийным номерам из вывода swaymsg
+ORDER:
+  - eDP-1           # Встроенный дисплей ноутбука (последний)
+  - '!^DP-2$'       # Домашний монитор (если есть)
+  - '!^HDMI-A-1$'   # Дополнительные варианты
+  - 'JCLMQS009609'  # Первый офисный ASUS VS229
+  - 'KALMQS121524'  # Второй офисный ASUS VS229
+
+## Включаем масштабирование
+SCALING: TRUE
+
+## Автоматическое масштабирование по DPI (96 DPI = scale 1.0)
+## Для встроенного дисплея с высоким разрешением автоматически применится scale ~2.0
+AUTO_SCALE: TRUE
+
+AUTO_SCALE_MIN: 1.0
+AUTO_SCALE_MAX: 2.0
+
+## Принудительные режимы для мониторов
+MODE:
+  # Встроенный дисплей - максимальный режим (2560x1440@144Hz или выше)
+  - NAME_DESC: eDP-1
+    MAX: TRUE
+
+  # Офисные мониторы ASUS VS229 - 1920x1080@60Hz
+  - NAME_DESC: 'JCLMQS009609'
+    WIDTH: 1920
+    HEIGHT: 1080
+    HZ: 60
+
+  - NAME_DESC: 'KALMQS121524'
+    WIDTH: 1920
+    HEIGHT: 1080
+    HZ: 60
+
+  # Домашний монитор - 2560x1440@144Hz
+  - NAME_DESC: '!^DP-2$'
+    WIDTH: 2560
+    HEIGHT: 1440
+    HZ: 144
+
+  # HDMI монитор дома (альтернативный вариант)
+  - NAME_DESC: '!^HDMI-A-1$'
+    WIDTH: 2560
+    HEIGHT: 1440
+    HZ: 144
+
+## VRR / adaptive sync включен по умолчанию
+## Отключаем для офисных мониторов ASUS VS229 - они не поддерживают VRR
+VRR_OFF:
+  - 'ASUS VS229'
+
+## Уведомления при изменениях
+CALLBACK_CMD: notify-send "way-displays ${CALLBACK_LEVEL}" "${CALLBACK_MSG}"
+
+## Префикс для встроенного дисплея ноутбука
+LAPTOP_DISPLAY_PREFIX: 'eDP'
+
+## Уровень логирования
+LOG_THRESHOLD: INFO
+
+## Автоматическое отключение встроенного дисплея когда подключены внешние мониторы
+## Это заменяет ваш sway_auto_display_manager.sh
+## Несколько правил для eDP-1 работают как OR - достаточно любого одного условия
+DISABLED:
+  # Отключить eDP-1 если подключен первый офисный монитор
+  - NAME_DESC: eDP-1
+    IF:
+      - PLUGGED:
+          - 'JCLMQS009609'
+
+  # Отключить eDP-1 если подключен второй офисный монитор
+  - NAME_DESC: eDP-1
+    IF:
+      - PLUGGED:
+          - 'KALMQS121524'
+
+  # Отключить eDP-1 если подключен домашний монитор на DP-2
+  - NAME_DESC: eDP-1
+    IF:
+      - PLUGGED:
+          - '!^DP-2$'
+
+  # Отключить eDP-1 если подключен домашний монитор на HDMI-A-1
+  - NAME_DESC: eDP-1
+    IF:
+      - PLUGGED:
+          - '!^HDMI-A-1$'

@@ -105,6 +105,10 @@ init () {
     sudo eopkg it libxkbcommon-devel libcairo-devel
     install__swaylock_effects
 
+    sudo eopkg it yaml-cpp-devel
+    install__way_displays
+    sudo usermod -a -G input "${USER}"
+
     # sudo eopkg it pango-devel libjpeg-turbo-devel hyprutils-devel hyprwayland-scanner
     # install__hyprpicker
 
@@ -155,6 +159,7 @@ update () {
     install__rofi_wayland
     install__rofi_calc
     install__swaylock_effects
+    install__way_displays
     install__asusctl
     install__supergfxctl
     # ~/.tmux/plugins/tpm/bin/update_plugins all

@@ -81,6 +81,17 @@ install__swaylock_effects () {
     sudo ninja -C build install
 }
 
+# sudo usermod -a -G input "${USER}"
+install__way_displays () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/way-displays
+    gclonecd https://github.com/alex-courtis/way-displays.git
+    sudo make install
+}
+
 install__earlyoom () {
     set -x
 
