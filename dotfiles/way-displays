@@ -67,6 +67,7 @@ MODE:
 ## Disable for office monitors ASUS VS229 - they don't support VRR
 VRR_OFF:
   - 'ASUS VS229'
+  - 'Mi Monitor'
 
 ## Notifications on display changes
 CALLBACK_CMD: notify-send "way-displays ${CALLBACK_LEVEL}" "${CALLBACK_MSG}"
