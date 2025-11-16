@@ -126,6 +126,7 @@ au BufNewFile,BufRead gitconfig setf gitconfig
 au BufNewFile,BufRead *dotfiles/i3 setf i3config
 au BufNewFile,BufRead *waybar/config setf jsonc
 au BufNewFile,BufRead *dotfiles/sway/* setf swayconfig
+au BufNewFile,BufRead *dotfiles/way-displays setf yaml
 au BufNewFile,BufRead *.def set syntax=c
 
 

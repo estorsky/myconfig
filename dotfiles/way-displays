@@ -1,58 +1,58 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/alex-courtis/way-displays/refs/heads/master/schema/cfg-1.1.0.yaml
 
-## Конфигурация way-displays для ноутбука ASUS
-## Автоматическое управление мониторами в Sway
+## way-displays configuration for ASUS laptop
+## Automatic display management for Sway
 
-## Расположение мониторов в ряд слева направо
+## Arrange displays in a row from left to right
 ARRANGE: ROW
 
-## Выравнивание по верхнему краю
+## Align displays at the top
 ALIGN: TOP
 
-## Порядок мониторов слева направо
-## Мониторы идентифицируются по серийным номерам (не зависит от имени порта DP-9/DP-11/etc)
+## Display order from left to right
+## Displays are identified by serial numbers (independent of port names like DP-9/DP-11/etc)
 ORDER:
-  - '3342300043348' # Домашний монитор Xiaomi Mi Monitor (DP-2 или HDMI-A-1)
-  - eDP-1           # Встроенный дисплей ноутбука (в конце)
-  - 'JCLMQS009609'  # Первый офисный ASUS VS229
-  - 'KALMQS121524'  # Второй офисный ASUS VS229
+  - '3342300043348' # Home: Xiaomi Mi Monitor (DP-2 or HDMI-A-1)
+  - eDP-1           # Built-in laptop display (last, fallback)
+  - 'JCLMQS009609'  # Office: ASUS VS229 left monitor
+  - 'KALMQS121524'  # Office: ASUS VS229 right monitor
 
-## Включаем масштабирование
+## Enable scaling
 SCALING: TRUE
 
-## Автоматическое масштабирование по DPI (96 DPI = scale 1.0)
-## Для встроенного дисплея с высоким разрешением автоматически применится scale ~2.0
+## Automatic scaling by DPI (96 DPI = scale 1.0)
+## Built-in high-DPI display will automatically get scale ~2.0
 AUTO_SCALE: TRUE
 
 AUTO_SCALE_MIN: 1.0
 AUTO_SCALE_MAX: 2.0
 
-## Принудительное масштабирование для конкретных мониторов
+## Override automatic scaling for specific displays
 SCALE:
-  # Домашний монитор Xiaomi - без масштабирования (по умолчанию было 1.125)
+  # Home monitor Xiaomi - no scaling (was 1.125 by default)
   - NAME_DESC: '3342300043348'
     SCALE: 1.0
   
-  # Офисные мониторы ASUS - без масштабирования
+  # Office monitors ASUS - no scaling
   - NAME_DESC: 'JCLMQS009609'
     SCALE: 1.0
   
   - NAME_DESC: 'KALMQS121524'
     SCALE: 1.0
 
-## Принудительные режимы для мониторов
+## Override display modes
 MODE:
-  # Встроенный дисплей - максимальный режим (2880x1800@120Hz)
+  # Built-in display - maximum mode (2880x1800@120Hz)
   - NAME_DESC: eDP-1
     MAX: TRUE
 
-  # Домашний монитор Xiaomi Mi Monitor - 2560x1440@144Hz (реально 143.998Hz)
+  # Home monitor: Xiaomi Mi Monitor - 2560x1440@144Hz (actually 143.998Hz)
   - NAME_DESC: '3342300043348'
     WIDTH: 2560
     HEIGHT: 1440
     HZ: 144
 
-  # Офисные мониторы ASUS VS229 - 1920x1080@60Hz
+  # Office monitors: ASUS VS229 - 1920x1080@60Hz
   - NAME_DESC: 'JCLMQS009609'
     WIDTH: 1920
     HEIGHT: 1080
@@ -63,37 +63,37 @@ MODE:
     HEIGHT: 1080
     HZ: 60
 
-## VRR / adaptive sync включен по умолчанию
-## Отключаем для офисных мониторов ASUS VS229 - они не поддерживают VRR
+## VRR / adaptive sync is enabled by default
+## Disable for office monitors ASUS VS229 - they don't support VRR
 VRR_OFF:
   - 'ASUS VS229'
 
-## Уведомления при изменениях
+## Notifications on display changes
 CALLBACK_CMD: notify-send "way-displays ${CALLBACK_LEVEL}" "${CALLBACK_MSG}"
 
-## Префикс для встроенного дисплея ноутбука
+## Laptop display prefix
 LAPTOP_DISPLAY_PREFIX: 'eDP'
 
-## Уровень логирования
+## Logging level
 LOG_THRESHOLD: INFO
 
-## Автоматическое отключение встроенного дисплея когда подключены внешние мониторы
-## Это заменяет ваш sway_auto_display_manager.sh
-## Несколько правил для eDP-1 работают как OR - достаточно любого одного условия
+## Automatically disable built-in display when external monitors are connected
+## This replaces sway_auto_display_manager.sh functionality
+## Multiple rules for eDP-1 work as OR - any single condition is sufficient
 DISABLED:
-  # Отключить eDP-1 если подключен домашний монитор Xiaomi
+  # Disable eDP-1 if home monitor Xiaomi is connected
   - NAME_DESC: eDP-1
     IF:
       - PLUGGED:
           - '3342300043348'
 
-  # Отключить eDP-1 если подключен первый офисный монитор ASUS
+  # Disable eDP-1 if first office monitor ASUS is connected
   - NAME_DESC: eDP-1
     IF:
       - PLUGGED:
           - 'JCLMQS009609'
 
-  # Отключить eDP-1 если подключен второй офисный монитор ASUS
+  # Disable eDP-1 if second office monitor ASUS is connected
   - NAME_DESC: eDP-1
     IF:
       - PLUGGED:
