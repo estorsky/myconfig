@@ -168,6 +168,8 @@ update () {
 
     # sudo eopkg it https://packages.getsol.us/shannon/n/neovim/neovim-0.9.5-41-1-x86_64.eopkg
     # sudo eopkg it https://packages.getsol.us/shannon/w/waybar/waybar-0.10.4-15-1-x86_64.eopkg
+
+    sudo mv /usr/share/defaults/etc/profile.d/50-starship.sh /usr/share/defaults/etc/profile.d/50-starship.sh.disabled
 }
 
 clean () {
