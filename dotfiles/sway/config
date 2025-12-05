@@ -269,7 +269,7 @@ bindsym Control+Shift+Escape exec gnome-system-monitor
 exec sway-xkb-switcher
 exec blueman-applet
 exec dunst
-exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
+# exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
 exec pavucontrol
 exec blueman-manager
 exec thunderbird
