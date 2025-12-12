@@ -245,3 +245,26 @@ install__supergfxctl () {
     sudo systemctl restart asusd
 }
 
+install__ly () {
+    set -x
+
+    cd /tmp/
+
+    rm -rf /tmp/ly
+    gclonecd https://codeberg.org/fairyglade/ly.git
+
+    local latest_tag=$(git describe --tags --abbrev=0)
+    if [ -n "$latest_tag" ]; then
+        git checkout "$latest_tag"
+    fi
+
+    export PATH=/home/dmitry/Dropbox/bin/zig-x86_64-linux-0.15.2:$PATH
+
+    zig build
+    sudo env PATH="$PATH" zig build installexe -Dinit_system=systemd
+
+    # sudo systemctl disable lightdm.service
+    # sudo systemctl enable ly@tty2.service
+    # sudo systemctl disable getty@tty2.service
+}
+

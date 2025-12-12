@@ -30,9 +30,7 @@ init () {
         sway waybar grim jq evtest
         # openjdk-8 cargo intel-microcode
 
-    # sudo eopkg it gdm
-    # https://github.com/fairyglade/ly
-    # https://github.com/fairyglade/ly/issues/718
+    # install__ly
 
     # sudo eopkg it -y iw aircrack-ng libpcap-devel hashcat bzip2-devel
     # sudo eopkg it -y curl-devel
@@ -153,6 +151,7 @@ update () {
     sudo eopkg3p up -y
     sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome.desktop
     sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome-beta.desktop
+    # install__ly
     # install__xkb_switch i3
     # install__nm_tray
     install__wl_clipboard
