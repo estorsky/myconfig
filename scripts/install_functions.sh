@@ -266,5 +266,14 @@ install__ly () {
     # sudo systemctl disable lightdm.service
     # sudo systemctl enable ly@tty2.service
     # sudo systemctl disable getty@tty2.service
+
+    # sudo mkdir -p /usr/share/wayland-sessions
+    # sudo tee /usr/share/wayland-sessions/sway.desktop << 'EOF'
+    # [Desktop Entry]
+    # Name=Sway
+    # Comment=An i3-compatible Wayland compositor
+    # Exec=sway
+    # Type=Application
+    # EOF
 }
 
