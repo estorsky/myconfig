@@ -225,7 +225,7 @@
         "menu-file": "/home/dmitry/.config/waybar/power_menu.xml",
         "menu-actions": {
             "lock": "~/myconfig/scripts/swaylock.sh",
-            "shutdown": "shutdown",
+            "shutdown": "shutdown now",
             "reboot": "reboot",
             "suspend": "~/myconfig/scripts/suspend.sh -l",
             "hibernate": "systemctl hibernate"
