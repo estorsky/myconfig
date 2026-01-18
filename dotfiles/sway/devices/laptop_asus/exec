@@ -1,4 +1,4 @@
-exec asusctl profile --profile-set Quiet
+exec asusctl profile set Quiet
 exec solaar --window=hide
 exec sleep 5 && rog-control-center
 # exec ~/myconfig/scripts/sway_auto_display_manager.sh
