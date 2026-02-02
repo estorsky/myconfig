@@ -137,6 +137,15 @@ init () {
     # sudo usermod -aG wireshark $USER
 
     # install_dns_vpn_resolver.sh
+
+    # for lightdm if not starting in wayland without nvidia
+    # sudo tee /etc/X11/xorg.conf.d/10-amdgpu.conf << 'EOF'
+    # Section "Device"
+    #     Identifier "AMD"
+    #     Driver "amdgpu"
+    #     BusID "PCI:101:0:0"
+    # EndSection
+    # EOF
 }
 
 update () {
