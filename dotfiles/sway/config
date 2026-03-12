@@ -266,10 +266,11 @@ bindsym Control+Shift+Escape exec gnome-system-monitor
 
 ########## Autolaunch ##########
 
+exec playerctld daemon
 exec sway-xkb-switcher
 exec blueman-applet
 exec dunst
-# exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
+exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
 exec pavucontrol
 exec blueman-manager
 exec thunderbird
@@ -279,6 +280,7 @@ exec sleep 5 && dropbox start
 exec nm-applet
 exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 exec ~/myconfig/scripts/swayidle.sh
+exec ~/myconfig/scripts/bluetooth_audio_monitor.sh
 exec ~/Dropbox/bin/hiddify.sh
 
 assign [app_id="hiddify"] 5

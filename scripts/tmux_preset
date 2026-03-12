@@ -125,6 +125,36 @@ config () {
     tmux send-keys -t "$SESSION_NAME" " cd myconfig && clear" C-m
     tmux select-layout -t "$SESSION_NAME" main-vertical
 
+    local WIN_DESK="apps"
+    local WIN_MONITORING="monitor"
+    local DESK_TARGET="$SESSION_NAME:$WIN_DESK"
+    local MON_TARGET="$SESSION_NAME:$WIN_MONITORING"
+
+    tmux new-window -t "$SESSION_NAME" -n "$WIN_DESK"
+    local APPS_PANE_VPN
+    local APPS_PANE_CURSOR
+    local APPS_PANE_RV
+    local APPS_PANE_CHROME
+
+    APPS_PANE_VPN="$(tmux display-message -p -t "$DESK_TARGET" '#{pane_id}')"
+    APPS_PANE_CURSOR="$(tmux split-window -h -t "$APPS_PANE_VPN" -P -F '#{pane_id}')"
+    APPS_PANE_RV="$(tmux split-window -v -t "$APPS_PANE_VPN" -P -F '#{pane_id}')"
+    APPS_PANE_CHROME="$(tmux split-window -v -t "$APPS_PANE_CURSOR" -P -F '#{pane_id}')"
+
+    tmux send-keys -t "$APPS_PANE_VPN" "vpn work"
+    tmux send-keys -t "$APPS_PANE_CURSOR" "cursor"
+    tmux send-keys -t "$APPS_PANE_RV" "rv"
+    tmux send-keys -t "$APPS_PANE_CHROME" "google-chrome-beta-proxy"
+
+    tmux new-window -t "$SESSION_NAME" -n "$WIN_MONITORING"
+    local MON_PANE_BTOP
+    local MON_PANE_SENSORS
+
+    MON_PANE_BTOP="$(tmux display-message -p -t "$MON_TARGET" '#{pane_id}')"
+    MON_PANE_SENSORS="$(tmux split-window -h -p 35 -t "$MON_PANE_BTOP" -P -F '#{pane_id}')"
+    tmux send-keys -t "$MON_PANE_BTOP" "btop" C-m
+    tmux send-keys -t "$MON_PANE_SENSORS" "sudo watch sensors"
+
     tmux select-window -t "$SESSION_NAME":1
 
     tmux attach -t "$SESSION_NAME"
