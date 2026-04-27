@@ -244,8 +244,6 @@ workspace  8 output eDP-1 DP-1 DP-10  HDMI-A-1 DP-2 DP-9
 workspace  9 output eDP-1 DP-1 DP-10  HDMI-A-1 DP-2 DP-9
 workspace 10 output eDP-1 DP-1 DP-10  HDMI-A-1 DP-2 DP-9
 
-bindsym --to-code --release $mod+m exec ~/myconfig/scripts/sway_outputs_toggle.sh
-
 ### Music
 bindsym --to-code $mod+p exec playerctl play-pause
 bindsym --to-code $mod+bracketleft exec playerctl previous
@@ -256,18 +254,20 @@ bindsym --to-code $mod+Shift+bracketright exec pactl set-sink-volume @DEFAULT_SI
 bindsym --to-code $mod+Shift+bracketleft exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 
 bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 
 bindsym --to-code $mod+t exec ~/myconfig/scripts/translate.sh
 bindsym --to-code $mod+n exec kitty -e ranger
 bindsym --to-code $mod+c exec gnome-calculator
-bindsym --to-code $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
-bindsym Print exec grim - | wl-copy && wl-paste > "Screenshot_$(date +%F_%H-%M-%S).png"
+bindsym --to-code $mod+Shift+s exec ~/myconfig/scripts/sway_satty.sh region
+bindsym Print exec ~/myconfig/scripts/sway_satty.sh screen
 bindsym Control+Shift+Escape exec gnome-system-monitor
 
 ########## Autolaunch ##########
 
+exec playerctld daemon
 exec sway-xkb-switcher
 exec blueman-applet
 exec dunst
@@ -275,13 +275,19 @@ exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
 exec pavucontrol
 exec blueman-manager
 exec thunderbird
-exec sleep 5 && Telegram
+exec ~/Dropbox/bin/obsidian
+exec sleep 5 && ~/Dropbox/bin/telegram
 exec sleep 5 && dropbox start
 exec nm-applet
 exec /usr/lib64/polkit-gnome/polkit-gnome-authentication-agent-1
 exec ~/myconfig/scripts/swayidle.sh
+exec_always ~/myconfig/scripts/bluetooth_audio_monitor.sh
+exec ~/Dropbox/bin/hiddify.sh
 
+assign [app_id="hiddify"] 5
 assign [app_id="net.thunderbird.Thunderbird"] 8
+assign [app_id="obsidian"] 8
+assign [instance="obsidian"] 8
 assign [app_id="spotify"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="blueman-manager"] 9
@@ -289,8 +295,15 @@ assign [app_id="org.telegram.desktop"] 10
 
 for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [app_id="nm-connection-editor"] floating enable
+for_window [app_id="rog-control-center"] floating enable
+for_window [app_id="org.satty.satty"] floating enable
 for_window [title="Media viewer"] floating enable
 for_window [title="TelegramDesktop"] floating enable
+for_window [app_id="^org\.telegram\.desktop\..*$" title="^Mini App: .*"] {
+    floating enable
+    resize set width 402 px height 712 px
+    move position center
+}
 for_window [app_id="electrum"] floating enable
 for_window [instance="feather"] floating enable
 for_window [app_id="waybar" floating] {

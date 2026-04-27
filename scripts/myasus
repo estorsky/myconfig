@@ -1,0 +1,119 @@
+#!/bin/bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage:
+  myasus rog-toggle
+  myasus profile-next
+  myasus kbd-backlight-down
+  myasus kbd-backlight-up
+EOF
+}
+
+notify() {
+    if command -v dunstify >/dev/null 2>&1; then
+        dunstify -u low -t 3000 -r 101 "myasus" "$1"
+    elif command -v notify-send >/dev/null 2>&1; then
+        notify-send "myasus" "$1"
+    fi
+}
+
+rog_toggle() {
+    local node_id
+
+    node_id="$(swaymsg -t get_tree | jq -r 'first(.. | objects | select(.app_id? == "rog-control-center") | .id) // empty')"
+
+    if [ -n "${node_id}" ]; then
+        swaymsg "[con_id=${node_id}]" kill >/dev/null
+        return 0
+    fi
+
+    rog-control-center >/dev/null 2>&1 &
+}
+
+get_profile() {
+    asusctl profile get \
+        | sed -n 's/^Active profile: //p'
+}
+
+profile_next() {
+    local profile
+
+    asusctl profile next
+    profile="$(get_profile)"
+
+    if [ -n "${profile}" ]; then
+        notify "Profile: ${profile}"
+    fi
+}
+
+kbd_backlight_down() {
+    local current
+
+    current="$(get_kbd_backlight)"
+
+    if [ -z "${current}" ] || [ "${current}" = "off" ]; then
+        return 0
+    fi
+
+    case "${current}" in
+        high)
+            asusctl leds set med
+            ;;
+        med)
+            asusctl leds set low
+            ;;
+        low)
+            asusctl leds set off
+            ;;
+    esac
+}
+
+get_kbd_backlight() {
+    asusctl leds get \
+        | sed -n 's/^Current keyboard led brightness: //p' \
+        | tr '[:upper:]' '[:lower:]'
+}
+
+kbd_backlight_up() {
+    local current
+
+    current="$(get_kbd_backlight)"
+
+    if [ -z "${current}" ] || [ "${current}" = "high" ]; then
+        return 0
+    fi
+
+    case "${current}" in
+        off)
+            asusctl leds set low
+            ;;
+        low)
+            asusctl leds set med
+            ;;
+        med)
+            asusctl leds set high
+            ;;
+    esac
+}
+
+case "${1:-}" in
+    rog-toggle)
+        rog_toggle
+        ;;
+    profile-next)
+        profile_next
+        ;;
+    kbd-backlight-down)
+        kbd_backlight_down
+        ;;
+    kbd-backlight-up)
+        kbd_backlight_up
+        ;;
+    *)
+        usage >&2
+        exit 1
+        ;;
+esac

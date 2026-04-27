@@ -1,1 +1,4 @@
-# exec asusctl profile --profile-set Quiet
+exec solaar --window=hide
+exec sleep 6 && asusctl profile set Quiet
+# exec ~/myconfig/scripts/sway_auto_display_manager.sh
+exec way-displays > /tmp/way-displays.${XDG_VTNR}.${USER}.log 2>&1

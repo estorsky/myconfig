@@ -1,3 +1,5 @@
+bindsym --to-code --release $mod+m exec ~/myconfig/scripts/sway_outputs_toggle.sh
+
 # [14:     wl_keyboard] key: serial: 41178; time: 103111906; key: 179; state: 1 (pressed)
 #                       sym: XF86Tools    (269025153), utf8: ''
 # [14:     wl_keyboard] key: serial: 41179; time: 103112050; key: 179; state: 0 (released)
