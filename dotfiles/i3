@@ -49,7 +49,7 @@ exec dropbox start
 
 ########## Keybindings ##########
 # bindsym $mod+Shift+s exec i3lock # Easier locking
-bindsym $mod+Shift+s exec ~/myconfig/lockscreen/lock.sh -ws
+bindsym $mod+Shift+s exec ~/myconfig/scripts/i3lock/lock.sh -ws
 
 ### Backlight ###
 # Note: If light doesn't work, install xbacklight and 1) uncomment the two lines below.

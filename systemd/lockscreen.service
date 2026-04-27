@@ -6,7 +6,7 @@ Before=sleep.target
 User=estor
 Type=forking
 Environment=DISPLAY=:0
-ExecStart=/home/estor/myconfig/lockscreen/lock.sh -s
+ExecStart=/home/estor/myconfig/scripts/i3lock/lock.sh -s
 
 [Install]
 WantedBy=sleep.target
