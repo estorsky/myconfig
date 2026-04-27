@@ -1,0 +1,10 @@
+# Keep the UGREEN dock USB hub chain awake on this laptop.
+# DisplayPort Alt Mode can work while the USB branch stays in autosuspend,
+# which leaves keyboards and other devices behind the dock uninitialized
+# until the dock is replugged.
+
+ACTION=="add|bind|change", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{bDeviceClass}=="09", ATTR{idVendor}=="05e3", TEST=="power/control", ATTR{power/control}="on"
+ACTION=="add|bind|change", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{bDeviceClass}=="09", ATTR{idVendor}=="05e3", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"
+
+ACTION=="add|bind|change", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{bDeviceClass}=="09", ATTR{idVendor}=="2109", TEST=="power/control", ATTR{power/control}="on"
+ACTION=="add|bind|change", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{bDeviceClass}=="09", ATTR{idVendor}=="2109", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"

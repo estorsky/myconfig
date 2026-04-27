@@ -1,0 +1,15 @@
+[Unit]
+Description=Fix PCI power management for USB controllers
+After=sysinit.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "echo on > /sys/bus/pci/devices/0000:67:00.3/power/control"
+ExecStart=/bin/sh -c "echo on > /sys/bus/pci/devices/0000:67:00.4/power/control"
+ExecStart=/bin/sh -c "echo on > /sys/bus/pci/devices/0000:67:00.5/power/control"
+# Disable runtime PM for USB4/Thunderbolt NHI controller
+ExecStart=/bin/sh -c "echo on > /sys/bus/pci/devices/0000:67:00.0/power/control 2>/dev/null || true"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

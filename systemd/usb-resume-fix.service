@@ -1,0 +1,13 @@
+[Unit]
+Description=Fix USB/DisplayPort after suspend resume
+After=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+ExecStop=/home/dmitry/myconfig/scripts/usb_resume_fix.sh
+
+[Install]
+WantedBy=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
