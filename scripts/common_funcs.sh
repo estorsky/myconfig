@@ -1,4 +1,4 @@
-if [ "$MY_ECHO" = true ]
+if [ "${MY_ECHO:-}" = true ]
 then
     echo () {
         builtin echo " <> $(basename $0) ($(date '+%H:%M:%S')): $@"

@@ -44,6 +44,7 @@
 | prefix +  { / }  | move pane left/right          |
 | prefix + z       | fullsize win                  |
 | prefix + /       | serach                        |
+| prefix + $       | rename session                |
 | prefix + ,       | rename window                 |
 | prefix w         | win list                      |
 | prefix !         | pane on new window            |
@@ -70,6 +71,12 @@
 | ctrl + shift + space | hide all notif                |
 | ctrl + \`            | show old notif                |
 | ctrl + shift + .     | show context menu             |
+
+### ranger
+
+| Action          | Binding                       |
+| --------------- | ----------------------------- |
+| om              | Sort by modification time     |
 
 ### vim
 

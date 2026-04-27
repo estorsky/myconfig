@@ -91,6 +91,11 @@ do
             build_iss=true
             shift
             ;;
+        realtek_iss_4|iss4|i4)
+            PROJECT_NAME="realtek_iss_4"
+            build_iss=true
+            shift
+            ;;
         -c)
             CMD="$2"
             shift # past argument
