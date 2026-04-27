@@ -15,7 +15,7 @@
     // ],
     "modules-right": [
         "sway/language",
-        "pulseaudio",
+        "custom/pulseaudio",
         "network",
         "cpu",
         "memory",
@@ -101,8 +101,20 @@
     },
     "clock": {
         // "timezone": "America/New_York",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format-alt": "{:%Y-%m-%d}"
+        "locale": "en_GB.UTF-8",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%Y-%m-%d}",
+        "calendar": {
+            "mode": "month",
+            "weeks-pos": "left",
+            "format": {
+                "months": "<span color='#ffead3'><b>{}</b></span>",
+                "days": "<span color='#ecc6d9'><b>{}</b></span>",
+                "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+                "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+                "today": "<span color='#ff6699'><b>{}</b></span>"
+            }
+        }
     },
     "cpu": {
         "interval": 5,
@@ -174,24 +186,15 @@
         "format-disconnected": "Disconnected ⚠",
         "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
-    "pulseaudio": {
-        "scroll-step": 5, // %, can be a float
-        "format": "{volume}% {icon} {format_source}",
-        "format-bluetooth": "{volume}% {icon} {format_source}",
-        "format-bluetooth-muted": " {icon} {format_source}",
-        "format-muted": " {format_source}",
-        "format-source": "{volume}% ",
-        "format-source-muted": "",
-        "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
-        },
-        "on-click": "pavucontrol"
+    "custom/pulseaudio": {
+        "exec": "/home/dmitry/myconfig/dotfiles/sway/waybar/waybar_volume.sh",
+        "return-type": "json",
+        "format": "{}",
+        "interval": 1,
+        "on-click": "pavucontrol",
+        "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+        "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%"
     },
     "custom/media": {
         "format": "{icon} {}",
@@ -213,7 +216,7 @@
         "menu-file": "/home/dmitry/.config/waybar/power_menu.xml",
         "menu-actions": {
             "lock": "~/myconfig/scripts/swaylock.sh",
-            "shutdown": "shutdown",
+            "shutdown": "shutdown now",
             "reboot": "reboot",
             "suspend": "~/myconfig/scripts/suspend.sh -l",
             "hibernate": "systemctl hibernate"

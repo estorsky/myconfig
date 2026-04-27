@@ -254,6 +254,16 @@ label:focus {
     color: #dbdbdb;
 }
 
+#custom-pulseaudio {
+    font-weight: bold;
+    color: #dbdbdb;
+}
+
+#custom-pulseaudio.muted {
+    font-weight: bold;
+    color: #dbdbdb;
+}
+
 #wireplumber {
     background-color: #fff0f5;
     color: #000000;
