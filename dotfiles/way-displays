@@ -1,0 +1,105 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/alex-courtis/way-displays/refs/heads/master/schema/cfg-1.1.0.yaml
+
+## way-displays configuration for ASUS laptop
+## Automatic display management for Sway
+
+## Arrange displays in a row from left to right
+ARRANGE: ROW
+
+## Align displays at the top
+ALIGN: TOP
+
+## Display order from left to right
+## Displays are identified by serial numbers (independent of port names like DP-9/DP-11/etc)
+ORDER:
+  - 'Dangbei'       # Home: Dangbei projector
+  - '3342300043348' # Home: Xiaomi Mi Monitor (DP-2 or HDMI-A-1)
+  - eDP-1           # Built-in laptop display (last, fallback)
+  - 'JCLMQS009609'  # Office: ASUS VS229 left monitor
+  - 'KALMQS121524'  # Office: ASUS VS229 right monitor
+
+## Enable scaling
+SCALING: TRUE
+
+## Automatic scaling by DPI (96 DPI = scale 1.0)
+## Built-in high-DPI display will automatically get scale ~2.0
+AUTO_SCALE: TRUE
+
+AUTO_SCALE_MIN: 1.0
+AUTO_SCALE_MAX: 2.0
+
+## Override automatic scaling for specific displays
+SCALE:
+  # Home monitor Xiaomi - no scaling (was 1.125 by default)
+  - NAME_DESC: '3342300043348'
+    SCALE: 1.0
+  
+  # Office monitors ASUS - no scaling
+  - NAME_DESC: 'JCLMQS009609'
+    SCALE: 1.0
+  
+  - NAME_DESC: 'KALMQS121524'
+    SCALE: 1.0
+
+  - NAME_DESC: 'Dangbei'
+    SCALE: 2.0
+
+## Override display modes
+MODE:
+  # Built-in display - maximum mode (2880x1800@120Hz)
+  - NAME_DESC: eDP-1
+    MAX: TRUE
+
+  # Home monitor: Xiaomi Mi Monitor - 2560x1440@144Hz (actually 143.998Hz)
+  - NAME_DESC: '3342300043348'
+    WIDTH: 2560
+    HEIGHT: 1440
+    HZ: 144
+
+  # Office monitors: ASUS VS229 - 1920x1080@60Hz
+  - NAME_DESC: 'JCLMQS009609'
+    WIDTH: 1920
+    HEIGHT: 1080
+    HZ: 60
+
+  - NAME_DESC: 'KALMQS121524'
+    WIDTH: 1920
+    HEIGHT: 1080
+    HZ: 60
+
+## VRR / adaptive sync is enabled by default
+## Disable for office monitors ASUS VS229 - they don't support VRR
+VRR_OFF:
+  - 'ASUS VS229'
+  - 'Mi Monitor'
+
+## Notifications on display changes
+CALLBACK_CMD: notify-send "way-displays ${CALLBACK_LEVEL}" "${CALLBACK_MSG}"
+
+## Laptop display prefix
+LAPTOP_DISPLAY_PREFIX: 'eDP'
+
+## Logging level
+LOG_THRESHOLD: INFO
+
+## Automatically disable built-in display when external monitors are connected
+## This replaces sway_auto_display_manager.sh functionality
+## Multiple rules for eDP-1 work as OR - any single condition is sufficient
+DISABLED:
+  # Disable eDP-1 if home monitor Xiaomi is connected
+  - NAME_DESC: eDP-1
+    IF:
+      - PLUGGED:
+          - '3342300043348'
+
+  # Disable eDP-1 if first office monitor ASUS is connected
+  - NAME_DESC: eDP-1
+    IF:
+      - PLUGGED:
+          - 'JCLMQS009609'
+
+  # Disable eDP-1 if second office monitor ASUS is connected
+  - NAME_DESC: eDP-1
+    IF:
+      - PLUGGED:
+          - 'KALMQS121524'
