@@ -1,0 +1,8 @@
+.cursor/
+scripts/work/workspace_secure/*/output/
+scripts/work/workspace_secure/workspace_env.sh
+scripts/work/workspace_secure.tar.gz
+*.log
+out.tar.gz
+output.txt
+inputs.json

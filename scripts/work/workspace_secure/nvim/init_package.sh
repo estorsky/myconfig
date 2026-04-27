@@ -1,16 +1,17 @@
 #!/bin/bash
 
-echo "Copying configuration files for $(basename "$PWD")"
+set -euo pipefail
 
-LINK="https://github.com/neovim/neovim/releases/download/v0.9.5/nvim-linux64.tar.gz"
-ARCHIVE_PATH="./output/archive.tar.xz"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PACKAGE_DIR="${DIR}/output/package"
+BIN_PATH="${PACKAGE_DIR}/bin"
+ENV_FILE="${DIR}/../workspace_env.sh"
 
-# rm -rf ./output
-# mkdir output
+source "${DIR}/../lib.sh"
 
-if [ ! -f "$ARCHIVE_PATH" ]; then
-    mkdir output
-    wget -q --show-progress $LINK -O $ARCHIVE_PATH
-else
-    echo "File already exists, skipping download."
+if [ ! -x "${BIN_PATH}/nvim" ]; then
+    echo "Portable neovim package was not prepared: ${BIN_PATH}/nvim"
+    exit 1
 fi
+
+workspace_secure_append_env_path "${ENV_FILE}" "${BIN_PATH}" "nvim"

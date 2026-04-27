@@ -1,18 +1,17 @@
 #!/bin/bash
 
+set -euo pipefail
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PACKAGE_DIR="${DIR}/output/package"
+BIN_PATH="${PACKAGE_DIR}/bin"
+ENV_FILE="${DIR}/../workspace_env.sh"
 
-echo "Copying configuration files for $(basename "$PWD")"
+source "${DIR}/../lib.sh"
 
-LINK="https://nodejs.org/dist/v20.15.1/node-v20.15.1-linux-x64.tar.xz"
-ARCHIVE_PATH="./output/archive.tar.xz"
-
-# rm -rf ./output
-# mkdir output
-
-if [ ! -f "$ARCHIVE_PATH" ]; then
-    mkdir output
-    wget -q --show-progress $LINK -O $ARCHIVE_PATH
-else
-    echo "File already exists, skipping download."
+if [ ! -x "${BIN_PATH}/node" ]; then
+    echo "Portable nodejs package was not prepared: ${BIN_PATH}/node"
+    exit 1
 fi
+
+workspace_secure_append_env_path "${ENV_FILE}" "${BIN_PATH}" "nodejs"

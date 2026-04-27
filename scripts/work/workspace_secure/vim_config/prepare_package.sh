@@ -1,26 +1,21 @@
 #!/bin/bash
 
-echo "Copying configuration files for $(basename "$PWD")"
+set -euo pipefail
 
-# Define the output directory
-OUTPUT_DIR="./output"
-BACKUP_DIR=~/workspace_backup
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+OUTPUT_DIR="${DIR}/output"
 
-# Ensure the output directory exists
-if [ ! -d "$OUTPUT_DIR" ]; then
-    echo "Output directory does not exist: $OUTPUT_DIR"
-    exit 1
+rm -rf "${OUTPUT_DIR}"
+mkdir -p "${OUTPUT_DIR}"
+
+if [ -d "${HOME}/.vim" ]; then
+    cp -aL "${HOME}/.vim" "${OUTPUT_DIR}/"
 fi
 
-# Ensure the backup directory exists
-mkdir -p "$BACKUP_DIR"
+if [ -d "${HOME}/.config/coc" ]; then
+    cp -aL "${HOME}/.config/coc" "${OUTPUT_DIR}/"
+fi
 
-# Copy old directories to backup
-sudo cp -rL ~/.vim "$BACKUP_DIR/"
-sudo cp -rL ~/.config/coc "$BACKUP_DIR/"
-sudo cp -rL ~/.config/nvim "$BACKUP_DIR/"
-
-# Copy directories from output to their respective locations
-cp -rL "$OUTPUT_DIR/.vim" ~/
-cp -rL "$OUTPUT_DIR/coc" ~/.config/
-cp -rL "$OUTPUT_DIR/nvim" ~/.config/
+if [ -d "${HOME}/.config/nvim" ]; then
+    cp -aL "${HOME}/.config/nvim" "${OUTPUT_DIR}/"
+fi

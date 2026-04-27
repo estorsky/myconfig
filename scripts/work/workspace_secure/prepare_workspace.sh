@@ -1,13 +1,20 @@
 #!/bin/bash
 
-cat <<EOL > workspace_env.sh
-# Generating file
-EOL
+set -euo pipefail
 
-# Iterate over each subdirectory and call its preparation script
-for dir in */ ; do
-    if [ -d "$dir" ]; then
-        echo "Preparing $dir"
-        (cd "$dir" && ./prepare_package.sh)
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "${DIR}/lib.sh"
+
+for dir in "${DIR}"/*/ ; do
+    if [ ! -x "${dir}/prepare_package.sh" ]; then
+        continue
     fi
+
+    workspace_secure_log "Preparing $(basename "${dir}")"
+    (cd "${dir}" && ./prepare_package.sh)
 done
+
+workspace_secure_log "Creating workspace bundle archive"
+tar -czf "${DIR}/../workspace_secure.tar.gz" \
+    -C "${DIR}/.." "$(basename "${DIR}")"
