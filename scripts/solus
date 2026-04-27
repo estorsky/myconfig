@@ -4,178 +4,33 @@ set -e
 
 trap 'exit' INT
 
-LINK="https://raw.githubusercontent.com/getsolus/3rd-party/master"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${DIR}/common_funcs.sh"
+source "${DIR}/install_functions.sh"
 
 run_with_root "$1"
-
-install__nm_tray () {
-    set -x
-
-    cd /tmp/
-
-    rm -rf /tmp/nm-tray
-    gclonecd https://github.com/palinek/nm-tray.git
-    mkdir build
-    cd build
-    cmake ..
-    sudo make install
-
-    # sway
-    # exec sleep 5 && QT_QPA_PLATFORMTHEME=gtk3 nm-tray
-    # for_window [app_id="nm-tray"] {
-        # floating enable
-        # move position mouse
-        # border none
-    # }
-}
-
-install__wl_clipboard () {
-    set -x
-
-    cd /tmp/
-
-    rm -rf /tmp/wl-clipboard
-    gclonecd https://github.com/bugaevc/wl-clipboard.git
-    meson build
-    cd build
-    sudo ninja install
-}
-
-install__swaylock_effects () {
-    set -x
-
-    cd /tmp/
-
-    rm -rf /tmp/swaylock-effects
-    gclonecd https://github.com/jirutka/swaylock-effects.git
-    meson build
-    ninja -C build
-    sudo ninja -C build install
-}
-
-install__earlyoom () {
-    set -x
-
-    cd /tmp/
-
-    rm -rf /tmp/earlyoom
-    gclonecd https://github.com/rfjakob/earlyoom.git
-    make
-    sudo make install
-    sudo systemctl start earlyoom
-
-    # sudo vim /etc/default/earlyoom
-    # EARLYOOM_ARGS="-m 2 -s 100,100 -r 0" # -n
-    # sudo journalctl -u earlyoom | grep sending
-}
-
-# sudo eopkg it pango-devel libjpeg-turbo-devel hyprutils-devel hyprwayland-scanner
-install__hyprpicker () {
-    set -x
-
-    cd /tmp/
-
-    rm -rf /tmp/hyprpicker
-    gclonecd https://github.com/hyprwm/hyprpicker.git
-
-    cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
-    cmake --build ./build --config Release --target hyprpicker -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF`
-    sudo cmake --install ./build
-}
-
-install__xkb_switch () {
-    set -x
-
-    ldconfig /usr/local/lib
-
-    cd /tmp/
-
-    if [[ "$1" == "i3" ]]; then
-        # jsoncpp-devel libsigc++-devel i3-devel
-        rm -rf /tmp/xkb-switch-i3
-        gclonecd https://github.com/zebradil/xkb-switch-i3
-        git submodule update --init
-    else
-        rm -rf /tmp/xkb-switch
-        gclonecd https://github.com/grwlf/xkb-switch.git
-    fi
-
-    mkdir build && cd build
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
-    make
-
-    make install
-
-    cd /tmp/
-}
-
-install__google_chrome () {
-    sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-stable/pspec.xml
-    sudo eopkg bi -q --ignore-safety $LINK/network/web/browser/google-chrome-beta/pspec.xml
-    sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
-
-    sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome.desktop
-    sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome-beta.desktop
-
-    # for Wayland
-    # Go to chrome://flags
-    # Search "Preferred Ozone platform"
-    # Set it to "Wayland"
-    # And 'Use system title bar and borders' - on
-    # Vulkan -> enable
-}
-
-install__spotify () {
-    sudo eopkg bi -q --ignore-safety $LINK/multimedia/music/spotify/pspec.xml
-    sudo eopkg it -y spotify*.eopkg; sudo rm spotify*.eopkg
-}
-
-install__sublime_text_3 () {
-    sudo eopkg bi -q --ignore-safety $LINK/programming/sublime-text-3/pspec.xml
-    sudo eopkg it -y sublime*.eopkg; sudo rm sublime*.eopkg
-}
-
-install__team_viewer () {
-    sudo eopkg bi -q --ignore-safety $LINK/network/util/teamviewer/pspec.xml
-    sudo eopkg it -y teamviewer*.eopkg; sudo rm teamviewer*.eopkg
-    sudo systemctl start teamviewerd.service
-}
-
-install__ms_fonts () {
-    sudo eopkg bi -q --ignore-safety $LINK/desktop/font/mscorefonts/pspec.xml
-    sudo eopkg it -y mscorefonts*.eopkg; sudo rm mscorefonts*.eopkg
-}
-
-install__anydesk () {
-    sudo eopkg bi -q --ignore-safety $LINK/network/util/anydesk/pspec.xml
-    sudo eopkg it -y anydesk*.eopkg; sudo rm anydesk*.eopkg
-}
 
 init () {
     cd "$DIR"
 
     sudo eopkg up -y
 
-    sudo eopkg it -y screenfetch telegram discord dropbox nautilus-dropbox git tmux \
+    sudo eopkg it -y screenfetch discord dropbox nautilus-dropbox git tmux \
         vlc mpv htop btop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks meld \
         llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
         linux-current-headers lm_sensors qbittorrent wireshark xkill \
         vim neovim helix mtr python3-ipython i3lock krita ranger cmus cava etcher \
         speedtest-cli cmatrix highlight curl-gnutls iotop iftop \
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
-        openvpn i3blocks i3 lxappearance dunst kitty \
-        xsel docker blueman pavucontrol doxygen cppcheck font-awesome-ttf \
+        openvpn wireguard-tools i3blocks i3 lxappearance dunst kitty \
+        xsel docker blueman solaar pavucontrol doxygen cppcheck font-awesome-ttf \
         net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev \
         ghex picocom golang rust zig nmap maim fzf fd stress-ng valgrind virt-viewer \
-        sway waybar grim jq evtest
+        sway waybar grim slurp jq evtest
         # openjdk-8 cargo intel-microcode
 
-    # sudo eopkg it gdm
-    # https://github.com/fairyglade/ly
-    # https://github.com/fairyglade/ly/issues/718
+    # install__ly
 
     # sudo eopkg it -y iw aircrack-ng libpcap-devel hashcat bzip2-devel
     # sudo eopkg it -y curl-devel
@@ -203,6 +58,13 @@ init () {
     # systemctl start logitech_wakeup_off.service
     # systemctl status logitech_wakeup_off.service
 
+    # for asus
+    # sudo cp ~/myconfig/systemd/pci-power-fix.service /etc/systemd/system/
+    # sudo systemctl enable --now pci-power-fix.service
+    install__asusctl
+    install__supergfxctl
+    install__proxychains4
+
     # lockscreen unit
     # sudo cp ../../myconfig/systemd/lockscreen.service /etc/systemd/system/
     # systemctl enable lockscreen.service
@@ -216,9 +78,13 @@ init () {
     # sudo clr-boot-manager update
 
     install__google_chrome
+    configure_chrome_wayland_desktop /usr/share/applications/google-chrome.desktop /usr/bin/google-chrome-stable
+    configure_chrome_wayland_desktop /usr/share/applications/google-chrome-beta.desktop /usr/bin/google-chrome-beta
     install__spotify
     # install__sublime_text_3
     install__ms_fonts
+    install__hiddify
+    install__telegram
 
     pip3 install sway-xkb-switcher
     go install github.com/arl/gitmux@latest
@@ -232,9 +98,21 @@ init () {
 
     sudo eopkg it -y wayland-devel wayland-protocols-devel # (optional)
     install__wl_clipboard
+    sudo eopkg it -y libgtk-4-devel libadwaita-devel libepoxy-devel
+    install__satty
 
-    sudo eopkg it libxkbcommon-devel libcairo-devel
-    install__swaylock_effects
+    sudo eopkg it -y gdk-pixbuf-devel xcb-util-devel xcb-util-wm-devel xcb-util-cursor-devel libstartup-notification-devel
+    install__rofi_wayland
+
+    sudo eopkg it libqalculate
+    install__rofi_calc
+
+    # sudo eopkg it libxkbcommon-devel libcairo-devel
+    # install__swaylock_effects
+
+    sudo eopkg it yaml-cpp-devel
+    install__way_displays
+    sudo usermod -a -G input "${USER}"
 
     # sudo eopkg it pango-devel libjpeg-turbo-devel hyprutils-devel hyprwayland-scanner
     # install__hyprpicker
@@ -266,30 +144,55 @@ init () {
     # sudo usermod -aG wireshark $USER
 
     # install_dns_vpn_resolver.sh
+
+    # for lightdm if not starting in wayland without nvidia
+    # sudo tee /etc/X11/xorg.conf.d/10-amdgpu.conf << 'EOF'
+    # Section "Device"
+    #     Identifier "AMD"
+    #     Driver "amdgpu"
+    #     BusID "PCI:101:0:0"
+    # EndSection
+    # EOF
 }
 
 update () {
     # TODO: pip packagees update
 
-    sudo eopkg up -y #\
+    # if [[ -x /usr/local/bin/proxychains4 ]]; then
+        # sudo /usr/local/bin/proxychains4 -q eopkg up -y #\
+    # else
+        sudo eopkg up -y #\
+    # fi
         # -x neovim \
         # -x waybar
 
     # sudo vim /usr/lib/python3.12/site-packages/eopkg3p/consts.py
     # EOPKG = _find_executable("eopkg.py3")
     sudo eopkg3p up -y
-    sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome.desktop
-    sudo sed -i '/Exec/s/$/ --force-dark-mode --enable-features=VaapiVideoDecodeLinuxGL --use-gl=angle --use-angle=gl --disable-3d-apis --enable-unsafe-webgpu --enable-features=UseOzonePlatform --ozone-platform=wayland/' /usr/share/applications/google-chrome-beta.desktop
+    configure_chrome_wayland_desktop /usr/share/applications/google-chrome.desktop /usr/bin/google-chrome-stable
+    configure_chrome_wayland_desktop /usr/share/applications/google-chrome-beta.desktop /usr/bin/google-chrome-beta
+    # install__ly
     # install__xkb_switch i3
     # install__nm_tray
     install__wl_clipboard
-    install__swaylock_effects
+    install__satty
+    install__rofi_wayland
+    install__rofi_calc
+    # install__swaylock_effects
+    install__way_displays
+    install__asusctl
+    install__supergfxctl
+    install__proxychains4
+    install__hiddify
+    # install__telegram
     # ~/.tmux/plugins/tpm/bin/update_plugins all
 
     # sudo clr-boot-manager update
 
     # sudo eopkg it https://packages.getsol.us/shannon/n/neovim/neovim-0.9.5-41-1-x86_64.eopkg
     # sudo eopkg it https://packages.getsol.us/shannon/w/waybar/waybar-0.10.4-15-1-x86_64.eopkg
+
+    # sudo mv /usr/share/defaults/etc/profile.d/50-starship.sh /usr/share/defaults/etc/profile.d/50-starship.sh.disabled
 }
 
 clean () {

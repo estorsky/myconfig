@@ -126,6 +126,12 @@ ln -s "$SCRIPT_DIR/sway/waybar/config" ~/.config/waybar/config
 ln -s "$SCRIPT_DIR/sway/waybar/style.css" ~/.config/waybar/style.css
 ln -s "$SCRIPT_DIR/sway/waybar/power_menu.xml" ~/.config/waybar/power_menu.xml
 
+#WAY-DISPLAYS
+if ! [ -d ~/.config/way-displays ]; then
+    mkdir ~/.config/way-displays
+fi
+ln -s "$SCRIPT_DIR/way-displays" ~/.config/way-displays/cfg.yaml
+
 #KITTY
 if ! [ -d ~/.config/kitty ]; then
     mkdir ~/.config/kitty
