@@ -249,14 +249,14 @@ bindsym --to-code $mod+p exec playerctl play-pause
 bindsym --to-code $mod+bracketleft exec playerctl previous
 bindsym --to-code $mod+bracketright exec playerctl next
 
-bindsym --to-code $mod+Shift+p exec pactl set-sink-mute @DEFAULT_SINK@ toggle
-bindsym --to-code $mod+Shift+bracketright exec pactl set-sink-volume @DEFAULT_SINK@ +5%
-bindsym --to-code $mod+Shift+bracketleft exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym --to-code $mod+Shift+p exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym --to-code $mod+Shift+bracketright exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+bindsym --to-code $mod+Shift+bracketleft exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
 
-bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
-bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+bindsym XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+bindsym XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
 
 bindsym --to-code $mod+t exec ~/myconfig/scripts/translate.sh
 bindsym --to-code $mod+n exec kitty -e ranger

@@ -2,41 +2,49 @@
 
 set -euo pipefail
 
-get_default_name() {
-    local kind="$1"
+get_wpctl_target() {
+    local target="$1"
 
-    pactl info 2>/dev/null | awk -F': ' -v kind="$kind" '
-        $1 == kind { print $2; exit }
+    case "$target" in
+        sink) echo "@DEFAULT_AUDIO_SINK@" ;;
+        source) echo "@DEFAULT_AUDIO_SOURCE@" ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+get_default_name() {
+    local target="$1"
+
+    wpctl inspect "$(get_wpctl_target "$target")" 2>/dev/null | awk -F'"' '
+        /\* node\.name = "/ {
+            print $2
+            exit
+        }
     '
 }
 
 get_volume_percent() {
     local target="$1"
-    local value
 
-    value="$(
-        pactl get-"$target"-volume "@DEFAULT_${target^^}@" 2>/dev/null | awk '
-            NR == 1 {
-                for (i = 1; i <= NF; i++) {
-                    if ($i ~ /^[0-9]+%$/) {
-                        gsub("%", "", $i)
-                        print $i
-                        exit
-                    }
-                }
-            }
-        '
-    )"
-
-    echo "${value:-0}"
+    wpctl get-volume "$(get_wpctl_target "$target")" 2>/dev/null | awk '
+        {
+            value = $2 + 0
+            printf "%d\n", int((value * 100) + 0.5)
+            exit
+        }
+    '
 }
 
 get_mute_state() {
     local target="$1"
 
-    pactl get-"$target"-mute "@DEFAULT_${target^^}@" 2>/dev/null | awk '
-        { print $2; exit }
-    '
+    if wpctl get-volume "$(get_wpctl_target "$target")" 2>/dev/null | grep -q '\[MUTED\]'; then
+        echo "yes"
+    else
+        echo "no"
+    fi
 }
 
 pick_sink_icon() {
@@ -70,8 +78,22 @@ main() {
     local tooltip
     local css_class="normal"
 
-    sink_name="$(get_default_name "Default Sink")"
-    source_name="$(get_default_name "Default Source")"
+    if ! command -v wpctl >/dev/null 2>&1; then
+        TEXT="audio unavailable" TOOLTIP="wpctl is not available" CLASS_NAME="muted" python3 - <<'PY'
+import json
+import os
+
+print(json.dumps({
+    "text": os.environ["TEXT"],
+    "tooltip": os.environ["TOOLTIP"],
+    "class": os.environ["CLASS_NAME"],
+}))
+PY
+        return 0
+    fi
+
+    sink_name="$(get_default_name sink)"
+    source_name="$(get_default_name source)"
     sink_volume="$(get_volume_percent sink)"
     sink_muted="$(get_mute_state sink)"
     sink_icon="$(pick_sink_icon "$sink_name" "$sink_volume")"
