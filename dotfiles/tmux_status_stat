@@ -1,20 +1,20 @@
 #!/bin/bash
 
 #COLORS
-r1='#[fg=colour203, bg=default]'
-r2='#[fg=colour234, bg=colour203]'
-g1='#[fg=colour113, bg=default]'
-g2='#[fg=colour234, bg=colour113]'
-p1='#[fg=colour140, bg=default]'
-p2='#[fg=colour234, bg=colour140]'
-y1='#[fg=colour185, bg=default]'
-y2='#[fg=colour234, bg=colour185]'
-w1='#[fg=colour252, bg=default]'
-w2='#[fg=colour234, bg=colour252]'
-c1='#[fg=colour115, bg=default]'
-c2='#[fg=colour234, bg=colour115]'
-b1='#[fg=colour110, bg=default]'
-b2='#[fg=colour234, bg=colour110]'
+r1='#[fg=#f7768e, bg=default]'
+r2='#[fg=#1a1b26, bg=#f7768e]'
+g1='#[fg=#9ece6a, bg=default]'
+g2='#[fg=#1a1b26, bg=#9ece6a]'
+p1='#[fg=#bb9af7, bg=default]'
+p2='#[fg=#1a1b26, bg=#bb9af7]'
+y1='#[fg=#e0af68, bg=default]'
+y2='#[fg=#1a1b26, bg=#e0af68]'
+w1='#[fg=#c0caf5, bg=default]'
+w2='#[fg=#1a1b26, bg=#c0caf5]'
+c1='#[fg=#7dcfff, bg=default]'
+c2='#[fg=#1a1b26, bg=#7dcfff]'
+b1='#[fg=#7aa2f7, bg=default]'
+b2='#[fg=#1a1b26, bg=#7aa2f7]'
 
 cpu () {
     FREQ=$(($(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)/1000))
@@ -112,8 +112,8 @@ layout () {
 }
 
 names () {
-    echo -n " #[bold]#[bg=colour210]#[fg=colour234] ur #[bg=default]#[fg=colour210] #(whoami) \
- #[bg=colour229]#[fg=colour234] hs #[bg=default]#[fg=colour229] #H  "
+    echo -n " #[bold]#[bg=#bb9af7]#[fg=#1a1b26] ur #[bg=default]#[fg=#bb9af7] #(whoami) \
+ #[bg=#c0caf5]#[fg=#1a1b26] hs #[bg=default]#[fg=#c0caf5] #H  "
 }
 
 def () {

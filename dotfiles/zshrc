@@ -193,7 +193,7 @@ prompt_color() {
     elif [ -d ~/work ]; then
         echo -n "%{$fg_bold[blue]%}"
     else
-        echo -n "%{$fg_bold[green]%}"
+        echo -n "%{$fg_bold[cyan]%}"
     fi
 }
 
@@ -204,14 +204,14 @@ export PATH=$PATH:/home/$USER/myconfig/scripts/work
 # WORK
 if [ -d ~/work ]; then
     export PATH=$PATH:/home/$USER/myconfig/scripts/work
-    export TMUX_MAIN_COLOUR=colour113
+    export TMUX_MAIN_COLOUR=#91c4f0
 
     # Source the workspace environment setup
     if [ -f ~/Downloads/workspace_secure/workspace_env.sh ]; then
         source ~/Downloads/workspace_secure/workspace_env.sh
     fi
 else
-    export TMUX_MAIN_COLOUR=colour105
+    export TMUX_MAIN_COLOUR=#7893d8
 
     prompt_dir() {
         prompt_segment green $CURRENT_FG '%~'

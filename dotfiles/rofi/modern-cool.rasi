@@ -1,0 +1,124 @@
+* {
+    bg0:            #1e2233ee;
+    bg1:            #282d43ee;
+    bg2:            #333952ee;
+    bg3:            #425780ee;
+    fg0:            #c1cae9ff;
+    fg1:            #a6b2d2ff;
+    accent:         #7893d8ff;
+    accent-soft:    #91c4f0ff;
+    urgent:         #d07d8eff;
+    ok:             #90bf6bff;
+
+    background-color: transparent;
+    text-color: @fg0;
+    border-color: @accent;
+    separatorcolor: transparent;
+}
+
+window {
+    width: 40%;
+    border: 2px;
+    border-radius: 8px;
+    background-color: @bg0;
+}
+
+mainbox {
+    background-color: transparent;
+    spacing: 6px;
+    padding: 8px;
+    children: [ inputbar, message, listview ];
+}
+
+inputbar {
+    background-color: @bg1;
+    border-radius: 6px;
+    padding: 6px 8px;
+    spacing: 6px;
+    children: [ prompt, entry, case-indicator ];
+}
+
+prompt, entry, case-indicator {
+    background-color: transparent;
+    text-color: @fg0;
+}
+
+textbox-prompt-colon {
+    expand: false;
+    str: ">";
+    text-color: @accent-soft;
+}
+
+listview {
+    background-color: transparent;
+    columns: 1;
+    lines: 8;
+    spacing: 4px;
+    cycle: false;
+    dynamic: true;
+    scrollbar: false;
+}
+
+element {
+    background-color: transparent;
+    text-color: @fg1;
+    border-radius: 6px;
+    padding: 5px 8px;
+}
+
+element normal.normal {
+    background-color: transparent;
+    text-color: @fg1;
+}
+
+element normal.urgent {
+    background-color: rgba(208, 125, 142, 0.12);
+    text-color: @urgent;
+}
+
+element normal.active {
+    background-color: transparent;
+    text-color: @accent-soft;
+}
+
+element selected.normal {
+    background-color: @bg3;
+    text-color: @fg0;
+}
+
+element selected.active {
+    background-color: @accent;
+    text-color: #1e2233ff;
+}
+
+element selected.urgent {
+    background-color: @urgent;
+    text-color: #1e2233ff;
+}
+
+element-icon {
+    background-color: transparent;
+    text-color: inherit;
+    size: 1em;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+    vertical-align: 0.5;
+}
+
+message {
+    background-color: transparent;
+    expand: false;
+    padding: 0 4px;
+}
+
+error-message {
+    expand: false;
+}
+
+textbox {
+    background-color: transparent;
+    text-color: @fg1;
+}

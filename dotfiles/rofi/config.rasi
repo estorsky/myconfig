@@ -4,4 +4,4 @@ configuration {
 	kb-row-select: "";
 	kb-cancel: "Escape,Control+g,Control+bracketleft,Control+space";
 }
-@theme "/usr/local/share/rofi/themes/Arc-Dark.rasi"
+@theme "~/.config/rofi/modern-cool.rasi"

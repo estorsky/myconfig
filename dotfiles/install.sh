@@ -24,6 +24,10 @@ mv ~/.tmux.conf                     ~/dotfiles_old/
 # mv ~/.config/albert/albert.conf     ~/dotfiles_old/
 # mv ~/.albertignore                  ~/dotfiles_old/
 mv ~/.config/rofi/config.rasi       ~/dotfiles_old/
+mv ~/.config/gtk-3.0/settings.ini   ~/dotfiles_old/
+mv ~/.config/gtk-4.0/settings.ini   ~/dotfiles_old/
+mv ~/.gtkrc-2.0                     ~/dotfiles_old/
+mv ~/.config/swaynag/config         ~/dotfiles_old/
 mv ~/.config/feh/themes             ~/dotfiles_old/
 mv ~/.config/i3/config              ~/dotfiles_old/
 mv ~/.config/sway/config            ~/dotfiles_old/
@@ -90,7 +94,19 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 if ! [ -d ~/.config/rofi ]; then
     mkdir ~/.config/rofi
 fi
-ln -s "$SCRIPT_DIR/rofi" ~/.config/rofi/config.rasi
+ln -s "$SCRIPT_DIR/rofi/config.rasi" ~/.config/rofi/config.rasi
+ln -s "$SCRIPT_DIR/rofi/modern-cool.rasi" ~/.config/rofi/modern-cool.rasi
+
+#GTK
+if ! [ -d ~/.config/gtk-3.0 ]; then
+    mkdir ~/.config/gtk-3.0
+fi
+if ! [ -d ~/.config/gtk-4.0 ]; then
+    mkdir ~/.config/gtk-4.0
+fi
+ln -s "$SCRIPT_DIR/gtk-3.0/settings.ini" ~/.config/gtk-3.0/settings.ini
+ln -s "$SCRIPT_DIR/gtk-4.0/settings.ini" ~/.config/gtk-4.0/settings.ini
+ln -s "$SCRIPT_DIR/gtk-2.0/gtkrc" ~/.gtkrc-2.0
 
 #FEH
 if ! [ -d ~/.config/feh ]; then
@@ -143,6 +159,12 @@ if ! [ -d ~/.config/dunst ]; then
     mkdir ~/.config/dunst
 fi
 ln -s "$SCRIPT_DIR/dunstrc" ~/.config/dunst/dunstrc
+
+#SWAYNAG
+if ! [ -d ~/.config/swaynag ]; then
+    mkdir ~/.config/swaynag
+fi
+ln -s "$SCRIPT_DIR/swaynag/config" ~/.config/swaynag/config
 
 #RANGER
 if ! [ -d ~/.config/ranger ]; then

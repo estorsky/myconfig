@@ -2,7 +2,7 @@
 
 # albert toggle
 
-rofi -show combi &
+rofi -eh 2 -show combi &
 
 if xkb-switch --list &> /dev/null; then
     xkb-switch -s us

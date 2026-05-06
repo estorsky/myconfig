@@ -83,7 +83,7 @@ set $menu ~/myconfig/scripts/run_dialog_sway.sh
     bindsym --to-code $mod+Shift+c reload
 
     # Exit sway (logs you out of your Wayland session)
-    bindsym --to-code $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+    bindsym --to-code $mod+Shift+e exec swaynag -c ~/.config/swaynag/config -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 #
 # Moving around:
 #
@@ -312,17 +312,18 @@ for_window [app_id="waybar" floating] {
     move down 25px
 }
 
-set $bg-color            #222222
-set $inactive-bg-color   #3E3E46
-set $text-color          #DEDEDE
-set $inactive-text-color #DEDEDE
-set $urgent-bg-color     #8A2725
-set $border              #355F90
+set $bg-color            #1e2233
+set $inactive-bg-color   #282d43
+set $focused-text-color  #1e2233
+set $text-color          #c1cae9
+set $inactive-text-color #a6b2d2
+set $urgent-bg-color     #d07d8e
+set $border              #7893d8
 
-client.focused          $bg-color  $border            $text-color          $border
+client.focused          $bg-color  $border            $focused-text-color  $border
 client.focused_inactive $bg-color  $inactive-bg-color $text-color          $border
 client.unfocused        $bg-color  $inactive-bg-color $inactive-text-color $border
-client.urgent           $bg-color  $urgent-bg-color   $text-color          $border
+client.urgent           $bg-color  $urgent-bg-color   $focused-text-color  $border
 
 hide_edge_borders smart
 

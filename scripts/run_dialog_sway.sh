@@ -6,4 +6,4 @@ source ~/myconfig/scripts/common_envs.sh
 
 swaymsg input "${KEYBOARD}" xkb_switch_layout 0
 
-rofi -monitor "${MONITOR}" -show combi &
+rofi -monitor "${MONITOR}" -eh 2 -show combi &
