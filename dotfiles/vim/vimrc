@@ -48,7 +48,7 @@ if has('nvim')
     " Plug 'rbgrouleff/bclose.vim'
     " Plug 'ararslan/gruvbox', {'branch': 'aa/nvim-0.11'}
     Plug 'ellisonleao/gruvbox.nvim'
-    Plug 'phaazon/hop.nvim'
+    Plug 'smoka7/hop.nvim'
 else
     Plug 'morhetz/gruvbox'
     Plug 'easymotion/vim-easymotion'
