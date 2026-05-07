@@ -2,22 +2,221 @@
 
 set -euo pipefail
 
+LOG_FILE="/tmp/myasus.log"
+SUPPORTED_VENDOR="ASUSTeK COMPUTER INC."
+SUPPORTED_PRODUCT_PART="Zephyrus G14"
+
 usage() {
     cat <<'EOF'
 Usage:
   myasus rog-toggle
   myasus profile-next
+  myasus profile-set quiet|balanced|performance
+  myasus session-apply
+  myasus power-ac-root
+  myasus power-battery-root
+  myasus gpu-integrated
+  myasus status
   myasus kbd-backlight-down
   myasus kbd-backlight-up
 EOF
 }
 
+log() {
+    printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >> "$LOG_FILE"
+}
+
 notify() {
+    log "notify: $1"
+
     if command -v dunstify >/dev/null 2>&1; then
-        dunstify -u low -t 3000 -r 101 "myasus" "$1"
+        dunstify -u low -t 3000 -r 101 "myasus" "$1" >/dev/null 2>&1 || true
     elif command -v notify-send >/dev/null 2>&1; then
-        notify-send "myasus" "$1"
+        notify-send "myasus" "$1" >/dev/null 2>&1 || true
     fi
+}
+
+capture_cmd() {
+    local output=""
+    local rc=0
+
+    log "+ $*"
+
+    output="$("$@" 2>&1)" || rc=$?
+
+    if [ -n "$output" ]; then
+        while IFS= read -r line; do
+            log "$line"
+        done <<< "$output"
+    fi
+
+    if [ "$rc" -ne 0 ]; then
+        log "command failed (${rc}): $*"
+        [ -n "$output" ] && printf '%s\n' "$output" >&2
+        return "$rc"
+    fi
+
+    [ -n "$output" ] && printf '%s\n' "$output"
+}
+
+read_sysfs() {
+    local path="$1"
+
+    [ -r "$path" ] || return 0
+    head -n 1 "$path"
+}
+
+host_vendor() {
+    read_sysfs /sys/class/dmi/id/sys_vendor
+}
+
+host_product() {
+    read_sysfs /sys/class/dmi/id/product_name
+}
+
+is_supported_host() {
+    local vendor product
+
+    vendor="$(host_vendor)"
+    product="$(host_product)"
+
+    [[ "$vendor" == "$SUPPORTED_VENDOR" ]] && [[ "$product" == *"$SUPPORTED_PRODUCT_PART"* ]]
+}
+
+skip_if_unsupported() {
+    local command_name="$1"
+
+    if is_supported_host; then
+        return 0
+    fi
+
+    log "skip unsupported host for '${command_name}': vendor='$(host_vendor)' product='$(host_product)'"
+    exit 0
+}
+
+get_profile() {
+    asusctl profile get \
+        | sed -n 's/^Active profile: //p'
+}
+
+map_profile_to_power_mode() {
+    case "${1,,}" in
+        quiet)
+            echo "power-saver"
+            ;;
+        balanced)
+            echo "balanced"
+            ;;
+        performance)
+            echo "performance"
+            ;;
+    esac
+}
+
+sync_power_profile() {
+    local profile="$1"
+    local target_mode=""
+    local output=""
+
+    target_mode="$(map_profile_to_power_mode "$profile")"
+
+    [ -n "$target_mode" ] || return 0
+    command -v powerprofilesctl >/dev/null 2>&1 || return 0
+
+    output="$(powerprofilesctl set "$target_mode" 2>&1)" && return 0
+
+    if [ -n "$output" ]; then
+        while IFS= read -r line; do
+            log "powerprofilesctl: $line"
+        done <<< "$output"
+    fi
+
+    if [[ "$output" == *"Failed to activate CPU driver 'amd_pstate'"* ]]; then
+        log "skip powerprofilesctl sync due to amd_pstate activation failure"
+        return 0
+    fi
+
+    log "powerprofilesctl set '$target_mode' failed"
+}
+
+print_status() {
+    local profile power_mode gfx_mode pending_action pending_mode dgpu_disable gpu_mux
+
+    profile="$(get_profile 2>/dev/null || true)"
+    power_mode="$(powerprofilesctl get 2>/dev/null || true)"
+    gfx_mode="$(supergfxctl -g 2>/dev/null || true)"
+    pending_action="$(supergfxctl -p 2>/dev/null || true)"
+    pending_mode="$(supergfxctl -P 2>/dev/null || true)"
+    dgpu_disable="$(read_sysfs /sys/devices/platform/asus-nb-wmi/dgpu_disable)"
+    gpu_mux="$(read_sysfs /sys/devices/platform/asus-nb-wmi/gpu_mux_mode)"
+
+    printf 'host_vendor=%s\n' "$(host_vendor)"
+    printf 'host_product=%s\n' "$(host_product)"
+    printf 'profile=%s\n' "${profile:-unknown}"
+    printf 'power_profile=%s\n' "${power_mode:-unknown}"
+    printf 'supergfx_mode=%s\n' "${gfx_mode:-unknown}"
+    printf 'supergfx_pending_action=%s\n' "${pending_action:-unknown}"
+    printf 'supergfx_pending_mode=%s\n' "${pending_mode:-unknown}"
+    printf 'dgpu_disable=%s\n' "${dgpu_disable:-unknown}"
+    printf 'gpu_mux_mode=%s\n' "${gpu_mux:-unknown}"
+}
+
+log_status() {
+    while IFS= read -r line; do
+        log "state: $line"
+    done < <(print_status)
+}
+
+ensure_integrated_mode() {
+    local current_mode="" pending_action="" pending_mode="" change_output=""
+
+    command -v supergfxctl >/dev/null 2>&1 || return 0
+
+    if ! systemctl is-active --quiet supergfxd.service 2>/dev/null; then
+        log "supergfxd is not active, skip integrated enforcement"
+        return 0
+    fi
+
+    current_mode="$(supergfxctl -g 2>/dev/null || true)"
+
+    if [ "$current_mode" != "Integrated" ]; then
+        log "requesting Integrated mode from '${current_mode:-unknown}'"
+        change_output="$(capture_cmd supergfxctl -m Integrated || true)"
+        [ -n "$change_output" ] && log "supergfxctl change: $change_output"
+    fi
+
+    pending_action="$(supergfxctl -p 2>/dev/null || true)"
+    pending_mode="$(supergfxctl -P 2>/dev/null || true)"
+
+    if [ -n "$pending_action" ] && [ "$pending_action" != "No action required" ]; then
+        log "supergfx pending action: ${pending_action}; pending mode: ${pending_mode:-unknown}"
+        notify "GPU: ${pending_action}"
+    fi
+}
+
+apply_profile_side_effects() {
+    local profile="$1"
+
+    sync_power_profile "$profile"
+    ensure_integrated_mode
+    log_status
+}
+
+normalize_profile_name() {
+    case "${1,,}" in
+        quiet)
+            echo "Quiet"
+            ;;
+        balanced)
+            echo "Balanced"
+            ;;
+        performance)
+            echo "Performance"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
 }
 
 rog_toggle() {
@@ -33,20 +232,58 @@ rog_toggle() {
     rog-control-center >/dev/null 2>&1 &
 }
 
-get_profile() {
-    asusctl profile get \
-        | sed -n 's/^Active profile: //p'
+profile_set() {
+    local target="$1"
+    local profile=""
+
+    profile="$(normalize_profile_name "$target")" || {
+        usage >&2
+        exit 1
+    }
+
+    capture_cmd asusctl profile set "$profile" >/dev/null
+    apply_profile_side_effects "$profile"
+    notify "Profile: ${profile}"
 }
 
 profile_next() {
-    local profile
+    local profile=""
 
-    asusctl profile next
+    capture_cmd asusctl profile next >/dev/null
     profile="$(get_profile)"
 
     if [ -n "${profile}" ]; then
+        apply_profile_side_effects "$profile"
         notify "Profile: ${profile}"
     fi
+}
+
+session_apply() {
+    local profile=""
+
+    profile="$(get_profile 2>/dev/null || true)"
+
+    if [ -n "$profile" ]; then
+        apply_profile_side_effects "$profile"
+    else
+        ensure_integrated_mode
+        log_status
+    fi
+}
+
+power_event_root() {
+    local source_label="$1"
+    local profile=""
+
+    log "power event: ${source_label}"
+    profile="$(get_profile 2>/dev/null || true)"
+
+    if [ -n "$profile" ]; then
+        sync_power_profile "$profile"
+    fi
+
+    ensure_integrated_mode
+    log_status
 }
 
 kbd_backlight_down() {
@@ -60,13 +297,13 @@ kbd_backlight_down() {
 
     case "${current}" in
         high)
-            asusctl leds set med
+            capture_cmd asusctl leds set med >/dev/null
             ;;
         med)
-            asusctl leds set low
+            capture_cmd asusctl leds set low >/dev/null
             ;;
         low)
-            asusctl leds set off
+            capture_cmd asusctl leds set off >/dev/null
             ;;
     esac
 }
@@ -88,28 +325,61 @@ kbd_backlight_up() {
 
     case "${current}" in
         off)
-            asusctl leds set low
+            capture_cmd asusctl leds set low >/dev/null
             ;;
         low)
-            asusctl leds set med
+            capture_cmd asusctl leds set med >/dev/null
             ;;
         med)
-            asusctl leds set high
+            capture_cmd asusctl leds set high >/dev/null
             ;;
     esac
 }
 
 case "${1:-}" in
     rog-toggle)
+        skip_if_unsupported "rog-toggle"
         rog_toggle
         ;;
     profile-next)
+        skip_if_unsupported "profile-next"
         profile_next
         ;;
+    profile-set)
+        skip_if_unsupported "profile-set"
+        [ -n "${2:-}" ] || {
+            usage >&2
+            exit 1
+        }
+        profile_set "$2"
+        ;;
+    session-apply)
+        skip_if_unsupported "session-apply"
+        session_apply
+        ;;
+    power-ac-root)
+        skip_if_unsupported "power-ac-root"
+        power_event_root "ac"
+        ;;
+    power-battery-root)
+        skip_if_unsupported "power-battery-root"
+        power_event_root "battery"
+        ;;
+    gpu-integrated)
+        skip_if_unsupported "gpu-integrated"
+        ensure_integrated_mode
+        log_status
+        ;;
+    status)
+        skip_if_unsupported "status"
+        print_status
+        ;;
     kbd-backlight-down)
+        skip_if_unsupported "kbd-backlight-down"
         kbd_backlight_down
         ;;
     kbd-backlight-up)
+        skip_if_unsupported "kbd-backlight-up"
         kbd_backlight_up
         ;;
     *)

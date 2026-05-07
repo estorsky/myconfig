@@ -716,6 +716,47 @@ is_asus_zephyrus_g14 () {
     return 1
 }
 
+install__myasus_hook () {
+    local hook_source hook_target
+
+    hook_source="${INSTALL_DIR}/myasus_asusd_hook.sh"
+    hook_target="/usr/local/bin/myasus-hook"
+
+    root_cmd install -Dm755 "$hook_source" "$hook_target" || return 1
+}
+
+configure__asusd_power_hooks () {
+    local config_source config_path
+
+    config_source="${INSTALL_DIR}/../dotfiles/asus/asusd.ron.example"
+    config_path="/etc/asusd/asusd.ron"
+
+    if ! root_cmd test -f "$config_path"; then
+        root_cmd install -Dm644 "$config_source" "$config_path" || return 1
+    fi
+
+    root_cmd python3 - "$config_path" <<'PY' || return 1
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+
+patterns = {
+    r'(?m)^(\s*ac_command:\s*).*$': r'\1"/usr/local/bin/myasus-hook ac",',
+    r'(?m)^(\s*bat_command:\s*).*$': r'\1"/usr/local/bin/myasus-hook battery",',
+}
+
+for pattern, replacement in patterns.items():
+    text, count = re.subn(pattern, replacement, text)
+    if count == 0:
+        raise SystemExit(f"failed to patch {path}: pattern not found: {pattern}")
+
+path.write_text(text)
+PY
+}
+
 # sudo eopkg it clang-devel fontconfig-devel cmake libxkbcommon-devel rust seatd-devel libinput-devel
 install__asusctl () {
     set -x
@@ -732,17 +773,18 @@ install__asusctl () {
     source_version="$(source_version__asusctl)"
     installed_version="$(installed_version__asusctl)"
 
-    if should_skip_source_install "asusctl" "$source_id" "$source_version" "$installed_version"; then
-        return 0
+    if ! should_skip_source_install "asusctl" "$source_id" "$source_version" "$installed_version"; then
+        build_path="$(prepare_source_build_dir "asusctl" "$repo_path")" || return 1
+        cd "$build_path" || return 1
+        make || return 1
+        sudo make install || return 1
+        write_source_install_state "asusctl" "$source_id"
     fi
 
-    build_path="$(prepare_source_build_dir "asusctl" "$repo_path")" || return 1
-    cd "$build_path" || return 1
-    make || return 1
-    sudo make install || return 1
+    install__myasus_hook || return 1
+    configure__asusd_power_hooks || return 1
     sudo systemctl daemon-reload || return 1
     sudo systemctl restart asusd || return 1
-    write_source_install_state "asusctl" "$source_id"
 }
 
 install__supergfxctl () {
