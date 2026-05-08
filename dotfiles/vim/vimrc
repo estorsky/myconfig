@@ -45,6 +45,7 @@ Plug 'khaser/sway-vim-kbswitch' , {'do': 'cargo build -r'} " it cargo
 " Plug 'qpkorr/vim-bufkill'
 if has('nvim')
     Plug 'axelf4/vim-strip-trailing-whitespace'
+    Plug 'xTacobaco/cursor-agent.nvim'
     " Plug 'rbgrouleff/bclose.vim'
     " Plug 'ararslan/gruvbox', {'branch': 'aa/nvim-0.11'}
     Plug 'ellisonleao/gruvbox.nvim'
@@ -81,6 +82,12 @@ if &term =~ '^screen'
 endif
 let g:mapleader=';'
 set autoread
+
+augroup auto_reload_changed_files
+    autocmd!
+    autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
+                \ if mode() !=# 'c' | checktime | endif
+augroup END
 
 
 " CUSTOMIZATION
@@ -307,6 +314,15 @@ let g:XkbSwitchLib = expand('~/.vim/plugged/sway-vim-kbswitch/target/release/lib
 
 if has('nvim')
     set termguicolors
+    lua << EOF
+    local ok, cursor_agent = pcall(require, 'cursor-agent')
+    if ok then
+        cursor_agent.setup({
+            cmd = vim.fn.expand('~/myconfig/scripts/cursor_agent_proxy.sh'),
+            args = {},
+        })
+    end
+EOF
     " nmap <BS> <C-h>
     augroup modern_cool_highlights
         autocmd!
@@ -388,6 +404,11 @@ map <silent> <C-p> :Files<CR>
 vmap <silent> <C-p> <esc>:Files<CR>
 map <Leader>m :Marks<CR>
 vmap <Leader>m <esc>:Marks<CR>
+if has('nvim')
+    nnoremap <silent> <leader>ca :CursorAgent<CR>
+    vnoremap <silent> <leader>ca <Esc>:CursorAgentSelection<CR>
+    nnoremap <silent> <leader>cA :CursorAgentBuffer<CR>
+endif
 " nnoremap <silent> ? :noh<CR>
 " vnoremap <silent> ? <esc>:noh<CR>
 nnoremap <silent> ? :let @/ = ""<CR>
@@ -650,6 +671,28 @@ if has('nvim')
     lua require'hop'.setup { keys = 'asdghklqwertyuiopzxcvbnmfj' }
 
     nmap <Space> :HopChar1<CR>
+
+    " Agent
+    function! SetupCursorAgentTermMappings() abort
+        if &buftype !=# 'terminal'
+            return
+        endif
+
+        let l:bufname = expand('%')
+        if l:bufname !~# 'cursor_agent_proxy\.sh' && l:bufname !~# 'cursor-agent'
+            return
+        endif
+
+        tnoremap <silent><buffer> <Esc> <C-\><C-n>
+        " tnoremap <silent><buffer> <C-q> <C-\><C-n>:close<CR>
+        tnoremap <silent><buffer> <leader>w <C-\><C-n>:close<CR>
+        nnoremap <silent><buffer> <Esc> :close<CR>
+    endfunction
+
+    augroup cursor_agent_terminal
+        autocmd!
+        autocmd TermOpen * call SetupCursorAgentTermMappings()
+    augroup END
 else
     " EasyMotion
     let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnmfj'

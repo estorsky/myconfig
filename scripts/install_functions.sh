@@ -104,6 +104,61 @@ installed_binary_path() {
     command -v "$1" 2>/dev/null || true
 }
 
+proxychains4_binary_path() {
+    installed_binary_path "proxychains4"
+}
+
+cursor_agent_binary_path() {
+    local candidate
+
+    for candidate in \
+        "$HOME/.local/bin/agent" \
+        "/usr/local/bin/agent" \
+        "/usr/bin/agent"
+    do
+        if [[ -x "$candidate" ]]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+
+    command -v agent 2>/dev/null || true
+}
+
+cursor_agent_is_local_only_command() {
+    case "${1:-}" in
+        -h|--help|-v|--version|help)
+            return 0
+            ;;
+    esac
+
+    return 1
+}
+
+run_cursor_agent_command() {
+    local agent_bin proxy_bin
+    agent_bin="$(cursor_agent_binary_path)"
+
+    if [[ -z "$agent_bin" ]]; then
+        echo "agent binary is not installed"
+        return 1
+    fi
+
+    if cursor_agent_is_local_only_command "${1:-}"; then
+        "$agent_bin" "$@"
+        return $?
+    fi
+
+    if "$agent_bin" "$@"; then
+        return 0
+    fi
+
+    proxy_bin="$(proxychains4_binary_path)"
+    [[ -n "$proxy_bin" ]] || return 1
+
+    "$proxy_bin" -q "$agent_bin" "$@"
+}
+
 proxychains4_library_path() {
     local candidate
 
@@ -364,6 +419,28 @@ installed_version__proxychains4() {
     [[ -n "$lib_path" ]] || return 0
 
     strings "$lib_path" 2>/dev/null | sed -n 's/^\([0-9][0-9.]*\(-git-[0-9][0-9]*-g[0-9a-f]\+\)\?\)$/\1/p' | head -n 1
+}
+
+install__cursor_agent () {
+    set -x
+
+    local agent_bin proxy_bin install_cmd
+    agent_bin="$(cursor_agent_binary_path)"
+
+    if [[ -n "$agent_bin" ]]; then
+        run_cursor_agent_command update
+        return $?
+    fi
+
+    proxy_bin="$(proxychains4_binary_path)"
+    install_cmd='set -o pipefail; curl https://cursor.com/install -fsS | bash'
+
+    if bash -lc "$install_cmd"; then
+        return 0
+    fi
+
+    [[ -n "$proxy_bin" ]] || return 1
+    "$proxy_bin" -q bash -lc "$install_cmd"
 }
 
 hiddify_target_user() {

@@ -64,6 +64,7 @@ init () {
     install__asusctl
     install__supergfxctl
     install__proxychains4
+    install__cursor_agent
 
     # lockscreen unit
     # sudo cp ../../myconfig/systemd/lockscreen.service /etc/systemd/system/
@@ -183,6 +184,7 @@ update () {
     install__asusctl
     install__supergfxctl
     install__proxychains4
+    install__cursor_agent
     install__hiddify
     # install__telegram
     # ~/.tmux/plugins/tpm/bin/update_plugins all
