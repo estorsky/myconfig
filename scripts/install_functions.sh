@@ -108,6 +108,25 @@ proxychains4_binary_path() {
     installed_binary_path "proxychains4"
 }
 
+run_with_proxychains_fallback() {
+    local proxy_bin exit_code
+
+    "$@"
+    exit_code=$?
+
+    if [[ "$exit_code" -eq 0 ]]; then
+        return 0
+    fi
+
+    proxy_bin="$(proxychains4_binary_path)"
+
+    if [[ -z "$proxy_bin" ]]; then
+        return "$exit_code"
+    fi
+
+    "$proxy_bin" -q "$@"
+}
+
 cursor_agent_binary_path() {
     local candidate
 
@@ -795,24 +814,40 @@ is_asus_zephyrus_g14 () {
 
 install__myasus_hook () {
     local hook_source hook_target
+    MYASUS_HOOK_CHANGED=0
 
     hook_source="${INSTALL_DIR}/myasus_asusd_hook.sh"
     hook_target="/usr/local/bin/myasus-hook"
 
+    if root_cmd test -f "$hook_target" && root_cmd cmp -s "$hook_source" "$hook_target" && root_cmd test -x "$hook_target"; then
+        return 0
+    fi
+
     root_cmd install -Dm755 "$hook_source" "$hook_target" || return 1
+    MYASUS_HOOK_CHANGED=1
 }
 
 configure__asusd_power_hooks () {
-    local config_source config_path
+    local config_source config_path tmp_config
+    ASUSD_POWER_HOOKS_CHANGED=0
 
     config_source="${INSTALL_DIR}/../dotfiles/asus/asusd.ron.example"
     config_path="/etc/asusd/asusd.ron"
+    tmp_config="$(mktemp)" || return 1
 
-    if ! root_cmd test -f "$config_path"; then
-        root_cmd install -Dm644 "$config_source" "$config_path" || return 1
+    if root_cmd test -f "$config_path"; then
+        root_cmd cat "$config_path" > "$tmp_config" || {
+            rm -f "$tmp_config"
+            return 1
+        }
+    else
+        cp "$config_source" "$tmp_config" || {
+            rm -f "$tmp_config"
+            return 1
+        }
     fi
 
-    root_cmd python3 - "$config_path" <<'PY' || return 1
+    if ! python3 - "$tmp_config" <<'PY'
 from pathlib import Path
 import re
 import sys
@@ -832,6 +867,20 @@ for pattern, replacement in patterns.items():
 
 path.write_text(text)
 PY
+    then
+        rm -f "$tmp_config"
+        return 1
+    fi
+
+    if ! root_cmd test -f "$config_path" || ! root_cmd cmp -s "$tmp_config" "$config_path"; then
+        root_cmd install -Dm644 "$tmp_config" "$config_path" || {
+            rm -f "$tmp_config"
+            return 1
+        }
+        ASUSD_POWER_HOOKS_CHANGED=1
+    fi
+
+    rm -f "$tmp_config"
 }
 
 # sudo eopkg it clang-devel fontconfig-devel cmake libxkbcommon-devel rust seatd-devel libinput-devel
@@ -839,6 +888,7 @@ install__asusctl () {
     set -x
 
     local repo_path build_path source_id source_version installed_version
+    local asusctl_changed=0
 
     if ! is_asus_zephyrus_g14; then
         return 0
@@ -856,12 +906,16 @@ install__asusctl () {
         make || return 1
         sudo make install || return 1
         write_source_install_state "asusctl" "$source_id"
+        asusctl_changed=1
     fi
 
     install__myasus_hook || return 1
     configure__asusd_power_hooks || return 1
-    sudo systemctl daemon-reload || return 1
-    sudo systemctl restart asusd || return 1
+
+    if (( asusctl_changed || MYASUS_HOOK_CHANGED || ASUSD_POWER_HOOKS_CHANGED )); then
+        sudo systemctl daemon-reload || return 1
+        sudo systemctl restart asusd || return 1
+    fi
 }
 
 install__supergfxctl () {
@@ -1041,7 +1095,7 @@ install__hiddify () {
 
     mkdir -p "$install_root" || return 1
 
-    curl -fsSL "https://api.github.com/repos/hiddify/hiddify-app/releases/latest" -o "$release_json" || return 1
+    run_with_proxychains_fallback curl -fsSL "https://api.github.com/repos/hiddify/hiddify-app/releases/latest" -o "$release_json" || return 1
 
     latest_version="$(jq -r '.tag_name | ltrimstr("v")' "$release_json")"
     asset_url="$(
@@ -1072,7 +1126,7 @@ install__hiddify () {
 
     appimage_path="${tmp_dir}/Hiddify-Linux-x64-AppImage.AppImage"
 
-    curl -fL --progress-bar "$asset_url" -o "$appimage_path" || return 1
+    run_with_proxychains_fallback curl -fL --progress-bar "$asset_url" -o "$appimage_path" || return 1
     chmod +x "$appimage_path" || return 1
 
     if [[ -n "$asset_digest" ]]; then
