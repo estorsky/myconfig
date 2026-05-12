@@ -5,6 +5,7 @@ set -euo pipefail
 LOG_FILE="/tmp/myasus.log"
 SUPPORTED_VENDOR="ASUSTeK COMPUTER INC."
 SUPPORTED_PRODUCT_PART="Zephyrus G14"
+USE_POWERPROFILESCTL="${MYASUS_USE_POWERPROFILESCTL:-false}"
 
 usage() {
     cat <<'EOF'
@@ -118,6 +119,10 @@ sync_power_profile() {
     local target_mode=""
     local output=""
 
+    if [[ "$USE_POWERPROFILESCTL" != "true" ]]; then
+        return 0
+    fi
+
     target_mode="$(map_profile_to_power_mode "$profile")"
 
     [ -n "$target_mode" ] || return 0
@@ -143,7 +148,11 @@ print_status() {
     local profile power_mode gfx_mode pending_action pending_mode dgpu_disable gpu_mux
 
     profile="$(get_profile 2>/dev/null || true)"
-    power_mode="$(powerprofilesctl get 2>/dev/null || true)"
+    if [[ "$USE_POWERPROFILESCTL" == "true" ]] && command -v powerprofilesctl >/dev/null 2>&1; then
+        power_mode="$(powerprofilesctl get 2>/dev/null || true)"
+    else
+        power_mode="unused"
+    fi
     gfx_mode="$(supergfxctl -g 2>/dev/null || true)"
     pending_action="$(supergfxctl -p 2>/dev/null || true)"
     pending_mode="$(supergfxctl -P 2>/dev/null || true)"

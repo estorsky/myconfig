@@ -883,6 +883,19 @@ PY
     rm -f "$tmp_config"
 }
 
+configure__asusd_fan_curves () {
+    local fan_curves_source fan_curves_path
+    ASUSD_FAN_CURVES_CHANGED=0
+
+    fan_curves_source="${INSTALL_DIR}/../dotfiles/asus/fan_curves.ron.example"
+    fan_curves_path="/etc/asusd/fan_curves.ron"
+
+    if ! root_cmd test -f "$fan_curves_path"; then
+        root_cmd install -Dm644 "$fan_curves_source" "$fan_curves_path" || return 1
+        ASUSD_FAN_CURVES_CHANGED=1
+    fi
+}
+
 # sudo eopkg it clang-devel fontconfig-devel cmake libxkbcommon-devel rust seatd-devel libinput-devel
 install__asusctl () {
     set -x
@@ -911,8 +924,9 @@ install__asusctl () {
 
     install__myasus_hook || return 1
     configure__asusd_power_hooks || return 1
+    configure__asusd_fan_curves || return 1
 
-    if (( asusctl_changed || MYASUS_HOOK_CHANGED || ASUSD_POWER_HOOKS_CHANGED )); then
+    if (( asusctl_changed || MYASUS_HOOK_CHANGED || ASUSD_POWER_HOOKS_CHANGED || ASUSD_FAN_CURVES_CHANGED )); then
         sudo systemctl daemon-reload || return 1
         sudo systemctl restart asusd || return 1
     fi
