@@ -34,6 +34,19 @@ window#waybar.chromium {
     border: none;
 }
 
+tooltip {
+    background-color: rgba(30, 34, 51, 0.96);
+    border: 1px solid rgba(120, 147, 216, 0.45);
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(8, 10, 18, 0.35);
+}
+
+tooltip label {
+    color: #c1cae9;
+    padding: 6px 8px;
+    font-size: 14px;
+}
+
 button {
     /* Use box-shadow instead of border so the text isn't offset */
     box-shadow: inset 0 -3px transparent;
@@ -90,6 +103,7 @@ button:hover {
 #network,
 #pulseaudio,
 #wireplumber,
+#custom-weather,
 #custom-media,
 #tray,
 #mode,
@@ -305,6 +319,34 @@ label:focus {
     /* background-color: #eb4d4b; */
 
     /* background: rgba(0, 0, 0, 0.6); */
+    color: #d07d8e;
+}
+
+#custom-weather {
+    font-weight: bold;
+    color: #c1cae9;
+}
+
+#custom-weather.clear,
+#custom-weather.partly-cloudy {
+    color: #d5aa73;
+}
+
+#custom-weather.cloudy,
+#custom-weather.fog {
+    color: #a6b2d2;
+}
+
+#custom-weather.rain {
+    color: #91c4f0;
+}
+
+#custom-weather.snow {
+    color: #c1cae9;
+}
+
+#custom-weather.storm,
+#custom-weather.error {
     color: #d07d8e;
 }
 

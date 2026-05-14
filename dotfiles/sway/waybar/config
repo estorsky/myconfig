@@ -16,12 +16,12 @@
     "modules-right": [
         "sway/language",
         "custom/pulseaudio",
-        "network",
         "cpu",
         "memory",
         "temperature",
         "backlight",
         "battery",
+        "custom/weather",
         "clock",
         "tray",
         "custom/power"
@@ -102,7 +102,7 @@
     "clock": {
         // "timezone": "America/New_York",
         "locale": "en_GB.UTF-8",
-        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "tooltip-format": "<tt>{calendar}</tt>",
         "format-alt": "{:%Y-%m-%d}",
         "calendar": {
             "mode": "month",
@@ -145,7 +145,8 @@
         "scroll-step": 10,
         // "device": "acpi_video1",
         "format": "{percent}% {icon}",
-        "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+        "format-icons": ["○", "◔", "◑", "◕", "●"],
+        "tooltip-format": "Brightness: {percent}%"
     },
     "battery": {
         "interval": 5,
@@ -195,6 +196,14 @@
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
         "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+",
         "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+    },
+    "custom/weather": {
+        "exec": "/home/dmitry/myconfig/dotfiles/sway/waybar/waybar_weather.py",
+        "return-type": "json",
+        "format": "{}",
+        "interval": 60,
+        "escape": false,
+        "tooltip": true
     },
     "custom/media": {
         "format": "{icon} {}",

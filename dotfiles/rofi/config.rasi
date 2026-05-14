@@ -1,6 +1,8 @@
 configuration {
 	modi: "window,drun,ssh,combi,calc";
 	combi-modi: "window,drun,calc";
+	combi-display-format: "{text}";
+	window-format: "{c}: {t}";
 	kb-row-select: "";
 	kb-cancel: "Escape,Control+g,Control+bracketleft,Control+space";
 }

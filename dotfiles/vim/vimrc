@@ -31,7 +31,6 @@ Plug 'skywind3000/asyncrun.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Plug 'rhysd/vim-clang-format'
 Plug 'gcmt/taboo.vim'
-Plug 'mhartington/oceanic-next'
 Plug 'bfrg/vim-cpp-modern'
 Plug 'mtdl9/vim-log-highlighting'
 Plug 'hjson/vim-hjson'
@@ -47,6 +46,7 @@ if has('nvim')
     Plug 'axelf4/vim-strip-trailing-whitespace'
     Plug 'xTacobaco/cursor-agent.nvim'
     " Plug 'rbgrouleff/bclose.vim'
+    Plug 'folke/tokyonight.nvim'
     " Plug 'ararslan/gruvbox', {'branch': 'aa/nvim-0.11'}
     Plug 'ellisonleao/gruvbox.nvim'
     Plug 'smoka7/hop.nvim'
@@ -91,8 +91,6 @@ augroup END
 
 
 " CUSTOMIZATION
-let g:oceanic_next_terminal_bold = 1
-let g:oceanic_next_terminal_italic = 0
 " if has('nvim')
 " lua << EOF
 "     require("gruvbox").setup({
@@ -109,11 +107,40 @@ let g:oceanic_next_terminal_italic = 0
 
 set number
 syntax on
-try
-    colorscheme OceanicNext
-catch /^Vim\%((\a\+)\)\=:E185/
-    colorscheme gruvbox
-endtry
+if has('nvim')
+    lua << EOF
+    local ok, tokyonight = pcall(require, "tokyonight")
+    if ok then
+        tokyonight.setup({
+            style = "moon",
+            transparent = true,
+            terminal_colors = true,
+            styles = {
+                comments = { italic = false },
+                keywords = { italic = false },
+                sidebars = "transparent",
+                floats = "dark",
+            },
+            on_highlights = function(hl, c)
+                hl.Comment = { fg = c.dark5, italic = false }
+                hl.Visual = { bg = c.bg_visual }
+                hl.VisualNOS = { bg = c.bg_visual }
+            end,
+        })
+    end
+EOF
+    try
+        colorscheme tokyonight
+    catch /^Vim\%((\a\+)\)\=:E185/
+        colorscheme gruvbox
+    endtry
+else
+    try
+        colorscheme gruvbox
+    catch /^Vim\%((\a\+)\)\=:E185/
+        colorscheme default
+    endtry
+endif
 set background=dark
 set shortmess+=O
 set noshowmode
@@ -121,15 +148,8 @@ set cursorline
 " Colors
 hi VertSplit ctermbg=none
 set fillchars+=vert:│
-hi SignColumn guibg=NONE ctermbg=NONE
-hi TabLineFill ctermfg=243 ctermbg=NONE guifg=#617194 guibg=NONE
-hi TabLineSel cterm=bold ctermfg=235 ctermbg=111 guifg=#1e2233 guibg=#7893d8 gui=bold
-hi TabLine cterm=bold ctermfg=146 ctermbg=NONE guifg=#7a85b5 guibg=NONE
 hi Search ctermfg=111 ctermbg=none cterm=bold guifg=#91c4f0 guibg=NONE gui=bold
 hi link CurSearch Search
-" hi Visual ctermfg=Black ctermbg=110 cterm=bold
-" hi Visual cterm=bold
-hi Visual cterm=bold ctermbg=60 guibg=#425780
 let g:load_doxygen_syntax=1
 au FileType gitcommit setlocal tw=90
 au FileType markdown setlocal colorcolumn=120
@@ -157,6 +177,10 @@ let g:localvimrc_ask = 0
 let g:coc_global_extensions = [
             \ 'coc-json', 'coc-explorer', 'coc-calc', 'coc-clangd',
             \ 'coc-sh', 'coc-pyright', 'coc-vimlsp', 'coc-yaml']
+hi CocDiagnosticsError guifg=#d65d76 ctermfg=167 guibg=NONE ctermbg=NONE
+hi CocDiagnosticsWarning guifg=#d5aa73 ctermfg=179 guibg=NONE ctermbg=NONE
+hi CocDiagnosticsInfo guifg=#7893d8 ctermfg=111 guibg=NONE ctermbg=NONE
+hi CocDiagnosticsHint guifg=#91c4f0 ctermfg=117 guibg=NONE ctermbg=NONE
 hi link CocErrorSign CocDiagnosticsError
 hi link CocWarningSign CocDiagnosticsWarning
 hi link CocInfoSign CocDiagnosticsInfo
@@ -184,7 +208,11 @@ let g:AutoPairsMultilineClose = 0
 " let g:AutoPairsFlyMode = 0
 
 " Airline
-let g:airline_theme='oceanicnext'
+if has('nvim')
+    let g:airline_theme='base16_material_palenight'
+else
+    let g:airline_theme='zenburn'
+endif
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#xkblayout#enabled = 0
 let g:airline#extensions#tabline#enabled = 1
@@ -257,9 +285,6 @@ let g:ale_sign_warning = '•'
 let g:ale_linters = {'c': ['clang'], 'cpp': ['clang']}
 let g:ale_cpp_gcc_options="-Wall -Wextra -pedantic -std=c99"
 let g:ale_c_parse_makefile = 1
-hi ALEErrorSign ctermfg=160 ctermbg=none
-hi ALEWarningSign ctermfg=178 ctermbg=none
-hi ALEInfoSign ctermfg=075 ctermbg=none
 
 " CVim
 " let g:C_Ctrl_j = 'off'
@@ -270,9 +295,6 @@ let g:slime_python_ipython = 1
 
 " Gitgutter
 set updatetime=100
-hi link GitGutterAdd CocDiagnosticsHint
-hi link GitGutterChange CocDiagnosticsWarning
-hi link GitGutterDelete CocDiagnosticsError
 let g:gitgutter_highlight_linenrs = 1
 let g:gitgutter_sign_priority = 20
 let g:gitgutter_sign_added = '▌'
@@ -324,9 +346,9 @@ if has('nvim')
     end
 EOF
     " nmap <BS> <C-h>
-    augroup modern_cool_highlights
+    augroup nvim_theme_overrides
         autocmd!
-        autocmd VimEnter,ColorScheme * call ModernCoolHighlights()
+        autocmd VimEnter,ColorScheme * if exists('g:colors_name') && g:colors_name =~# '^tokyonight' | call NvimThemeOverrides() | endif
     augroup END
 else
     set timeoutlen=1000 ttimeoutlen=0
@@ -339,11 +361,9 @@ else
     map <Esc>[Z <S-Tab>
 endif
 
-function! ModernCoolHighlights() abort
+function! NvimThemeOverrides() abort
     hi Normal guibg=NONE ctermbg=NONE
     hi NormalNC guibg=NONE ctermbg=NONE
-    hi NormalFloat guifg=#c1cae9 guibg=#282d43 ctermfg=252 ctermbg=237
-    hi FloatBorder guifg=#91c4f0 guibg=#282d43 ctermfg=117 ctermbg=237
     hi EndOfBuffer guibg=NONE ctermbg=NONE guifg=#49526b ctermfg=243
     hi NonText guibg=NONE ctermbg=NONE guifg=#49526b ctermfg=243
     hi SignColumn guibg=NONE ctermbg=NONE
@@ -351,27 +371,13 @@ function! ModernCoolHighlights() abort
     hi LineNr guibg=NONE ctermbg=NONE guifg=#617194 ctermfg=243
     hi CursorLine guibg=NONE ctermbg=NONE
     hi CursorLineNr guibg=NONE ctermbg=NONE guifg=#91c4f0 ctermfg=117 gui=bold cterm=bold
-    hi DiffAdd gui=NONE cterm=NONE guifg=#d9e6c3 guibg=#2b4634 ctermfg=254 ctermbg=22
-    hi DiffAdded gui=NONE cterm=NONE guifg=#d9e6c3 guibg=#2b4634 ctermfg=254 ctermbg=22
-    hi DiffChange guifg=#d9e2ff guibg=#22324a ctermfg=255 ctermbg=24
-    hi DiffDelete guifg=#e0b8c1 guibg=#3a2630 ctermfg=224 ctermbg=52
-    hi DiffRemoved gui=NONE cterm=NONE guifg=#f2d6dc guibg=#3a2630 ctermfg=255 ctermbg=52
-    hi DiffText guifg=#f2f6ff guibg=#315b88 ctermfg=255 ctermbg=25 gui=bold cterm=bold
-    hi Added gui=NONE cterm=NONE guifg=#d9e6c3 guibg=#2b4634 ctermfg=254 ctermbg=22
-    hi Removed guifg=#f2d6dc guibg=#3a2630 ctermfg=255 ctermbg=52
-    hi Changed guifg=#d9e2ff guibg=#22324a ctermfg=255 ctermbg=24
-    hi GitGutterAdd guifg=#90bf6b guibg=NONE ctermfg=149 ctermbg=NONE
-    hi GitGutterChange guifg=#7893d8 guibg=NONE ctermfg=111 ctermbg=NONE
-    hi GitGutterDelete guifg=#d07d8e guibg=NONE ctermfg=210 ctermbg=NONE
-    hi GitGutterChangeDelete guifg=#d5aa73 guibg=NONE ctermfg=180 ctermbg=NONE
-    hi GitGutterAddLineNr guifg=#90bf6b guibg=NONE ctermfg=149 ctermbg=NONE
-    hi GitGutterChangeLineNr guifg=#7893d8 guibg=NONE ctermfg=111 ctermbg=NONE
-    hi GitGutterDeleteLineNr guifg=#d07d8e guibg=NONE ctermfg=210 ctermbg=NONE
-    hi GitGutterChangeDeleteLineNr guifg=#d5aa73 guibg=NONE ctermfg=180 ctermbg=NONE
+    hi TabLineFill guibg=NONE ctermbg=NONE
+    hi link CocFloating NormalFloat
+    hi link CocFloatBorder FloatBorder
 endfunction
 
-if has('nvim')
-    call ModernCoolHighlights()
+if has('nvim') && exists('g:colors_name') && g:colors_name =~# '^tokyonight'
+    call NvimThemeOverrides()
 endif
 
 
