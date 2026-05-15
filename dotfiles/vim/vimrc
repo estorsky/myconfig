@@ -339,6 +339,22 @@ if has('nvim')
     lua << EOF
     local ok, cursor_agent = pcall(require, 'cursor-agent')
     if ok then
+        local util = require('cursor-agent.util')
+        local original_get_project_root = util.get_project_root
+
+        util.get_project_root = function()
+            local buf = vim.api.nvim_get_current_buf()
+            local name = vim.api.nvim_buf_get_name(buf)
+            local start = (name ~= '' and vim.fn.fnamemodify(name, ':p:h')) or vim.fn.getcwd()
+            local git_root = vim.fn.systemlist({ 'git', '-C', start, 'rev-parse', '--show-toplevel' })
+
+            if vim.v.shell_error == 0 and git_root[1] and git_root[1] ~= '' then
+                return git_root[1]
+            end
+
+            return original_get_project_root()
+        end
+
         cursor_agent.setup({
             cmd = vim.fn.expand('~/myconfig/scripts/cursor_agent_proxy.sh'),
             args = {},
