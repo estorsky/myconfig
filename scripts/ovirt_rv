@@ -1,0 +1,700 @@
+#!/usr/bin/env python3
+
+import argparse
+import getpass
+import json
+import os
+import pathlib
+import re
+import shutil
+import ssl
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+import xml.etree.ElementTree as ET
+
+
+API_VERSION = "4"
+
+
+def eprint(*args: object) -> None:
+    print(*args, file=sys.stderr)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Launch an oVirt VM in remote-viewer."
+    )
+    parser.add_argument("vm_name", help="Exact VM name in oVirt")
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List accessible VMs and exit",
+    )
+    parser.add_argument(
+        "--engine",
+        default=os.environ.get("OVIRT_ENGINE", "ovirt.eltex.loc"),
+        help="oVirt engine host",
+    )
+    parser.add_argument(
+        "--username",
+        default=os.environ.get("OVIRT_USERNAME"),
+        help="oVirt username, for example user@internal or just user with --profile",
+    )
+    parser.add_argument(
+        "--profile",
+        default=os.environ.get("OVIRT_PROFILE"),
+        help="oVirt auth profile, for example internal, ldap or ad profile name",
+    )
+    parser.add_argument(
+        "--sso-profile",
+        default=os.environ.get("OVIRT_SSO_PROFILE"),
+        help="Optional SSO suffix for Keycloak-based oVirt, for example internalsso",
+    )
+    parser.add_argument(
+        "--password",
+        default=os.environ.get("OVIRT_PASSWORD"),
+        help="oVirt password; prefer OVIRT_PASSWORD env for automation",
+    )
+    parser.add_argument(
+        "--ca-file",
+        default=os.environ.get("OVIRT_CA_FILE"),
+        help="CA file used for HTTPS verification",
+    )
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        default=os.environ.get("OVIRT_INSECURE", "").lower() in {"1", "true", "yes"},
+        help="Disable TLS verification",
+    )
+    parser.add_argument(
+        "--title",
+        help="Window title for remote-viewer",
+    )
+    parser.add_argument(
+        "--workspace",
+        default=os.environ.get("OVIRT_WORKSPACE"),
+        help="Move the viewer window to this sway workspace and focus it",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=120,
+        help="Seconds to wait for the VM to become ready",
+    )
+    parser.add_argument(
+        "--release-cursor",
+        default="ctrl+alt",
+        help="Hotkey used to release cursor grab",
+    )
+    parser.add_argument(
+        "--viewer",
+        default=os.environ.get("OVIRT_REMOTE_VIEWER", "remote-viewer"),
+        help="Remote viewer binary",
+    )
+    parser.add_argument(
+        "--full-screen",
+        action="store_true",
+        help="Launch remote-viewer in full screen",
+    )
+    parser.add_argument(
+        "--kiosk",
+        action="store_true",
+        help="Launch remote-viewer in kiosk mode",
+    )
+    parser.add_argument(
+        "--kiosk-quit",
+        choices=["never", "on-disconnect"],
+        help="Quit policy for kiosk mode",
+    )
+    parser.add_argument(
+        "--auto-resize",
+        choices=["never", "always"],
+        default="always",
+        help="remote-viewer auto-resize mode",
+    )
+    parser.add_argument(
+        "--shared",
+        action="store_true",
+        help="Launch remote-viewer in shared session mode",
+    )
+    return parser
+
+
+def request(
+    url: str,
+    *,
+    method: str = "GET",
+    data: bytes | None = None,
+    headers: dict[str, str] | None = None,
+    context: ssl.SSLContext | None = None,
+    timeout: int = 30,
+) -> tuple[int, str]:
+    req = urllib.request.Request(url, data=data, method=method)
+    for key, value in (headers or {}).items():
+        req.add_header(key, value)
+    try:
+        with urllib.request.urlopen(req, context=context, timeout=timeout) as response:
+            body = response.read().decode("utf-8")
+            return response.getcode(), body
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"HTTP {exc.code} for {url}\n{body}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"Request failed for {url}: {exc.reason}") from exc
+
+
+def cache_dir() -> pathlib.Path:
+    base = os.environ.get("XDG_CACHE_HOME")
+    if base:
+        return pathlib.Path(base) / "ovirt-rv"
+    return pathlib.Path.home() / ".cache" / "ovirt-rv"
+
+
+def download_engine_ca(engine: str) -> pathlib.Path | None:
+    target_dir = cache_dir()
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_path = target_dir / f"{engine}-ca.pem"
+    if target_path.exists() and target_path.stat().st_size > 0:
+        return target_path
+
+    url = (
+        f"http://{engine}/ovirt-engine/services/pki-resource"
+        "?resource=ca-certificate&format=X509-PEM-CA"
+    )
+    try:
+        _, body = request(url, timeout=15)
+    except RuntimeError:
+        return None
+
+    if "BEGIN CERTIFICATE" not in body:
+        return None
+
+    target_path.write_text(body, encoding="utf-8")
+    os.chmod(target_path, 0o600)
+    return target_path
+
+
+def build_ssl_context(args: argparse.Namespace) -> ssl.SSLContext:
+    if args.insecure:
+        return ssl._create_unverified_context()
+
+    ca_file = args.ca_file
+    if not ca_file:
+        cached_ca = download_engine_ca(args.engine)
+        if cached_ca:
+            ca_file = str(cached_ca)
+
+    if ca_file:
+        return ssl.create_default_context(cafile=ca_file)
+
+    return ssl.create_default_context()
+
+
+class OVirtClient:
+    def __init__(self, engine: str, token: str, ssl_context: ssl.SSLContext) -> None:
+        self.engine = engine
+        self.token = token
+        self.ssl_context = ssl_context
+        self.base_url = f"https://{engine}/ovirt-engine/api"
+
+    def api(
+        self,
+        path: str,
+        *,
+        method: str = "GET",
+        body: str | None = None,
+        accept: str = "application/xml",
+    ) -> str:
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Version": API_VERSION,
+            "Accept": accept,
+        }
+        data = None
+        if body is not None:
+            headers["Content-Type"] = "application/xml"
+            data = body.encode("utf-8")
+        _, response_body = request(
+            f"{self.base_url}{path}",
+            method=method,
+            data=data,
+            headers=headers,
+            context=self.ssl_context,
+        )
+        return response_body
+
+def get_access_token(
+    *,
+    engine: str,
+    username: str,
+    password: str,
+    ssl_context: ssl.SSLContext,
+) -> str:
+    payload = urllib.parse.urlencode(
+        {
+            "grant_type": "password",
+            "scope": "ovirt-app-api",
+            "username": username,
+            "password": password,
+        }
+    ).encode("utf-8")
+    try:
+        body = request(
+            f"https://{engine}/ovirt-engine/sso/oauth/token",
+            method="POST",
+            data=payload,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            context=ssl_context,
+        )[1]
+    except RuntimeError as exc:
+        message = str(exc)
+        if "No valid profile found in credentials" in message:
+            raise RuntimeError(
+                "Authentication profile was not recognized. "
+                "Use username in the form user@PROFILE, for example user@internal, "
+                "or pass --username user --profile PROFILE."
+            ) from exc
+        raise
+    try:
+        token = json.loads(body)["access_token"]
+    except (KeyError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Failed to parse token response:\n{body}") from exc
+    return token
+
+
+def build_username(username: str, profile: str | None, sso_profile: str | None) -> str:
+    result = username.strip()
+    if profile and not result.endswith(f"@{profile}") and f"@{profile}@" not in result:
+        result = f"{result}@{profile}"
+    if sso_profile and not result.endswith(f"@{sso_profile}"):
+        result = f"{result}@{sso_profile}"
+    return result
+
+
+def get_access_token_with_fallback(
+    *,
+    engine: str,
+    username: str,
+    password: str,
+    ssl_context: ssl.SSLContext,
+    profile: str | None,
+    sso_profile: str | None,
+) -> str:
+    candidates: list[str] = []
+    primary = build_username(username, profile, sso_profile)
+    candidates.append(primary)
+
+    # oVirt 4.5+ with Keycloak commonly expects an extra @internalsso suffix.
+    if sso_profile is None:
+        fallback = build_username(username, profile, "internalsso")
+        if fallback not in candidates:
+            candidates.append(fallback)
+
+    last_error: RuntimeError | None = None
+    for idx, candidate in enumerate(candidates):
+        try:
+            if idx > 0:
+                eprint(f"Retrying authentication as {candidate}")
+            return get_access_token(
+                engine=engine,
+                username=candidate,
+                password=password,
+                ssl_context=ssl_context,
+            )
+        except RuntimeError as exc:
+            last_error = exc
+            if "No valid profile found in credentials" in str(exc) and idx + 1 < len(candidates):
+                continue
+            raise
+
+    assert last_error is not None
+    raise last_error
+
+
+def xml_root(xml_text: str) -> ET.Element:
+    try:
+        return ET.fromstring(xml_text)
+    except ET.ParseError as exc:
+        raise RuntimeError(f"Failed to parse XML response:\n{xml_text}") from exc
+
+
+def local_name(tag: str) -> str:
+    if "}" in tag:
+        return tag.rsplit("}", 1)[1]
+    return tag
+
+
+def find_children(node: ET.Element, name: str) -> list[ET.Element]:
+    return [child for child in node if local_name(child.tag) == name]
+
+
+def find_child(node: ET.Element, name: str) -> ET.Element | None:
+    for child in node:
+        if local_name(child.tag) == name:
+            return child
+    return None
+
+
+def child_text(node: ET.Element, name: str) -> str:
+    child = find_child(node, name)
+    if child is None or child.text is None:
+        return ""
+    return child.text.strip()
+
+
+def list_all_vms(client: OVirtClient) -> list[ET.Element]:
+    root = xml_root(client.api("/vms?filter=true"))
+    return find_children(root, "vm")
+
+
+def get_vm(client: OVirtClient, vm_id: str) -> ET.Element:
+    return xml_root(client.api(f"/vms/{vm_id}"))
+
+
+def get_vm_status(vm_node: ET.Element) -> str:
+    status_node = find_child(vm_node, "status")
+    if status_node is None:
+        return ""
+    state = status_node.attrib.get("state", "").strip().lower()
+    if state:
+        return state
+    if status_node.text and status_node.text.strip():
+        return status_node.text.strip().lower()
+    state_node = find_child(status_node, "state")
+    if state_node is not None and state_node.text:
+        return state_node.text.strip().lower()
+    return ""
+
+
+def find_vm(client: OVirtClient, vm_name: str) -> ET.Element:
+    all_vms = list_all_vms(client)
+    exact = [vm for vm in all_vms if child_text(vm, "name") == vm_name]
+    if len(exact) == 1:
+        return exact[0]
+    if len(exact) > 1:
+        raise RuntimeError(f"Multiple VMs matched exact name {vm_name!r}")
+
+    lowered_name = vm_name.lower()
+    fuzzy = [
+        vm for vm in all_vms
+        if lowered_name in child_text(vm, "name").lower()
+    ]
+    if len(fuzzy) == 1:
+        return fuzzy[0]
+    if len(fuzzy) > 1:
+        available = ", ".join(child_text(vm, "name") for vm in fuzzy[:10])
+        raise RuntimeError(
+            f"VM {vm_name!r} matched multiple accessible VMs: {available}"
+        )
+
+    available = ", ".join(child_text(vm, "name") for vm in all_vms[:20]) or "none"
+    raise RuntimeError(
+        f"VM {vm_name!r} not found. Accessible VMs: {available}"
+    )
+
+
+def print_vm_list(vms: list[ET.Element]) -> None:
+    if not vms:
+        print("No accessible VMs found.")
+        return
+    for vm in sorted(vms, key=lambda item: child_text(item, "name").lower()):
+        name = child_text(vm, "name")
+        status = get_vm_status(vm) or "unknown"
+        print(f"{name}\t{status}")
+
+
+def start_vm_if_needed(client: OVirtClient, vm_id: str, status: str) -> None:
+    if status == "up":
+        return
+    if status not in {"powering_up", "wait_for_launch", "reboot_in_progress"}:
+        try:
+            client.api(f"/vms/{vm_id}/start", method="POST", body="<action/>")
+        except RuntimeError as exc:
+            message = str(exc)
+            if "Cannot run VM because the VM is in Up status." in message:
+                return
+            raise
+
+
+def wait_for_vm_up(client: OVirtClient, vm_id: str, timeout: int) -> ET.Element:
+    deadline = time.monotonic() + timeout
+    last_status = ""
+    while time.monotonic() < deadline:
+        vm = get_vm(client, vm_id)
+        status = get_vm_status(vm)
+        if status == "up":
+            return vm
+        if status != last_status:
+            eprint(f"VM status: {status or 'unknown'}")
+            last_status = status
+        time.sleep(3)
+    raise RuntimeError("Timed out waiting for VM to start")
+
+
+def get_graphics_console_id(client: OVirtClient, vm_id: str, timeout: int) -> str:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        root = xml_root(client.api(f"/vms/{vm_id}/graphicsconsoles"))
+        console = find_child(root, "graphics_console")
+        if console is not None:
+            console_id = console.attrib.get("id", "").strip()
+            if console_id:
+                return console_id
+        time.sleep(2)
+    raise RuntimeError("No graphics console became available in time")
+
+
+def get_remote_viewer_file(client: OVirtClient, vm_id: str, console_id: str) -> str:
+    response = client.api(
+        f"/vms/{vm_id}/graphicsconsoles/{console_id}/remoteviewerconnectionfile",
+        method="POST",
+        body="<action/>",
+    )
+    stripped = response.lstrip()
+    if stripped.startswith("[virt-viewer]"):
+        return response
+
+    root = xml_root(response)
+    rv_file = find_child(root, "remote_viewer_connection_file")
+    if rv_file is None or rv_file.text is None:
+        raise RuntimeError(f"oVirt did not return a remote-viewer file:\n{response}")
+    return rv_file.text
+
+
+def write_vv_file(vv_contents: str, title: str) -> pathlib.Path:
+    lines = vv_contents.splitlines()
+    updates = {
+        "title": title,
+        "release-cursor": "ctrl+alt",
+        "delete-this-file": "1",
+    }
+
+    section = None
+    seen_keys: set[str] = set()
+    updated_lines: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            if section == "virt-viewer":
+                for key, value in updates.items():
+                    if key not in seen_keys:
+                        updated_lines.append(f"{key}={value}")
+            section = stripped.strip("[]")
+            seen_keys = set()
+            updated_lines.append(line)
+            continue
+
+        if section == "virt-viewer" and "=" in line:
+            key, _, _ = line.partition("=")
+            key = key.strip()
+            if key in updates:
+                updated_lines.append(f"{key}={updates[key]}")
+                seen_keys.add(key)
+                continue
+            seen_keys.add(key)
+
+        updated_lines.append(line)
+
+    if section == "virt-viewer":
+        for key, value in updates.items():
+            if key not in seen_keys:
+                updated_lines.append(f"{key}={value}")
+
+    vv_contents = "\n".join(updated_lines) + "\n"
+    fd, path = tempfile.mkstemp(prefix="ovirt-", suffix=".vv")
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(vv_contents)
+    os.chmod(path, 0o600)
+    return pathlib.Path(path)
+
+
+def run_sway(cmd: str) -> None:
+    subprocess.run(
+        ["swaymsg", cmd],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def title_regex(title: str) -> str:
+    # remote-viewer may append the display number, e.g. "ovirt: vm (1)"
+    return "^" + re.escape(title) + r"( \([0-9]+\))?$"
+
+
+def get_sway_tree() -> dict | None:
+    if not os.environ.get("WAYLAND_DISPLAY"):
+        return None
+    if shutil.which("swaymsg") is None:
+        return None
+
+    tree = subprocess.run(
+        ["swaymsg", "-t", "get_tree"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if tree.returncode != 0:
+        return None
+    try:
+        return json.loads(tree.stdout)
+    except json.JSONDecodeError:
+        return None
+
+
+def has_matching_window(title: str) -> bool:
+    tree = get_sway_tree()
+    if tree is None:
+        return False
+
+    pattern = re.compile(title_regex(title))
+    stack = [tree]
+    while stack:
+        node = stack.pop()
+        name = node.get("name")
+        if isinstance(name, str) and pattern.fullmatch(name):
+            return True
+        stack.extend(node.get("nodes", []))
+        stack.extend(node.get("floating_nodes", []))
+    return False
+
+
+def focus_existing_window(title: str, workspace: str | None, fullscreen: bool) -> bool:
+    if not has_matching_window(title):
+        return False
+
+    criteria = f'[title="{title_regex(title)}"]'
+    if workspace:
+        run_sway(f"workspace number {workspace}")
+    run_sway(f"{criteria} focus")
+    if fullscreen:
+        run_sway(f"{criteria} fullscreen enable")
+    return True
+
+
+def sway_integrate(title: str, workspace: str | None, fullscreen: bool) -> None:
+    if get_sway_tree() is None:
+        return
+
+    criteria = f'[title="{title_regex(title)}"]'
+
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        if has_matching_window(title):
+            if workspace:
+                run_sway(f"{criteria} move container to workspace number {workspace}")
+                run_sway(f"workspace number {workspace}")
+            run_sway(f"{criteria} focus")
+            if fullscreen:
+                run_sway(f"{criteria} fullscreen enable")
+            return
+        time.sleep(0.5)
+
+
+def launch_remote_viewer(
+    args: argparse.Namespace,
+    vv_path: pathlib.Path,
+    title: str,
+) -> int:
+    viewer_bin = shutil.which(args.viewer)
+    if not viewer_bin:
+        raise RuntimeError(f"Viewer not found: {args.viewer}")
+
+    cmd = [
+        viewer_bin,
+        "--title",
+        title,
+        "--hotkeys",
+        f"release-cursor={args.release_cursor}",
+        f"--auto-resize={args.auto_resize}",
+    ]
+    if args.full_screen:
+        cmd.append("--full-screen")
+    if args.kiosk:
+        cmd.append("--kiosk")
+    if args.kiosk_quit:
+        cmd.append(f"--kiosk-quit={args.kiosk_quit}")
+    if args.shared:
+        cmd.append("--shared")
+    cmd.append(str(vv_path))
+
+    eprint("Starting:", " ".join(shlex_quote(part) for part in cmd))
+    process = subprocess.Popen(
+        cmd,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    sway_integrate(title, args.workspace, args.full_screen)
+    eprint(f"remote-viewer started in background (pid {process.pid})")
+    return 0
+
+
+def shlex_quote(text: str) -> str:
+    return subprocess.list2cmdline([text]) if os.name == "nt" else repr(text)
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    title = args.title or f"ovirt: {args.vm_name}"
+
+    if focus_existing_window(title, args.workspace, args.full_screen):
+        eprint(f"remote-viewer already running for {args.vm_name}, focusing existing window")
+        return 0
+
+    username = args.username or input("oVirt username: ").strip()
+    if not username:
+        raise RuntimeError("Username is required")
+
+    password = args.password or getpass.getpass("oVirt password: ")
+    if not password:
+        raise RuntimeError("Password is required")
+
+    ssl_context = build_ssl_context(args)
+    token = get_access_token_with_fallback(
+        engine=args.engine,
+        username=username,
+        password=password,
+        ssl_context=ssl_context,
+        profile=args.profile,
+        sso_profile=args.sso_profile,
+    )
+    client = OVirtClient(args.engine, token, ssl_context)
+
+    if args.list:
+        print_vm_list(list_all_vms(client))
+        return 0
+
+    vm = find_vm(client, args.vm_name)
+    vm_id = vm.attrib.get("id", "").strip()
+    if not vm_id:
+        raise RuntimeError("VM id is missing in API response")
+
+    status = get_vm_status(vm)
+    eprint(f"VM: {child_text(vm, 'name')} ({status or 'unknown'})")
+    start_vm_if_needed(client, vm_id, status)
+    wait_for_vm_up(client, vm_id, args.timeout)
+
+    console_id = get_graphics_console_id(client, vm_id, args.timeout)
+    vv_path = write_vv_file(get_remote_viewer_file(client, vm_id, console_id), title)
+
+    return launch_remote_viewer(args, vv_path, title)
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        raise SystemExit(130)
+    except RuntimeError as exc:
+        eprint(f"error: {exc}")
+        raise SystemExit(1)
