@@ -462,7 +462,101 @@ install__cursor_agent () {
     "$proxy_bin" -q bash -lc "$install_cmd"
 }
 
-hiddify_target_user() {
+run_as_target_user() {
+    local target_user="$1"
+    shift
+
+    if [[ "$(id -un)" == "$target_user" ]]; then
+        "$@"
+    else
+        sudo -u "$target_user" "$@"
+    fi
+}
+
+install__proxy_app_launchers () {
+    set -x
+
+    local target_user target_group target_home applications_dir
+    local cursor_desktop cursor_proxy_desktop chrome_desktop
+    local tmp_cursor_desktop tmp_cursor_proxy_desktop tmp_chrome_desktop
+
+    target_user="$(desktop_target_user)"
+    target_group="$(id -gn "$target_user")"
+    target_home="$(desktop_target_home "$target_user")"
+
+    if [[ -z "$target_home" || ! -d "$target_home" ]]; then
+        echo "failed to detect home directory for launcher target user: $target_user"
+        return 1
+    fi
+
+    applications_dir="${target_home}/.local/share/applications"
+    cursor_desktop="${applications_dir}/cursor.desktop"
+    cursor_proxy_desktop="${applications_dir}/cursor-proxy.desktop"
+    chrome_desktop="${applications_dir}/google-chrome-beta-proxy.desktop"
+    tmp_cursor_desktop="$(mktemp)"
+    tmp_cursor_proxy_desktop="$(mktemp)"
+    tmp_chrome_desktop="$(mktemp)"
+
+    trap 'rm -f "$tmp_cursor_desktop" "$tmp_cursor_proxy_desktop" "$tmp_chrome_desktop"; trap - RETURN' RETURN
+    run_as_target_user "$target_user" mkdir -p "$applications_dir" || return 1
+
+    cat > "$tmp_cursor_desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Cursor
+Comment=Launch Cursor
+Exec=${target_home}/Dropbox/bin/cursor
+TryExec=${target_home}/Dropbox/bin/cursor
+Icon=cursor
+Terminal=false
+StartupNotify=true
+Categories=Development;IDE;
+EOF
+
+    cat > "$tmp_cursor_proxy_desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Cursor Proxy
+Comment=Launch Cursor with the local SOCKS proxy
+Exec=${target_home}/myconfig/scripts/cursor-proxy
+TryExec=${target_home}/myconfig/scripts/cursor-proxy
+Icon=cursor
+Terminal=false
+StartupNotify=true
+Categories=Development;IDE;
+EOF
+
+    cat > "$tmp_chrome_desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Google Chrome Beta Proxy
+Comment=Launch Google Chrome Beta with the local SOCKS proxy
+Exec=${target_home}/myconfig/scripts/google-chrome-beta-proxy %U
+TryExec=${target_home}/myconfig/scripts/google-chrome-beta-proxy
+Icon=google-chrome-beta
+Terminal=false
+StartupNotify=true
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;x-scheme-handler/http;x-scheme-handler/https;
+StartupWMClass=Google-chrome-beta
+EOF
+
+    if [[ "$(id -un)" == "$target_user" ]]; then
+        install -Dm644 "$tmp_cursor_desktop" "$cursor_desktop" || return 1
+        install -Dm644 "$tmp_cursor_proxy_desktop" "$cursor_proxy_desktop" || return 1
+        install -Dm644 "$tmp_chrome_desktop" "$chrome_desktop" || return 1
+    else
+        root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_cursor_desktop" "$cursor_desktop" || return 1
+        root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_cursor_proxy_desktop" "$cursor_proxy_desktop" || return 1
+        root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_chrome_desktop" "$chrome_desktop" || return 1
+    fi
+
+    if command -v update-desktop-database >/dev/null 2>&1; then
+        run_as_target_user "$target_user" update-desktop-database "$applications_dir" >/dev/null 2>&1 || true
+    fi
+}
+
+desktop_target_user() {
     if [[ -n "${SUDO_USER:-}" && "${SUDO_USER}" != "root" ]]; then
         printf '%s\n' "${SUDO_USER}"
         return 0
@@ -471,7 +565,7 @@ hiddify_target_user() {
     id -un
 }
 
-hiddify_target_home() {
+desktop_target_home() {
     local target_user="$1"
 
     getent passwd "$target_user" | cut -d: -f6 | head -n 1
@@ -998,9 +1092,9 @@ install__telegram () {
     local tmp_dir archive_path extracted_dir backup_dir download_proxy
     local -a resolve_args download_args
 
-    target_user="$(hiddify_target_user)"
+    target_user="$(desktop_target_user)"
     target_group="$(id -gn "$target_user")"
-    target_home="$(hiddify_target_home "$target_user")"
+    target_home="$(desktop_target_home "$target_user")"
 
     if [[ -z "$target_home" || ! -d "$target_home" ]]; then
         echo "failed to detect home directory for telegram target user: $target_user"
@@ -1087,9 +1181,9 @@ install__hiddify () {
         return 1
     fi
 
-    target_user="$(hiddify_target_user)"
+    target_user="$(desktop_target_user)"
     target_group="$(id -gn "$target_user")"
-    target_home="$(hiddify_target_home "$target_user")"
+    target_home="$(desktop_target_home "$target_user")"
 
     if [[ -z "$target_home" || ! -d "$target_home" ]]; then
         echo "failed to detect home directory for hiddify target user: $target_user"

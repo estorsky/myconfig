@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+proxy_server="${GOOGLE_CHROME_BETA_PROXY_SERVER:-${MYCONFIG_PROXY_SERVER:-socks5://127.0.0.1:12334}}"
+chrome_bin="${GOOGLE_CHROME_BETA_BIN:-$(command -v google-chrome-beta 2>/dev/null || true)}"
+
+if [[ -z "$chrome_bin" ]]; then
+    echo "google-chrome-beta binary was not found" >&2
+    exit 1
+fi
+
+exec "$chrome_bin" --proxy-server="$proxy_server" "$@"

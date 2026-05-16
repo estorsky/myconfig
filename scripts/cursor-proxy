@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+find_cursor_bin() {
+    local candidate
+
+    for candidate in \
+        "${CURSOR_BIN:-}" \
+        "$HOME/Dropbox/bin/cursor" \
+        "$HOME/.local/bin/cursor" \
+        "/usr/local/bin/cursor" \
+        "/usr/bin/cursor"
+    do
+        if [[ -n "$candidate" && -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    command -v cursor 2>/dev/null || true
+}
+
+proxy_server="${CURSOR_PROXY_SERVER:-${MYCONFIG_PROXY_SERVER:-socks5://127.0.0.1:12334}}"
+cursor_bin="$(find_cursor_bin)"
+
+if [[ -z "$cursor_bin" ]]; then
+    echo "cursor binary was not found" >&2
+    exit 1
+fi
+
+exec "$cursor_bin" --proxy-server="$proxy_server" "$@"

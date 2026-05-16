@@ -81,6 +81,7 @@ init () {
     install__google_chrome
     configure_chrome_wayland_desktop /usr/share/applications/google-chrome.desktop /usr/bin/google-chrome-stable
     configure_chrome_wayland_desktop /usr/share/applications/google-chrome-beta.desktop /usr/bin/google-chrome-beta
+    install__proxy_app_launchers
     install__spotify
     # install__sublime_text_3
     install__ms_fonts
@@ -172,6 +173,7 @@ update () {
     sudo eopkg3p up -y
     configure_chrome_wayland_desktop /usr/share/applications/google-chrome.desktop /usr/bin/google-chrome-stable
     configure_chrome_wayland_desktop /usr/share/applications/google-chrome-beta.desktop /usr/bin/google-chrome-beta
+    install__proxy_app_launchers
     # install__ly
     # install__xkb_switch i3
     # install__nm_tray
