@@ -24,7 +24,7 @@ ZSH_THEME="evan"
 # HYPHEN_INSENSITIVE="true"
 
 # Uncomment one of the following lines to change the auto-update behavior
-# zstyle ':omz:update' mode disabled  # disable automatic updates
+zstyle ':omz:update' mode disabled  # disable automatic updates
 # zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
@@ -156,7 +156,7 @@ alias weather="curl wttr.in"
 alias ag="ag --color-match '1;33' --color-line-number '0;34'"
 alias rg="rg -F"
 alias tmux="tmux -u"
-alias UP="neovim +PlugUpgrade +PlugUpdate +CocUpdateSync +qa && solus up"
+alias UP="(omz update) && neovim +PlugUpgrade +PlugUpdate +CocUpdateSync +qa && solus up"
 alias beep="notify-send beep"
 alias rv="sed -i -e 's/release-cursor=shift+f12/release-cursor=ctrl+alt/g' ~/Downloads/console.vv && remote-viewer ~/Downloads/console.vv"
 alias orv="ovirt_rv"

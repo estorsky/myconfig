@@ -41,6 +41,7 @@ init () {
 
     sudo eopkg it -y pip
     sudo pip3 install eopkg3p
+    fixup_eopkg3p
     # sudo pip2 install autorandr
 
     gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
@@ -168,8 +169,7 @@ update () {
         # -x neovim \
         # -x waybar
 
-    # sudo vim /usr/lib/python3.12/site-packages/eopkg3p/consts.py
-    # EOPKG = _find_executable("eopkg.py3")
+    fixup_eopkg3p
     sudo eopkg3p up -y
     configure_chrome_wayland_desktop /usr/share/applications/google-chrome.desktop /usr/bin/google-chrome-stable
     configure_chrome_wayland_desktop /usr/share/applications/google-chrome-beta.desktop /usr/bin/google-chrome-beta
@@ -201,6 +201,7 @@ update () {
 
 clean () {
     sudo eopkg delete-cache
+    fixup_eopkg3p
     sudo eopkg3p delete-cache
 }
 

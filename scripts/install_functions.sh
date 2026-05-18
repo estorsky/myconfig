@@ -15,6 +15,89 @@ root_cmd() {
     fi
 }
 
+fixup_eopkg3p() {
+    root_cmd python3 - <<'PY'
+from pathlib import Path
+
+base_dirs = []
+for lib_root in (Path("/usr/lib"), Path("/usr/lib64")):
+    if not lib_root.is_dir():
+        continue
+    for site_packages in lib_root.glob("python3*/site-packages/eopkg3p"):
+        if site_packages.is_dir():
+            base_dirs.append(site_packages)
+
+consts_old = 'EOPKG = _find_executable("eopkg.py3")'
+consts_new = '''def _find_eopkg_executable() -> str:
+    for name in ("eopkg.py", "eopkg.py3"):
+        exc = find_executable(name)
+        if exc is not None:
+            return exc
+
+    _excecutable_not_found("eopkg.py or eopkg.py3")
+
+
+EOPKG = _find_eopkg_executable()'''
+
+core_import_old = "import shutil\nimport subprocess\n"
+core_import_new = "import os\nimport shutil\nimport subprocess\n"
+
+core_anchor = "def build_pspec(pspecfile: Path):"
+core_helper = '''def _privileged_eopkg_cmd(*args):
+    cmd = [EOPKG, *map(str, args)]
+    if os.geteuid() == 0:
+        return cmd
+    return [PKEXEC, *cmd]
+
+
+'''
+
+core_build_old = '''    subprocess.check_call(
+        [PKEXEC, EOPKG, "bi", "--ignore-safety", pspecfile, "-O", dest]
+    )'''
+core_build_new = '''    subprocess.check_call(
+        _privileged_eopkg_cmd("bi", "--ignore-safety", pspecfile, "-O", dest)
+    )'''
+
+core_install_old = '    subprocess.check_call([PKEXEC, EOPKG, "it", eopkgfile])'
+core_install_new = '    subprocess.check_call(_privileged_eopkg_cmd("it", eopkgfile))'
+
+for base in base_dirs:
+    consts = base / "consts.py"
+    if consts.exists():
+        text = consts.read_text()
+        if "_find_eopkg_executable" not in text:
+            if consts_old not in text:
+                raise SystemExit(f"unexpected consts.py format: {consts}")
+            text = text.replace(consts_old, consts_new)
+            consts.write_text(text)
+
+    core = base / "core.py"
+    if core.exists():
+        text = core.read_text()
+
+        if "def _privileged_eopkg_cmd(*args):" not in text:
+            if core_anchor not in text:
+                raise SystemExit(f"unexpected core.py format: {core}")
+            text = text.replace(core_anchor, core_helper + core_anchor)
+
+        if "import os\n" not in text:
+            if core_import_old not in text:
+                raise SystemExit(f"unexpected import block in core.py: {core}")
+            text = text.replace(core_import_old, core_import_new)
+
+        text = text.replace(core_build_old, core_build_new)
+        text = text.replace(core_install_old, core_install_new)
+        core.write_text(text)
+
+    pycache = base / "__pycache__"
+    if pycache.exists():
+        for item in pycache.iterdir():
+            item.unlink()
+        pycache.rmdir()
+PY
+}
+
 configure_chrome_wayland_desktop() {
     local desktop_file="$1"
     local browser_cmd="$2"
@@ -128,9 +211,13 @@ run_with_proxychains_fallback() {
 }
 
 cursor_agent_binary_path() {
-    local candidate
+    local candidate target_user target_home
+
+    target_user="$(desktop_target_user)"
+    target_home="$(desktop_target_home "$target_user")"
 
     for candidate in \
+        "${target_home:+$target_home/.local/bin/agent}" \
         "$HOME/.local/bin/agent" \
         "/usr/local/bin/agent" \
         "/usr/bin/agent"
@@ -144,6 +231,34 @@ cursor_agent_binary_path() {
     command -v agent 2>/dev/null || true
 }
 
+run_as_target_user_with_home() {
+    local target_user="$1"
+    local target_home="$2"
+    shift 2
+
+    if [[ "$(id -un)" == "$target_user" ]]; then
+        HOME="$target_home" "$@"
+    else
+        sudo -H -u "$target_user" env HOME="$target_home" "$@"
+    fi
+}
+
+run_cursor_agent_for_target_user() {
+    local target_user target_home timeout_secs last_arg
+
+    target_user="$(desktop_target_user)"
+    target_home="$(desktop_target_home "$target_user")"
+    timeout_secs="${CURSOR_AGENT_UPDATE_TIMEOUT_SECS:-45}"
+    last_arg="${!#}"
+
+    if [[ "$last_arg" == "update" ]] && command -v timeout >/dev/null 2>&1; then
+        run_as_target_user_with_home "$target_user" "$target_home" timeout --foreground "${timeout_secs}s" "$@"
+        return $?
+    fi
+
+    run_as_target_user_with_home "$target_user" "$target_home" "$@"
+}
+
 cursor_agent_is_local_only_command() {
     case "${1:-}" in
         -h|--help|-v|--version|help)
@@ -155,7 +270,7 @@ cursor_agent_is_local_only_command() {
 }
 
 run_cursor_agent_command() {
-    local agent_bin proxy_bin
+    local agent_bin proxy_bin exit_code
     agent_bin="$(cursor_agent_binary_path)"
 
     if [[ -z "$agent_bin" ]]; then
@@ -164,18 +279,21 @@ run_cursor_agent_command() {
     fi
 
     if cursor_agent_is_local_only_command "${1:-}"; then
-        "$agent_bin" "$@"
+        run_cursor_agent_for_target_user "$agent_bin" "$@"
         return $?
     fi
 
-    if "$agent_bin" "$@"; then
+    run_cursor_agent_for_target_user "$agent_bin" "$@"
+    exit_code=$?
+
+    if [[ "$exit_code" -eq 0 ]]; then
         return 0
     fi
 
     proxy_bin="$(proxychains4_binary_path)"
     [[ -n "$proxy_bin" ]] || return 1
 
-    "$proxy_bin" -q "$agent_bin" "$@"
+    run_cursor_agent_for_target_user "$proxy_bin" -q "$agent_bin" "$@"
 }
 
 proxychains4_library_path() {
@@ -208,10 +326,10 @@ sync_source_repo() {
 
     if ! root_cmd test -d "$repo_path/.git"; then
         root_cmd rm -rf "$repo_path"
-        root_cmd git clone --recurse-submodules "$repo_url" "$repo_path" >&2
+        root_cmd git clone --quiet --recurse-submodules "$repo_url" "$repo_path" >&2
     else
         root_cmd git -C "$repo_path" remote set-url origin "$repo_url"
-        root_cmd git -C "$repo_path" fetch --tags origin >&2
+        root_cmd git -C "$repo_path" fetch --quiet --tags origin >&2
         default_branch="$(root_cmd git -C "$repo_path" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)"
 
         if [[ -z "$default_branch" ]]; then
@@ -221,14 +339,14 @@ sync_source_repo() {
 
         if [[ -n "$default_branch" ]]; then
             default_branch="${default_branch#origin/}"
-            root_cmd git -C "$repo_path" checkout "$default_branch" >&2
-            root_cmd git -C "$repo_path" pull --ff-only --tags origin "$default_branch" >&2
+            root_cmd git -C "$repo_path" checkout --quiet "$default_branch" >&2
+            root_cmd git -C "$repo_path" pull --quiet --ff-only --tags origin "$default_branch" >&2
         else
-            root_cmd git -C "$repo_path" pull --ff-only --tags >&2
+            root_cmd git -C "$repo_path" pull --quiet --ff-only --tags >&2
         fi
 
         if root_cmd test -f "$repo_path/.gitmodules"; then
-            root_cmd git -C "$repo_path" submodule update --init --recursive >&2
+            root_cmd git -C "$repo_path" submodule update --quiet --init --recursive >&2
         fi
     fi
 
@@ -443,23 +561,32 @@ installed_version__proxychains4() {
 install__cursor_agent () {
     set -x
 
-    local agent_bin proxy_bin install_cmd
+    local agent_bin proxy_bin install_cmd target_user target_home update_rc
+    target_user="$(desktop_target_user)"
+    target_home="$(desktop_target_home "$target_user")"
     agent_bin="$(cursor_agent_binary_path)"
 
     if [[ -n "$agent_bin" ]]; then
         run_cursor_agent_command update
-        return $?
+        update_rc=$?
+
+        if [[ "$update_rc" -ne 0 ]]; then
+            echo "agent update failed or timed out, skipping"
+            return 0
+        fi
+
+        return "$update_rc"
     fi
 
     proxy_bin="$(proxychains4_binary_path)"
     install_cmd='set -o pipefail; curl https://cursor.com/install -fsS | bash'
 
-    if bash -lc "$install_cmd"; then
+    if run_as_target_user_with_home "$target_user" "$target_home" bash -lc "$install_cmd"; then
         return 0
     fi
 
     [[ -n "$proxy_bin" ]] || return 1
-    "$proxy_bin" -q bash -lc "$install_cmd"
+    run_as_target_user_with_home "$target_user" "$target_home" "$proxy_bin" -q bash -lc "$install_cmd"
 }
 
 run_as_target_user() {
