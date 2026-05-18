@@ -144,7 +144,7 @@ config () {
 
     tmux send-keys -t "$APPS_PANE_VPN" "vpn work"
     tmux send-keys -t "$APPS_PANE_CURSOR" "cursor-proxy"
-    tmux send-keys -t "$APPS_PANE_RV" "rv"
+    tmux send-keys -t "$APPS_PANE_RV" "orvd"
     tmux send-keys -t "$APPS_PANE_CHROME" "google-chrome-beta-proxy"
 
     tmux new-window -t "$SESSION_NAME" -n "$WIN_MONITORING"

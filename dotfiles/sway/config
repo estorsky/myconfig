@@ -290,6 +290,7 @@ assign [app_id="net.thunderbird.Thunderbird"] 8
 assign [app_id="obsidian"] 8
 assign [instance="obsidian"] 8
 assign [app_id="spotify"] 9
+assign [instance="spotify"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="blueman-manager"] 9
 assign [app_id="org.telegram.desktop"] 10
