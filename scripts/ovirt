@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+exec "${HOME}/myconfig/scripts/ovirt_rv" \
+    "dmitriy.privalov" \
+    --credentials-file "${HOME}/.config/ovirt/credentials.json.gpg" \
+    --workspace 1 \
+    --insecure \
+    "$@"

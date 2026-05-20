@@ -41,9 +41,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="oVirt engine host",
     )
     parser.add_argument(
+        "--credentials-file",
+        default=os.environ.get("OVIRT_CREDENTIALS_FILE"),
+        help="Path to JSON credentials file; .gpg files are decrypted with gpg",
+    )
+    parser.add_argument(
         "--username",
         default=os.environ.get("OVIRT_USERNAME"),
         help="oVirt username, for example user@internal or just user with --profile",
+    )
+    parser.add_argument(
+        "--username-command",
+        default=os.environ.get("OVIRT_USERNAME_CMD"),
+        help="Shell command that prints the username",
     )
     parser.add_argument(
         "--profile",
@@ -59,6 +69,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--password",
         default=os.environ.get("OVIRT_PASSWORD"),
         help="oVirt password; prefer OVIRT_PASSWORD env for automation",
+    )
+    parser.add_argument(
+        "--password-command",
+        default=os.environ.get("OVIRT_PASSWORD_CMD"),
+        help="Shell command that prints the password",
     )
     parser.add_argument(
         "--ca-file",
@@ -153,6 +168,65 @@ def cache_dir() -> pathlib.Path:
     if base:
         return pathlib.Path(base) / "ovirt-rv"
     return pathlib.Path.home() / ".cache" / "ovirt-rv"
+
+
+def run_secret_command(command: str, label: str) -> str:
+    shell = os.environ.get("SHELL") or "/bin/sh"
+    result = subprocess.run(
+        [shell, "-lc", command],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        stderr = result.stderr.strip()
+        if stderr:
+            raise RuntimeError(f"{label} command failed: {stderr}")
+        raise RuntimeError(f"{label} command failed with exit code {result.returncode}")
+    value = result.stdout.rstrip("\r\n")
+    if not value:
+        raise RuntimeError(f"{label} command returned an empty value")
+    return value
+
+
+def read_credentials_file(path_str: str) -> dict[str, str]:
+    path = pathlib.Path(path_str).expanduser()
+    if not path.exists():
+        raise RuntimeError(f"Credentials file was not found: {path}")
+
+    if path.suffix == ".gpg":
+        gpg_bin = shutil.which("gpg")
+        if not gpg_bin:
+            raise RuntimeError("gpg is required to decrypt the credentials file")
+        result = subprocess.run(
+            [gpg_bin, "--quiet", "--batch", "--decrypt", str(path)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            stderr = result.stderr.strip()
+            if stderr:
+                raise RuntimeError(f"Failed to decrypt credentials file: {stderr}")
+            raise RuntimeError("Failed to decrypt credentials file")
+        content = result.stdout
+    else:
+        content = path.read_text(encoding="utf-8")
+
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Credentials file is not valid JSON: {path}") from exc
+
+    if not isinstance(data, dict):
+        raise RuntimeError("Credentials file must contain a JSON object")
+
+    credentials: dict[str, str] = {}
+    for key in ("username", "password", "profile", "sso_profile"):
+        value = data.get(key)
+        if isinstance(value, str) and value:
+            credentials[key] = value
+    return credentials
 
 
 def download_engine_ca(engine: str) -> pathlib.Path | None:
@@ -651,11 +725,30 @@ def main() -> int:
         eprint(f"remote-viewer already running for {args.vm_name}, focusing existing window")
         return 0
 
-    username = args.username or input("oVirt username: ").strip()
+    credentials: dict[str, str] = {}
+    if args.credentials_file:
+        credentials = read_credentials_file(args.credentials_file)
+
+    username = args.username
+    if args.username_command:
+        username = run_secret_command(args.username_command, "username")
+    if not username:
+        username = credentials.get("username", "")
+    if not username:
+        username = input("oVirt username: ").strip()
     if not username:
         raise RuntimeError("Username is required")
 
-    password = args.password or getpass.getpass("oVirt password: ")
+    profile = args.profile or credentials.get("profile")
+    sso_profile = args.sso_profile or credentials.get("sso_profile")
+
+    password = args.password
+    if args.password_command:
+        password = run_secret_command(args.password_command, "password")
+    if not password:
+        password = credentials.get("password", "")
+    if not password:
+        password = getpass.getpass("oVirt password: ")
     if not password:
         raise RuntimeError("Password is required")
 
@@ -665,8 +758,8 @@ def main() -> int:
         username=username,
         password=password,
         ssl_context=ssl_context,
-        profile=args.profile,
-        sso_profile=args.sso_profile,
+        profile=profile,
+        sso_profile=sso_profile,
     )
     client = OVirtClient(args.engine, token, ssl_context)
 
