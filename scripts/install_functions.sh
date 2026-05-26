@@ -167,6 +167,62 @@ write_source_install_state() {
     printf '%s\n' "$2" | root_cmd tee "$state_path" >/dev/null
 }
 
+report_source_install_result() {
+    local package_name="$1"
+    local installed_label="$2"
+
+    echo "$package_name was updated to ${installed_label:-unknown}"
+}
+
+setup_log_stream() {
+    local action="${1:-run}"
+    local timestamp
+
+    timestamp="$(date +%Y%m%d-%H%M%S)"
+    SOLUS_LOG_PATH="/tmp/solus-${action}-${timestamp}.log"
+    export SOLUS_LOG_PATH
+
+    echo "Full log: ${SOLUS_LOG_PATH}"
+
+    exec > >(
+        tee "${SOLUS_LOG_PATH}" | awk '
+            /^\+\+?/ { next }
+            /^D\t/ { next }
+            /^From https:/ { next }
+            /^Already on / { next }
+            /^Your branch is up to date/ { next }
+            /^ \* branch[[:space:]]/ { next }
+            /^remote: Enumerating objects:/ { next }
+            /^remote: Counting objects:/ { next }
+            /^remote: Compressing objects:/ { next }
+            /^remote: Total / { next }
+            /^Receiving objects:/ { next }
+            /^Resolving deltas:/ { next }
+            /^Unpacking objects:/ { next }
+            /^Disabling keyboard interrupts for file operations\./ { print; next }
+            /^Full log:/ { print; next }
+            /^Checking internet connection/ { print; next }
+            /^Updating repositories/ { print; next }
+            /^Updating repository:/ { print; next }
+            /^No packages to upgrade\./ { print; next }
+            /^The following packages are going to be upgraded:/ { print; next }
+            / is already up to date \(/ { print; next }
+            / is already installed at / { print; next }
+            / was updated to / { print; next }
+            /^Upgraded / { print; next }
+            /^Installed / { print; next }
+            /^Removed / { print; next }
+            /agent update failed or timed out, skipping/ { print; next }
+            /timed out/ { print; next }
+            /failed/ { print; next }
+            /fatal:/ { print; next }
+            /compilation terminated\./ { print; next }
+            /Error [0-9]+/ { print; next }
+            /not found/ { print; next }
+        '
+    ) 2>&1
+}
+
 installed_binary_path() {
     local candidate
 
@@ -797,6 +853,7 @@ install__wl_clipboard () {
     cd build || return 1
     sudo ninja install || return 1
     write_source_install_state "wl-clipboard" "$source_id"
+    report_source_install_result "wl-clipboard" "$source_version"
 }
 
 install__rofi_wayland () {
@@ -820,6 +877,7 @@ install__rofi_wayland () {
     ninja -C build || return 1
     sudo ninja -C build install || return 1
     write_source_install_state "rofi-wayland" "$source_id"
+    report_source_install_result "rofi-wayland" "$source_version"
 }
 
 install__rofi_calc () {
@@ -849,8 +907,10 @@ install__rofi_calc () {
     cd build || return 1
     sudo meson install || return 1
     write_source_install_state "rofi-calc" "$source_id"
+    report_source_install_result "rofi-calc" "$source_version"
 }
 
+# sudo eopkg it libxkbcommon-devel libcairo-devel
 install__swaylock_effects () {
     set -x
 
@@ -872,6 +932,7 @@ install__swaylock_effects () {
     ninja -C build || return 1
     sudo ninja -C build install || return 1
     write_source_install_state "swaylock-effects" "$source_id"
+    report_source_install_result "swaylock-effects" "$source_version"
 }
 
 # sudo usermod -a -G input "${USER}"
@@ -894,6 +955,7 @@ install__way_displays () {
     cd "$build_path" || return 1
     sudo make install || return 1
     write_source_install_state "way-displays" "$source_id"
+    report_source_install_result "way-displays" "$source_version"
 }
 
 # sudo eopkg it slurp libgtk-4-devel libadwaita-devel libepoxy-devel
@@ -917,6 +979,7 @@ install__satty () {
     make build-release || return 1
     sudo PREFIX=/usr/local make install || return 1
     write_source_install_state "satty" "$source_id"
+    report_source_install_result "satty" "$source_version"
 }
 
 install__earlyoom () {
@@ -1140,6 +1203,7 @@ install__asusctl () {
         make || return 1
         sudo make install || return 1
         write_source_install_state "asusctl" "$source_id"
+        report_source_install_result "asusctl" "$source_version"
         asusctl_changed=1
     fi
 
@@ -1181,6 +1245,7 @@ install__supergfxctl () {
     sudo systemctl daemon-reload || return 1
     sudo systemctl restart asusd || return 1
     write_source_install_state "supergfxctl" "$source_id"
+    report_source_install_result "supergfxctl" "$source_version"
 }
 
 install__proxychains4 () {
@@ -1209,6 +1274,7 @@ install__proxychains4 () {
     fi
 
     write_source_install_state "proxychains4" "$source_id"
+    report_source_install_result "proxychains4" "$source_version"
 }
 
 install__telegram () {
