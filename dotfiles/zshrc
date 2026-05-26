@@ -162,6 +162,7 @@ alias rv="sed -i -e 's/release-cursor=shift+f12/release-cursor=ctrl+alt/g' ~/Dow
 alias orv="ovirt_rv"
 alias orvd='ovirt'
 
+alias winboot='bash ~/myconfig/scripts/reboot_windows.sh'
 if [[ -x "${HOME}/myconfig/scripts/cursor_agent_proxy.sh" ]]; then
     agent() {
         "${HOME}/myconfig/scripts/cursor_agent_proxy.sh" "$@"
