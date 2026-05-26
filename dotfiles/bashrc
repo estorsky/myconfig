@@ -84,6 +84,7 @@ alias suspend="systemctl suspend -i"
 alias reboot="systemctl reboot -i"
 alias poweroff="systemctl poweroff -i"
 alias lock="dm-tool lock"
+alias winboot="bash ~/myconfig/scripts/reboot_windows.sh"
 alias sp="dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause > /dev/null"
 
 alias battery="watch -t -n 60 upower -i /org/freedesktop/UPower/devices/battery_BAT0"
