@@ -84,22 +84,11 @@ LOG_THRESHOLD: INFO
 
 ## Automatically disable built-in display when external monitors are connected
 ## This replaces sway_auto_display_manager.sh functionality
-## Multiple rules for eDP-1 work as OR - any single condition is sufficient
+## Work around way-displays 2.x bug where IF condition lists are evaluated as
+## AND instead of OR by using a single regex that matches any known external
+## monitor description/serial.
 DISABLED:
-  # Disable eDP-1 if home monitor Xiaomi is connected
   - NAME_DESC: eDP-1
     IF:
       - PLUGGED:
-          - '3342300043348'
-
-  # Disable eDP-1 if first office monitor ASUS is connected
-  - NAME_DESC: eDP-1
-    IF:
-      - PLUGGED:
-          - 'JCLMQS009609'
-
-  # Disable eDP-1 if second office monitor ASUS is connected
-  - NAME_DESC: eDP-1
-    IF:
-      - PLUGGED:
-          - 'KALMQS121524'
+          - '!(3342300043348|JCLMQS009609|KALMQS121524)'
