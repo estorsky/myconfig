@@ -110,10 +110,7 @@ init () {
     sudo eopkg it libqalculate
     install__rofi_calc
 
-    # sudo eopkg it libxkbcommon-devel libcairo-devel
-    # install__swaylock_effects
-
-    sudo eopkg it yaml-cpp-devel
+    sudo eopkg it yaml-devel
     install__way_displays
     sudo usermod -a -G input "${USER}"
 
@@ -181,7 +178,6 @@ update () {
     install__satty
     install__rofi_wayland
     install__rofi_calc
-    # install__swaylock_effects
     install__way_displays
     install__asusctl
     install__supergfxctl
@@ -208,9 +204,9 @@ clean () {
 if [[ -n "$1" ]]
 then
     case "$1" in
-        init) check_connection; init; exit;;
-        up) check_connection; update; exit;;
-        clean) clean; exit;;
+        init) setup_log_stream init; check_connection; init; exit;;
+        up) setup_log_stream up; check_connection; update; exit;;
+        clean) setup_log_stream clean; clean; exit;;
         * ) echo "$1 is not an option"
             exit;;
     esac
