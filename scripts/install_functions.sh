@@ -174,6 +174,51 @@ report_source_install_result() {
     echo "$package_name was updated to ${installed_label:-unknown}"
 }
 
+eopkg_build_binary_path() {
+    local candidate
+
+    for candidate in \
+        "/usr/bin/eopkg.py" \
+        "/usr/local/bin/eopkg.py" \
+        "/usr/bin/eopkg.py3" \
+        "/usr/local/bin/eopkg.py3"
+    do
+        if [[ -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    command -v eopkg.py 2>/dev/null || command -v eopkg.py3 2>/dev/null || true
+}
+
+build_and_install_eopkg_third_party() {
+    local pspec_path="$1"
+    local package_glob="$2"
+    local eopkg_build_bin
+    local -a package_files=()
+
+    eopkg_build_bin="$(eopkg_build_binary_path)"
+    if [[ -z "$eopkg_build_bin" ]]; then
+        echo "eopkg.py or eopkg.py3 is required for building 3rd-party packages"
+        return 1
+    fi
+
+    root_cmd "$eopkg_build_bin" bi -q --ignore-safety "$pspec_path" || return 1
+
+    shopt -s nullglob
+    package_files=( $package_glob )
+    shopt -u nullglob
+
+    if [[ "${#package_files[@]}" -eq 0 ]]; then
+        echo "no built packages matched pattern: $package_glob"
+        return 1
+    fi
+
+    root_cmd eopkg it -y "${package_files[@]}" || return 1
+    root_cmd rm -f "${package_files[@]}" || return 1
+}
+
 setup_log_stream() {
     local action="${1:-run}"
     local timestamp
@@ -1045,9 +1090,8 @@ install__google_chrome () {
     # https://github.com/hiddify/hiddify-app
     # ./Hiddify-Linux-x64.AppImage --appimage-extract
 
-    sudo eopkg bi -q --ignore-safety ${INSTALL_LINK}/network/web/browser/google-chrome-stable/pspec.xml
-    sudo eopkg bi -q --ignore-safety ${INSTALL_LINK}/network/web/browser/google-chrome-beta/pspec.xml
-    sudo eopkg it -y google-chrome-*.eopkg; sudo rm google-chrome-*.eopkg
+    build_and_install_eopkg_third_party "${INSTALL_LINK}/network/web/browser/google-chrome-stable/pspec.xml" "google-chrome-stable*.eopkg" || return 1
+    build_and_install_eopkg_third_party "${INSTALL_LINK}/network/web/browser/google-chrome-beta/pspec.xml" "google-chrome-beta*.eopkg" || return 1
 
     configure_chrome_wayland_desktop /usr/share/applications/google-chrome.desktop /usr/bin/google-chrome-stable
     configure_chrome_wayland_desktop /usr/share/applications/google-chrome-beta.desktop /usr/bin/google-chrome-beta
@@ -1061,29 +1105,24 @@ install__google_chrome () {
 }
 
 install__spotify () {
-    sudo eopkg bi -q --ignore-safety ${INSTALL_LINK}/multimedia/music/spotify/pspec.xml
-    sudo eopkg it -y spotify*.eopkg; sudo rm spotify*.eopkg
+    build_and_install_eopkg_third_party "${INSTALL_LINK}/multimedia/music/spotify/pspec.xml" "spotify*.eopkg" || return 1
 }
 
 install__sublime_text_3 () {
-    sudo eopkg bi -q --ignore-safety ${INSTALL_LINK}/programming/sublime-text-3/pspec.xml
-    sudo eopkg it -y sublime*.eopkg; sudo rm sublime*.eopkg
+    build_and_install_eopkg_third_party "${INSTALL_LINK}/programming/sublime-text-3/pspec.xml" "sublime*.eopkg" || return 1
 }
 
 install__team_viewer () {
-    sudo eopkg bi -q --ignore-safety ${INSTALL_LINK}/network/util/teamviewer/pspec.xml
-    sudo eopkg it -y teamviewer*.eopkg; sudo rm teamviewer*.eopkg
-    sudo systemctl start teamviewerd.service
+    build_and_install_eopkg_third_party "${INSTALL_LINK}/network/util/teamviewer/pspec.xml" "teamviewer*.eopkg" || return 1
+    sudo systemctl start teamviewerd.service || return 1
 }
 
 install__ms_fonts () {
-    sudo eopkg bi -q --ignore-safety ${INSTALL_LINK}/desktop/font/mscorefonts/pspec.xml
-    sudo eopkg it -y mscorefonts*.eopkg; sudo rm mscorefonts*.eopkg
+    build_and_install_eopkg_third_party "${INSTALL_LINK}/desktop/font/mscorefonts/pspec.xml" "mscorefonts*.eopkg" || return 1
 }
 
 install__anydesk () {
-    sudo eopkg bi -q --ignore-safety ${INSTALL_LINK}/network/util/anydesk/pspec.xml
-    sudo eopkg it -y anydesk*.eopkg; sudo rm anydesk*.eopkg
+    build_and_install_eopkg_third_party "${INSTALL_LINK}/network/util/anydesk/pspec.xml" "anydesk*.eopkg" || return 1
 }
 
 is_asus_zephyrus_g14 () {
