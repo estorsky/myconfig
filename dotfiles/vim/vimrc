@@ -320,6 +320,7 @@ let g:indentLine_char = '⎸'
 " instant-markdown
 let g:instant_markdown_autostart = 0
 let g:instant_markdown_open_to_the_world = 1
+let g:instant_markdown_theme = 'dark'
 
 " Ctags
 " set tags=tags;.git/tags;
