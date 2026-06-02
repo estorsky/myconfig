@@ -14,7 +14,7 @@ run_with_root "$1"
 init () {
     cd "$DIR"
 
-    sudo eopkg up -y
+    run_eopkg_upgrade_with_proxy_fallback || return 1
 
     sudo eopkg it -y screenfetch discord dropbox nautilus-dropbox git tmux \
         vlc mpv htop btop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks meld \
@@ -27,7 +27,7 @@ init () {
         xsel docker blueman solaar pavucontrol doxygen cppcheck font-awesome-ttf \
         net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev \
         ghex picocom golang rust zig nmap maim fzf fd stress-ng valgrind virt-viewer \
-        sway waybar grim slurp jq evtest
+        sway waybar grim slurp jq evtest nftables flatpak
         # openjdk-8 cargo intel-microcode
 
     # install__ly
@@ -85,6 +85,7 @@ init () {
     install__proxy_app_launchers
     install__spotify
     # install__sublime_text_3
+    install__cassette
     install__ms_fonts
     install__hiddify
     install__telegram
@@ -158,13 +159,7 @@ init () {
 update () {
     # TODO: pip packagees update
 
-    # if [[ -x /usr/local/bin/proxychains4 ]]; then
-        # sudo /usr/local/bin/proxychains4 -q eopkg up -y #\
-    # else
-        sudo eopkg up -y #\
-    # fi
-        # -x neovim \
-        # -x waybar
+    run_eopkg_upgrade_with_proxy_fallback || return 1
 
     fixup_eopkg3p
     sudo eopkg3p up -y
@@ -184,6 +179,7 @@ update () {
     install__proxychains4
     install__cursor_agent
     install__hiddify
+    update__cassette
     # install__telegram
     # ~/.tmux/plugins/tpm/bin/update_plugins all
 

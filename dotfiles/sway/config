@@ -272,7 +272,7 @@ exec playerctld daemon
 exec sway-xkb-switcher
 exec blueman-applet
 exec dunst
-exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
+exec ~/myconfig/scripts/sway_music_pair.sh
 exec pavucontrol
 exec blueman-manager
 exec thunderbird
@@ -290,7 +290,9 @@ assign [app_id="net.thunderbird.Thunderbird"] 8
 assign [app_id="obsidian"] 8
 assign [instance="obsidian"] 8
 assign [app_id="spotify"] 9
+assign [class="Spotify"] 9
 assign [instance="spotify"] 9
+assign [app_id="space.rirusha.Cassette"] 9
 assign [app_id="pavucontrol"] 9
 assign [app_id="blueman-manager"] 9
 assign [app_id="org.telegram.desktop"] 10

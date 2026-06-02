@@ -156,7 +156,7 @@ alias weather="curl wttr.in"
 alias ag="ag --color-match '1;33' --color-line-number '0;34'"
 alias rg="rg -F"
 alias tmux="tmux -u"
-alias UP="(omz update) && neovim +PlugUpgrade +PlugUpdate +CocUpdateSync +qa && solus up"
+alias UP='zsh "$ZSH/tools/upgrade.sh" && neovim +PlugUpgrade +PlugUpdate +CocUpdateSync +qa && solus up'
 alias beep="notify-send beep"
 alias rv="sed -i -e 's/release-cursor=shift+f12/release-cursor=ctrl+alt/g' ~/Downloads/console.vv && remote-viewer ~/Downloads/console.vv"
 alias orv="ovirt_rv"
