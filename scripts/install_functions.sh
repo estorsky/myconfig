@@ -231,7 +231,17 @@ setup_log_stream() {
 
     exec > >(
         tee "${SOLUS_LOG_PATH}" | awk '
+            { gsub(/\r/, "", $0) }
+            /__SOLUS_EOPKG_UP_BEGIN__/ { passthrough=1; next }
+            /__SOLUS_EOPKG_UP_END__/ { passthrough=0; next }
             /^\+\+?/ { next }
+            passthrough && /eopkg-index\.xml\.xz\.sha1sum/ {
+                line = $0
+                sub(/^.*eopkg-index\.xml\.xz\.sha1sum/, "eopkg-index.xml.xz.sha1sum", line)
+                print line
+                next
+            }
+            passthrough { print; next }
             /^D\t/ { next }
             /^From https:/ { next }
             /^Already on / { next }
@@ -266,6 +276,22 @@ setup_log_stream() {
             /not found/ { print; next }
         '
     ) 2>&1
+}
+
+run_eopkg_upgrade_with_proxy_fallback() {
+    echo "__SOLUS_EOPKG_UP_BEGIN__"
+    run_with_proxychains_fallback eopkg up -y
+    local exit_code=$?
+    echo "__SOLUS_EOPKG_UP_END__"
+    return "$exit_code"
+}
+
+clone_source_repo_with_proxy() {
+    local repo_url="$1"
+    local repo_path="$2"
+
+    root_cmd rm -rf "$repo_path"
+    run_with_proxychains_fallback_quiet git clone --quiet --recurse-submodules "$repo_url" "$repo_path"
 }
 
 installed_binary_path() {
@@ -311,6 +337,38 @@ run_with_proxychains_fallback() {
     "$proxy_bin" -q "$@"
 }
 
+run_with_proxychains_fallback_quiet() {
+    local proxy_bin exit_code stderr_file
+
+    stderr_file="$(mktemp)"
+
+    "$@" >/dev/null 2>"$stderr_file"
+    exit_code=$?
+
+    if [[ "$exit_code" -eq 0 ]]; then
+        rm -f "$stderr_file"
+        return 0
+    fi
+
+    proxy_bin="$(proxychains4_binary_path)"
+
+    if [[ -z "$proxy_bin" ]]; then
+        cat "$stderr_file" >&2
+        rm -f "$stderr_file"
+        return "$exit_code"
+    fi
+
+    "$proxy_bin" -q "$@" >/dev/null 2>"$stderr_file"
+    exit_code=$?
+
+    if [[ "$exit_code" -ne 0 ]]; then
+        cat "$stderr_file" >&2
+    fi
+
+    rm -f "$stderr_file"
+    return "$exit_code"
+}
+
 cursor_agent_binary_path() {
     local candidate target_user target_home
 
@@ -344,12 +402,31 @@ run_as_target_user_with_home() {
     fi
 }
 
+run_as_target_user_with_home_proxy_fallback() {
+    local target_user="$1"
+    local target_home="$2"
+    local proxy_bin exit_code
+    shift 2
+
+    run_as_target_user_with_home "$target_user" "$target_home" "$@"
+    exit_code=$?
+
+    if [[ "$exit_code" -eq 0 ]]; then
+        return 0
+    fi
+
+    proxy_bin="$(proxychains4_binary_path)"
+    [[ -n "$proxy_bin" ]] || return "$exit_code"
+
+    run_as_target_user_with_home "$target_user" "$target_home" "$proxy_bin" -q "$@"
+}
+
 run_cursor_agent_for_target_user() {
     local target_user target_home timeout_secs last_arg
 
     target_user="$(desktop_target_user)"
     target_home="$(desktop_target_home "$target_user")"
-    timeout_secs="${CURSOR_AGENT_UPDATE_TIMEOUT_SECS:-45}"
+    timeout_secs="${CURSOR_AGENT_UPDATE_TIMEOUT_SECS:-120}"
     last_arg="${!#}"
 
     if [[ "$last_arg" == "update" ]] && command -v timeout >/dev/null 2>&1; then
@@ -426,11 +503,12 @@ sync_source_repo() {
     root_cmd mkdir -p "$SOURCE_REPO_CACHE_DIR"
 
     if ! root_cmd test -d "$repo_path/.git"; then
-        root_cmd rm -rf "$repo_path"
-        root_cmd git clone --quiet --recurse-submodules "$repo_url" "$repo_path" >&2
+        clone_source_repo_with_proxy "$repo_url" "$repo_path" || return 1
     else
         root_cmd git -C "$repo_path" remote set-url origin "$repo_url"
-        root_cmd git -C "$repo_path" fetch --quiet --tags origin >&2
+        if ! run_with_proxychains_fallback_quiet git -C "$repo_path" fetch --quiet --tags origin; then
+            clone_source_repo_with_proxy "$repo_url" "$repo_path" || return 1
+        fi
         default_branch="$(root_cmd git -C "$repo_path" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)"
 
         if [[ -z "$default_branch" ]]; then
@@ -441,13 +519,20 @@ sync_source_repo() {
         if [[ -n "$default_branch" ]]; then
             default_branch="${default_branch#origin/}"
             root_cmd git -C "$repo_path" checkout --quiet "$default_branch" >&2
-            root_cmd git -C "$repo_path" pull --quiet --ff-only --tags origin "$default_branch" >&2
+            if ! run_with_proxychains_fallback_quiet git -C "$repo_path" pull --quiet --ff-only --tags origin "$default_branch"; then
+                clone_source_repo_with_proxy "$repo_url" "$repo_path" || return 1
+                root_cmd git -C "$repo_path" checkout --quiet "$default_branch" >&2 || return 1
+            fi
         else
-            root_cmd git -C "$repo_path" pull --quiet --ff-only --tags >&2
+            if ! run_with_proxychains_fallback_quiet git -C "$repo_path" pull --quiet --ff-only --tags; then
+                clone_source_repo_with_proxy "$repo_url" "$repo_path" || return 1
+            fi
         fi
 
         if root_cmd test -f "$repo_path/.gitmodules"; then
-            root_cmd git -C "$repo_path" submodule update --quiet --init --recursive >&2
+            if ! run_with_proxychains_fallback_quiet git -C "$repo_path" submodule update --quiet --init --recursive; then
+                clone_source_repo_with_proxy "$repo_url" "$repo_path" || return 1
+            fi
         fi
     fi
 
@@ -1106,6 +1191,128 @@ install__google_chrome () {
 
 install__spotify () {
     build_and_install_eopkg_third_party "${INSTALL_LINK}/multimedia/music/spotify/pspec.xml" "spotify*.eopkg" || return 1
+}
+
+flatpak_binary_path() {
+    installed_binary_path "flatpak"
+}
+
+flatpak_ref_scope() {
+    local flatpak_bin="$1"
+    local ref="$2"
+    local target_user="${3:-}"
+    local target_home="${4:-}"
+
+    if [[ -n "$target_user" && -n "$target_home" ]]; then
+        if run_as_target_user_with_home \
+            "$target_user" "$target_home" \
+            "$flatpak_bin" info --user "$ref" >/dev/null 2>&1
+        then
+            printf '%s\n' "user"
+            return 0
+        fi
+    fi
+
+    if "$flatpak_bin" info --system "$ref" >/dev/null 2>&1; then
+        printf '%s\n' "system"
+        return 0
+    fi
+
+    printf '%s\n' "none"
+}
+
+ensure_flathub_remote() {
+    local target_user="$1"
+    local target_home="$2"
+    local flatpak_bin="$3"
+    local scope="${4:-system}"
+
+    if [[ "$scope" == "user" ]]; then
+        run_as_target_user_with_home_proxy_fallback \
+            "$target_user" "$target_home" \
+            "$flatpak_bin" remote-add --user --if-not-exists \
+            flathub https://flathub.org/repo/flathub.flatpakrepo
+        return $?
+    fi
+
+    run_as_target_user_with_home_proxy_fallback \
+        "$target_user" "$target_home" \
+        "$flatpak_bin" remote-add --system --if-not-exists \
+        flathub https://flathub.org/repo/flathub.flatpakrepo
+}
+
+install__cassette () {
+    set -x
+
+    local target_user target_home flatpak_bin install_scope
+
+    target_user="$(desktop_target_user)"
+    target_home="$(desktop_target_home "$target_user")"
+    flatpak_bin="$(flatpak_binary_path)"
+    install_scope="${CASSETTE_FLATPAK_SCOPE:-system}"
+
+    if [[ -z "$target_home" || ! -d "$target_home" ]]; then
+        echo "failed to detect home directory for cassette target user: $target_user"
+        return 1
+    fi
+
+    if [[ -z "$flatpak_bin" ]]; then
+        echo "flatpak is required to install cassette"
+        return 1
+    fi
+
+    ensure_flathub_remote "$target_user" "$target_home" "$flatpak_bin" "$install_scope" || return 1
+
+    if [[ "$install_scope" == "user" ]]; then
+        run_as_target_user_with_home_proxy_fallback \
+            "$target_user" "$target_home" \
+            "$flatpak_bin" install --user -y flathub space.rirusha.Cassette
+        return $?
+    fi
+
+    run_as_target_user_with_home_proxy_fallback \
+        "$target_user" "$target_home" \
+        "$flatpak_bin" install --system -y flathub space.rirusha.Cassette
+}
+
+update__cassette () {
+    set -x
+
+    local target_user target_home flatpak_bin cassette_scope
+
+    target_user="$(desktop_target_user)"
+    target_home="$(desktop_target_home "$target_user")"
+    flatpak_bin="$(flatpak_binary_path)"
+
+    if [[ -z "$target_home" || ! -d "$target_home" ]]; then
+        echo "failed to detect home directory for cassette target user: $target_user"
+        return 1
+    fi
+
+    if [[ -z "$flatpak_bin" ]]; then
+        echo "flatpak is required to update cassette"
+        return 1
+    fi
+
+    cassette_scope="$(flatpak_ref_scope "$flatpak_bin" "space.rirusha.Cassette" "$target_user" "$target_home")"
+
+    if [[ "$cassette_scope" == "none" ]]; then
+        echo "space.rirusha.Cassette is not installed"
+        return 1
+    fi
+
+    ensure_flathub_remote "$target_user" "$target_home" "$flatpak_bin" "$cassette_scope" || return 1
+
+    if [[ "$cassette_scope" == "user" ]]; then
+        run_as_target_user_with_home_proxy_fallback \
+            "$target_user" "$target_home" \
+            "$flatpak_bin" update --user -y space.rirusha.Cassette
+        return $?
+    fi
+
+    run_as_target_user_with_home_proxy_fallback \
+        "$target_user" "$target_home" \
+        "$flatpak_bin" update --system -y space.rirusha.Cassette
 }
 
 install__sublime_text_3 () {
