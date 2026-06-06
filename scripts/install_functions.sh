@@ -241,7 +241,16 @@ setup_log_stream() {
                 print line
                 next
             }
+            passthrough && /\.eopkg/ { next }
             passthrough { print; next }
+            pending_pkg_list {
+                line = $0
+                gsub(/\033\[[0-9;]*[[:alpha:]]/, "", line)
+                if (line ~ /^[[:space:]]*$/) { next }
+                if (line ~ /^Building source package:/) { pending_pkg_list=0; next }
+                if (line ~ /^[[:alnum:]][[:alnum:]._+-]*$/) { print line; next }
+                pending_pkg_list=0
+            }
             /^D\t/ { next }
             /^From https:/ { next }
             /^Already on / { next }
@@ -260,7 +269,7 @@ setup_log_stream() {
             /^Updating repositories/ { print; next }
             /^Updating repository:/ { print; next }
             /^No packages to upgrade\./ { print; next }
-            /^The following packages are going to be upgraded:/ { print; next }
+            /^The following packages are going to be upgraded:/ { print; pending_pkg_list=1; next }
             / is already up to date \(/ { print; next }
             / is already installed at / { print; next }
             / was updated to / { print; next }
