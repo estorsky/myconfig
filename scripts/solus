@@ -66,6 +66,7 @@ init () {
     install__supergfxctl
     install__proxychains4
     install__cursor_agent
+    install__cursor_app
 
     # lockscreen unit
     # sudo cp ../../myconfig/systemd/lockscreen.service /etc/systemd/system/
@@ -178,6 +179,7 @@ update () {
     install__supergfxctl
     install__proxychains4
     install__cursor_agent
+    install__cursor_app
     install__hiddify
     update__cassette
     # install__telegram
