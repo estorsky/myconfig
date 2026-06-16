@@ -235,14 +235,61 @@ setup_log_stream() {
             /__SOLUS_EOPKG_UP_BEGIN__/ { passthrough=1; next }
             /__SOLUS_EOPKG_UP_END__/ { passthrough=0; next }
             /^\+\+?/ { next }
-            passthrough && /eopkg-index\.xml\.xz\.sha1sum/ {
+            passthrough && /eopkg-index\.xml\.xz(\.sha1sum)?/ {
                 line = $0
-                sub(/^.*eopkg-index\.xml\.xz\.sha1sum/, "eopkg-index.xml.xz.sha1sum", line)
+                if (line ~ /eopkg-index\.xml\.xz\.sha1sum/) {
+                    sub(/^.*eopkg-index\.xml\.xz\.sha1sum/, "eopkg-index.xml.xz.sha1sum", line)
+                } else {
+                    sub(/^.*eopkg-index\.xml\.xz/, "eopkg-index.xml.xz", line)
+                }
                 print line
                 next
             }
-            passthrough && /\.eopkg/ { next }
-            passthrough { print; next }
+            passthrough {
+                line = $0
+                gsub(/\033\[[0-9;]*[[:alpha:]]/, "", line)
+
+                if (eopkg_pkg_list) {
+                    if (line ~ /^Total size of package\(s\):/ ||
+                        line ~ /^There are extra packages due to dependencies\./ ||
+                        line ~ /^Downloading [0-9]+ \/ [0-9]+/ ||
+                        line ~ /^Installing [0-9]+ \/ [0-9]+/ ||
+                        line ~ /^Finished downloading package upgrades\./) {
+                        eopkg_pkg_list=0
+                    } else if (line ~ /^[[:space:]]*$/) {
+                        next
+                    } else {
+                        print line
+                        next
+                    }
+                }
+
+                if (line ~ /^Safety switch forces the upgrade of following packages:/) { print line; eopkg_pkg_list=1; next }
+                if (line ~ /^The following packages (are going|will) to be upgraded:/) { print line; eopkg_pkg_list=1; next }
+                if (line ~ /^No packages to upgrade\./) { print line; next }
+                if (line ~ /^Solus repository information is up-to-date\./) { print line; next }
+                if (line ~ /^Updating repository:/) { print line; next }
+                if (line ~ /^Disabling keyboard interrupts for file operations\./) { print line; next }
+                if (line ~ /^Total size of package\(s\):/) { print line; next }
+                if (line ~ /^There are extra packages due to dependencies\./) { print line; next }
+                if (line ~ /^Finished downloading package upgrades\./) { print line; next }
+                if (line ~ /^Upgraded /) { print line; next }
+                if (line ~ /^Installed /) { print line; next }
+                if (line ~ /^Removed /) { print line; next }
+                if (line ~ /^Program terminated\./) { print line; next }
+                if (line ~ /^Please use /) { print line; next }
+                if (line ~ /^Use --debug /) { print line; next }
+                if (line ~ /^Hit max retry count when downloading:/) { print line; next }
+                if (line ~ /^Failed to fetch file, retrying /) { print line; next }
+                if (line ~ /\.eopkg/) { next }
+                if (line ~ /^Extracting the files of /) { next }
+                if (line ~ /^Downloading [0-9]+ \/ [0-9]+/) { next }
+                if (line ~ /^Package .* found in repository /) { next }
+                if (line ~ /^Installing [0-9]+ \/ [0-9]+/) { next }
+                if (line ~ /^Installing [^,]+, version /) { next }
+                if (line ~ /^Upgrading to new distribution release$/) { next }
+                next
+            }
             pending_pkg_list {
                 line = $0
                 gsub(/\033\[[0-9;]*[[:alpha:]]/, "", line)
@@ -784,6 +831,219 @@ install__cursor_agent () {
     run_as_target_user_with_home "$target_user" "$target_home" "$proxy_bin" -q bash -lc "$install_cmd"
 }
 
+cursor_app_binary_path() {
+    local target_home="${1:-$HOME}"
+    local candidate
+
+    for candidate in \
+        "${target_home}/Dropbox/bin/cursor" \
+        "${target_home}/.local/bin/cursor" \
+        "/usr/local/bin/cursor" \
+        "/usr/bin/cursor"
+    do
+        if [[ -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+cursor_release_track() {
+    printf '%s\n' "${CURSOR_RELEASE_TRACK:-stable}"
+}
+
+cursor_update_feed_hash_default() {
+    printf '%s\n' "${CURSOR_UPDATE_FEED_HASH:-81205f472f5191c0169eac2004d8159521c9ec1f916b18ab686a7e48d6a1009d}"
+}
+
+cursor_download_platform() {
+    case "$(uname -m)" in
+        x86_64|amd64) printf '%s\n' "linux-x64" ;;
+        aarch64|arm64) printf '%s\n' "linux-arm64" ;;
+        *)
+            echo "unsupported Cursor platform architecture: $(uname -m)" >&2
+            return 1
+            ;;
+    esac
+}
+
+cursor_logs_dir() {
+    local target_home="$1"
+
+    printf '%s\n' "${target_home}/.config/Cursor/logs"
+}
+
+cursor_latest_logged_update_url() {
+    local target_home="$1"
+    local logs_dir log_file update_url
+    local -a log_files=()
+
+    logs_dir="$(cursor_logs_dir "$target_home")"
+    [[ -d "$logs_dir" ]] || return 1
+
+    shopt -s nullglob
+    log_files=("${logs_dir}"/*/main.log)
+    shopt -u nullglob
+
+    [[ "${#log_files[@]}" -gt 0 ]] || return 1
+
+    mapfile -t log_files < <(ls -t "${log_files[@]}" 2>/dev/null)
+
+    for log_file in "${log_files[@]}"; do
+        update_url="$(awk '/ updateURL / { url=$NF } END { if (url != "") print url }' "$log_file")"
+
+        if [[ -n "$update_url" ]]; then
+            printf '%s\n' "$update_url"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+cursor_logged_installed_version() {
+    local target_home="$1"
+    local update_url version
+
+    update_url="$(cursor_latest_logged_update_url "$target_home")" || return 1
+    version="$(sed -En 's#^.*/cursor/([^/]+)/[0-9a-f]{64}/[^/]+$#\1#p' <<<"$update_url")"
+    [[ -n "$version" ]] || return 1
+    printf '%s\n' "$version"
+}
+
+cursor_update_feed_hash() {
+    local target_home="$1"
+    local update_url feed_hash
+
+    update_url="$(cursor_latest_logged_update_url "$target_home")" || {
+        cursor_update_feed_hash_default
+        return 0
+    }
+
+    feed_hash="$(sed -En 's#^.*/cursor/[^/]+/([0-9a-f]{64})/[^/]+$#\1#p' <<<"$update_url")"
+
+    if [[ -n "$feed_hash" ]]; then
+        printf '%s\n' "$feed_hash"
+        return 0
+    fi
+
+    cursor_update_feed_hash_default
+}
+
+cursor_update_api_url() {
+    local target_home="$1"
+    local current_version="$2"
+    local platform release_track feed_hash
+
+    platform="$(cursor_download_platform)" || return 1
+    release_track="$(cursor_release_track)"
+    feed_hash="$(cursor_update_feed_hash "$target_home")" || return 1
+
+    printf 'https://api2.cursor.sh/updates/api/update/%s/cursor/%s/%s/%s\n' \
+        "$platform" \
+        "$current_version" \
+        "$feed_hash" \
+        "$release_track"
+}
+
+cursor_state_path() {
+    local target_home="$1"
+
+    printf '%s\n' "${target_home}/.local/state/myconfig/cursor-appimage.version"
+}
+
+read_cursor_state() {
+    local target_home="$1"
+    local state_path
+
+    state_path="$(cursor_state_path "$target_home")"
+    [[ -f "$state_path" ]] || return 0
+    < "$state_path" tr -d '\n'
+}
+
+write_cursor_state() {
+    local target_user="$1"
+    local target_home="$2"
+    local version="$3"
+    local state_path
+
+    state_path="$(cursor_state_path "$target_home")"
+    run_as_target_user_with_home "$target_user" "$target_home" mkdir -p "$(dirname "$state_path")" || return 1
+    run_as_target_user_with_home "$target_user" "$target_home" bash -lc "printf '%s\n' \"$version\" > \"$state_path\"" || return 1
+}
+
+install__cursor_app () {
+    set -x
+
+    local target_user target_home cursor_path api_url release_json tmp_dir tmp_appimage
+    local latest_version download_url installed_version zsync_url
+
+    target_user="$(desktop_target_user)"
+    target_home="$(desktop_target_home "$target_user")"
+    cursor_path="$(cursor_app_binary_path "$target_home" || printf '%s\n' "${target_home}/Dropbox/bin/cursor")"
+
+    if [[ -z "$target_home" || ! -d "$target_home" ]]; then
+        echo "failed to detect home directory for cursor target user: $target_user"
+        return 1
+    fi
+
+    tmp_dir="$(run_as_target_user_with_home "$target_user" "$target_home" mktemp -d)"
+    release_json="${tmp_dir}/cursor-release.json"
+    tmp_appimage="${tmp_dir}/cursor.AppImage"
+
+    trap 'run_as_target_user_with_home "$target_user" "$target_home" rm -rf "$tmp_dir" >/dev/null 2>&1 || true; trap - RETURN' RETURN
+
+    run_as_target_user_with_home "$target_user" "$target_home" mkdir -p "$(dirname "$cursor_path")" || return 1
+    installed_version="$(read_cursor_state "$target_home")"
+
+    if [[ -z "$installed_version" ]]; then
+        installed_version="$(cursor_logged_installed_version "$target_home" || true)"
+    fi
+
+    if [[ -z "$installed_version" ]]; then
+        echo "failed to determine installed Cursor version from state or logs"
+        return 1
+    fi
+
+    api_url="$(cursor_update_api_url "$target_home" "$installed_version")" || return 1
+    run_as_target_user_with_home_proxy_fallback \
+        "$target_user" "$target_home" \
+        curl --connect-timeout 15 --max-time 60 -fsSL "$api_url" -o "$release_json" || return 1
+
+    if [[ ! -s "$release_json" && -x "$cursor_path" ]]; then
+        echo "cursor is already up to date ($installed_version)"
+        return 0
+    fi
+
+    latest_version="$(jq -r '.version // .productVersion // empty' "$release_json")"
+    zsync_url="$(jq -r '.url // empty' "$release_json")"
+    download_url="$(jq -r '.downloadUrl // empty' "$release_json")"
+
+    if [[ -n "$zsync_url" && -z "$download_url" ]]; then
+        download_url="${zsync_url%.zsync}"
+    fi
+
+    if [[ -z "$latest_version" || -z "$download_url" ]]; then
+        echo "failed to resolve latest Cursor AppImage release"
+        return 1
+    fi
+
+    if [[ -n "$installed_version" && "$installed_version" == "$latest_version" && -x "$cursor_path" ]]; then
+        echo "cursor is already up to date ($installed_version)"
+        return 0
+    fi
+
+    run_as_target_user_with_home_proxy_fallback \
+        "$target_user" "$target_home" \
+        curl --connect-timeout 15 --max-time 1800 -fL --no-progress-meter "$download_url" -o "$tmp_appimage" || return 1
+    run_as_target_user_with_home "$target_user" "$target_home" chmod +x "$tmp_appimage" || return 1
+    run_as_target_user_with_home "$target_user" "$target_home" mv "$tmp_appimage" "$cursor_path" || return 1
+    write_cursor_state "$target_user" "$target_home" "$latest_version" || return 1
+    echo "cursor was updated to $latest_version"
+}
+
 run_as_target_user() {
     local target_user="$1"
     shift
@@ -826,9 +1086,9 @@ install__proxy_app_launchers () {
 [Desktop Entry]
 Type=Application
 Name=Cursor
-Comment=Launch Cursor
-Exec=${target_home}/Dropbox/bin/cursor
-TryExec=${target_home}/Dropbox/bin/cursor
+Comment=Launch Cursor with selective routing
+Exec=${target_home}/myconfig/scripts/cursor-route
+TryExec=${target_home}/myconfig/scripts/cursor-route
 Icon=cursor
 Terminal=false
 StartupNotify=true
@@ -875,6 +1135,24 @@ EOF
 
     if command -v update-desktop-database >/dev/null 2>&1; then
         run_as_target_user "$target_user" update-desktop-database "$applications_dir" >/dev/null 2>&1 || true
+    fi
+}
+
+install__cursor_selective_routing () {
+    set -x
+    local target_user
+    local route_group="cursorroute"
+
+    target_user="$(desktop_target_user)"
+
+    root_cmd eopkg it -y nftables
+
+    if ! root_cmd getent group "$route_group" >/dev/null 2>&1; then
+        root_cmd groupadd --system "$route_group"
+    fi
+
+    if [[ -n "$target_user" && "$target_user" != "root" ]]; then
+        root_cmd usermod -a -G "$route_group" "$target_user"
     fi
 }
 
@@ -1651,7 +1929,10 @@ install__hiddify () {
 
     mkdir -p "$install_root" || return 1
 
-    run_with_proxychains_fallback curl -fsSL "https://api.github.com/repos/hiddify/hiddify-app/releases/latest" -o "$release_json" || return 1
+    run_with_proxychains_fallback_quiet \
+        curl --connect-timeout 15 --max-time 45 -fsSL \
+        "https://api.github.com/repos/hiddify/hiddify-app/releases/latest" \
+        -o "$release_json" || return 1
 
     latest_version="$(jq -r '.tag_name | ltrimstr("v")' "$release_json")"
     asset_url="$(
@@ -1682,7 +1963,9 @@ install__hiddify () {
 
     appimage_path="${tmp_dir}/Hiddify-Linux-x64-AppImage.AppImage"
 
-    run_with_proxychains_fallback curl -fL --progress-bar "$asset_url" -o "$appimage_path" || return 1
+    run_with_proxychains_fallback \
+        curl --connect-timeout 15 --max-time 900 -fL --no-progress-meter \
+        "$asset_url" -o "$appimage_path" || return 1
     chmod +x "$appimage_path" || return 1
 
     if [[ -n "$asset_digest" ]]; then
