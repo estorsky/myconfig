@@ -1,0 +1,15 @@
+[Unit]
+Description=myconfig Cursor selective routing (nftables redirect + transparent SOCKS helper)
+After=nftables.service network.target
+Wants=network.target
+
+[Service]
+Type=exec
+ExecStartPre=/home/dmitry/myconfig/scripts/cursor_selective_routing_enable.sh --nft-only
+ExecStart=/usr/bin/python3 /home/dmitry/myconfig/scripts/cursor_selective_transparent_proxy.py --listen-host 127.0.0.1 --listen-port 12335 --socks-host 127.0.0.1 --socks-port 12334
+ExecStopPost=/home/dmitry/myconfig/scripts/cursor_selective_routing_disable.sh --nft-only
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

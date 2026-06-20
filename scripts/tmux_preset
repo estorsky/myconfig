@@ -143,7 +143,7 @@ config () {
     APPS_PANE_CHROME="$(tmux split-window -v -t "$APPS_PANE_CURSOR" -P -F '#{pane_id}')"
 
     tmux send-keys -t "$APPS_PANE_VPN" "vpn work"
-    tmux send-keys -t "$APPS_PANE_CURSOR" "cursor-proxy"
+    tmux send-keys -t "$APPS_PANE_CURSOR" "cursor"
     tmux send-keys -t "$APPS_PANE_RV" "orvd"
     tmux send-keys -t "$APPS_PANE_CHROME" "google-chrome-beta-proxy"
 

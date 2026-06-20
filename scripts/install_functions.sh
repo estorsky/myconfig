@@ -1142,6 +1142,8 @@ install__cursor_selective_routing () {
     set -x
     local target_user
     local route_group="cursorroute"
+    local unit_name="cursor-routing-helper.service"
+    local unit_src="${INSTALL_DIR}/../systemd/${unit_name}"
 
     target_user="$(desktop_target_user)"
 
@@ -1153,6 +1155,12 @@ install__cursor_selective_routing () {
 
     if [[ -n "$target_user" && "$target_user" != "root" ]]; then
         root_cmd usermod -a -G "$route_group" "$target_user"
+    fi
+
+    if [[ -f "$unit_src" ]]; then
+        root_cmd cp "$unit_src" "/etc/systemd/system/${unit_name}"
+        root_cmd systemctl daemon-reload
+        root_cmd systemctl enable --now "$unit_name"
     fi
 }
 

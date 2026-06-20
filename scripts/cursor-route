@@ -1,0 +1,135 @@
+#!/bin/bash
+
+set -euo pipefail
+
+ROUTE_GROUP="${CURSOR_SELECTIVE_ROUTING_GROUP:-cursorroute}"
+RESTART_EXISTING=0
+DISABLE_QUIC="${CURSOR_SELECTIVE_ROUTING_DISABLE_QUIC:-1}"
+
+find_cursor_bin() {
+    local candidate
+
+    for candidate in \
+        "${CURSOR_BIN:-}" \
+        "$HOME/Dropbox/bin/cursor" \
+        "$HOME/.local/bin/cursor" \
+        "/usr/local/bin/cursor" \
+        "/usr/bin/cursor"
+    do
+        if [[ -n "$candidate" && -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    command -v cursor 2>/dev/null || true
+}
+
+build_exec_command() {
+    local part
+    local -a parts=()
+
+    for part in "$@"; do
+        parts+=("$(printf '%q' "$part")")
+    done
+
+    printf '%s\n' "${parts[*]}"
+}
+
+has_flag() {
+    local wanted="$1"
+    shift
+    local arg
+
+    for arg in "$@"; do
+        [[ "$arg" == "$wanted" ]] && return 0
+    done
+
+    return 1
+}
+
+user_in_route_group() {
+    local user_name members
+    user_name="$(id -un)"
+    members="$(getent group "$ROUTE_GROUP" | cut -d: -f4)"
+
+    if [[ "$(id -gn)" == "$ROUTE_GROUP" ]]; then
+        return 0
+    fi
+
+    tr ',' '\n' <<<"$members" | rg -qx "$user_name"
+}
+
+route_gid() {
+    getent group "$ROUTE_GROUP" | cut -d: -f3 | head -n 1
+}
+
+find_non_routed_cursor_pids() {
+    local gid_value cursor_path current_pid
+    gid_value="$(route_gid)"
+    cursor_path="$(readlink -f "$cursor_bin" 2>/dev/null || printf '%s\n' "$cursor_bin")"
+    current_pid="$$"
+
+    ps -eo pid,egid,args --no-headers | while read -r pid egid args; do
+        [[ "$pid" != "$current_pid" ]] || continue
+        [[ "$egid" != "$gid_value" ]] || continue
+        [[ "$args" == *"$cursor_path"* ]] || continue
+        printf '%s\n' "$pid"
+    done
+}
+
+stop_non_routed_cursor() {
+    local -a pids=()
+
+    mapfile -t pids < <(find_non_routed_cursor_pids)
+    [[ "${#pids[@]}" -gt 0 ]] || return 0
+
+    kill "${pids[@]}" 2>/dev/null || true
+    sleep 1
+    kill -9 "${pids[@]}" 2>/dev/null || true
+}
+
+if [[ "${1:-}" == "--restart" ]]; then
+    RESTART_EXISTING=1
+    shift
+fi
+
+cursor_bin="$(find_cursor_bin)"
+
+if [[ -z "$cursor_bin" ]]; then
+    echo "cursor binary was not found" >&2
+    exit 1
+fi
+
+if [[ "$DISABLE_QUIC" == "1" ]] && ! has_flag "--disable-quic" "$@"; then
+    set -- --disable-quic "$@"
+fi
+
+if [[ "$(id -gn)" == "$ROUTE_GROUP" ]]; then
+    exec "$cursor_bin" "$@"
+fi
+
+if ! getent group "$ROUTE_GROUP" >/dev/null 2>&1; then
+    echo "routing group does not exist: $ROUTE_GROUP" >&2
+    echo "run: sudo ~/myconfig/scripts/cursor_selective_routing_enable.sh" >&2
+    exit 1
+fi
+
+if ! user_in_route_group; then
+    echo "current user is not in routing group: $ROUTE_GROUP" >&2
+    echo "run: sudo ~/myconfig/scripts/cursor_selective_routing_enable.sh" >&2
+    exit 1
+fi
+
+if [[ "$RESTART_EXISTING" -eq 1 ]]; then
+    stop_non_routed_cursor
+else
+    mapfile -t non_routed_pids < <(find_non_routed_cursor_pids)
+    if [[ "${#non_routed_pids[@]}" -gt 0 ]]; then
+        echo "Cursor is already running outside routing group $ROUTE_GROUP: ${non_routed_pids[*]}" >&2
+        echo "close existing Cursor windows or run: cursor-route --restart" >&2
+        exit 1
+    fi
+fi
+
+exec sg "$ROUTE_GROUP" -c "$(build_exec_command "$cursor_bin" "$@")"

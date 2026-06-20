@@ -161,8 +161,24 @@ alias beep="notify-send beep"
 alias rv="sed -i -e 's/release-cursor=shift+f12/release-cursor=ctrl+alt/g' ~/Downloads/console.vv && remote-viewer ~/Downloads/console.vv"
 alias orv="ovirt_rv"
 alias orvd='ovirt'
-
 alias winboot='bash ~/myconfig/scripts/reboot_windows.sh'
+
+if [[ -x "${HOME}/myconfig/scripts/cursor-route" ]]; then
+    cursor() {
+        "${HOME}/myconfig/scripts/cursor-route" "$@"
+    }
+
+    cursor_restart() {
+        "${HOME}/myconfig/scripts/cursor-route" --restart "$@"
+    }
+
+    cursor_direct() {
+        command cursor "$@"
+    }
+
+    alias cursorr='cursor_restart'
+fi
+
 if [[ -x "${HOME}/myconfig/scripts/cursor_agent_proxy.sh" ]]; then
     agent() {
         "${HOME}/myconfig/scripts/cursor_agent_proxy.sh" "$@"

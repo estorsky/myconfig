@@ -2,6 +2,20 @@
 
 set -e
 
+disable_quic="${CURSOR_DISABLE_QUIC:-1}"
+
+has_flag() {
+    local wanted="$1"
+    shift
+    local arg
+
+    for arg in "$@"; do
+        [[ "$arg" == "$wanted" ]] && return 0
+    done
+
+    return 1
+}
+
 find_cursor_bin() {
     local candidate
 
@@ -27,6 +41,10 @@ cursor_bin="$(find_cursor_bin)"
 if [[ -z "$cursor_bin" ]]; then
     echo "cursor binary was not found" >&2
     exit 1
+fi
+
+if [[ "$disable_quic" == "1" ]] && ! has_flag "--disable-quic" "$@"; then
+    set -- --disable-quic "$@"
 fi
 
 exec "$cursor_bin" --proxy-server="$proxy_server" "$@"
