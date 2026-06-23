@@ -1037,7 +1037,8 @@ install__cursor_app () {
 
     run_as_target_user_with_home_proxy_fallback \
         "$target_user" "$target_home" \
-        curl --connect-timeout 15 --max-time 1800 -fL --no-progress-meter "$download_url" -o "$tmp_appimage" || return 1
+        curl --connect-timeout 15 --max-time 1800 --speed-limit 102400 --speed-time 45 \
+        -fL --no-progress-meter "$download_url" -o "$tmp_appimage" || return 1
     run_as_target_user_with_home "$target_user" "$target_home" chmod +x "$tmp_appimage" || return 1
     run_as_target_user_with_home "$target_user" "$target_home" mv "$tmp_appimage" "$cursor_path" || return 1
     write_cursor_state "$target_user" "$target_home" "$latest_version" || return 1
