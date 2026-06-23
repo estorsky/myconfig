@@ -11,7 +11,9 @@ import urllib.request
 
 
 DEFAULT_CITY = "Novosibirsk"
-REQUEST_TIMEOUT_SEC = 5
+REQUEST_TIMEOUT_SEC = 8
+REQUEST_ATTEMPTS = 3
+RETRY_DELAY_SEC = 1
 HOURLY_ENTRIES = 8
 CACHE_TTL_SEC = 900
 CACHE_FILENAME = "waybar-weather.json"
@@ -25,8 +27,18 @@ def fetch_json(url):
             "Accept": "application/json",
         },
     )
-    with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SEC) as response:
-        return json.load(response)
+
+    last_error = None
+    for attempt in range(REQUEST_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SEC) as response:
+                return json.load(response)
+        except Exception as exc:
+            last_error = exc
+            if attempt < REQUEST_ATTEMPTS - 1:
+                time.sleep(RETRY_DELAY_SEC)
+
+    raise last_error
 
 
 def weather_appearance(code):
