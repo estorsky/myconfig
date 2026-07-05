@@ -15,7 +15,28 @@ root_cmd() {
     fi
 }
 
+ensure_eopkg3p() {
+    # eopkg3p is a pip package tied to a specific python3 version. A Solus
+    # upgrade can bump the default python3 (e.g. 3.12 -> 3.14), leaving the
+    # module installed only under the old interpreter and breaking the
+    # /usr/bin/eopkg3p shebang. Reinstall it for the current python3 when the
+    # import fails so subsequent eopkg3p calls work.
+    if root_cmd python3 -c 'import eopkg3p' >/dev/null 2>&1; then
+        return 0
+    fi
+
+    # Wrap pip3 directly (not through a sudo/root_cmd wrapper) so proxychains4
+    # can LD_PRELOAD into the actual download process on the fallback path.
+    if [[ $(id -u) -eq 0 ]]; then
+        run_with_proxychains_fallback pip3 install --upgrade eopkg3p
+    else
+        run_with_proxychains_fallback sudo pip3 install --upgrade eopkg3p
+    fi
+}
+
 fixup_eopkg3p() {
+    ensure_eopkg3p || return 1
+
     root_cmd python3 - <<'PY'
 from pathlib import Path
 
@@ -27,7 +48,15 @@ for lib_root in (Path("/usr/lib"), Path("/usr/lib64")):
         if site_packages.is_dir():
             base_dirs.append(site_packages)
 
-consts_old = 'EOPKG = _find_executable("eopkg.py3")'
+# Newer eopkg3p releases resolve EOPKG via _find_executable("eopkg"), older
+# ones used "eopkg.py3". On Solus the bare "eopkg" is a nuitka binary that
+# cannot build packages ("bi"), so force resolution to the python "eopkg.py".
+consts_old_candidates = [
+    'EOPKG = _find_executable("eopkg.py3")',
+    'EOPKG = _find_executable("eopkg")',
+    "EOPKG = _find_executable('eopkg.py3')",
+    "EOPKG = _find_executable('eopkg')",
+]
 consts_new = '''def _find_eopkg_executable() -> str:
     for name in ("eopkg.py", "eopkg.py3"):
         exc = find_executable(name)
@@ -67,9 +96,10 @@ for base in base_dirs:
     if consts.exists():
         text = consts.read_text()
         if "_find_eopkg_executable" not in text:
-            if consts_old not in text:
+            matched = next((c for c in consts_old_candidates if c in text), None)
+            if matched is None:
                 raise SystemExit(f"unexpected consts.py format: {consts}")
-            text = text.replace(consts_old, consts_new)
+            text = text.replace(matched, consts_new)
             consts.write_text(text)
 
     core = base / "core.py"
