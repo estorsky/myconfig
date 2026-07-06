@@ -42,6 +42,7 @@ init () {
     sudo eopkg it -y pip
     sudo pip3 install eopkg3p
     fixup_eopkg3p
+    ensure_ranger_bytecode
     # sudo pip2 install autorandr
 
     gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
@@ -162,6 +163,8 @@ update () {
     # TODO: pip packagees update
 
     run_eopkg_upgrade_with_proxy_fallback || return 1
+
+    ensure_ranger_bytecode
 
     fixup_eopkg3p
     sudo eopkg3p up -y

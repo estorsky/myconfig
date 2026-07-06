@@ -128,6 +128,19 @@ for base in base_dirs:
 PY
 }
 
+ensure_ranger_bytecode() {
+    # The ranger eopkg package ships only unoptimized *.pyc, but /usr/bin/ranger
+    # runs with `python3 -O`, which needs *.opt-1.pyc. Without it Python
+    # recompiles ranger on every launch and re-emits SyntaxWarnings ("return in
+    # finally") under python 3.14. Precompile the optimized bytecode once so it
+    # stays quiet; a python version bump invalidates the cache and rerunning
+    # this refreshes it.
+    local ranger_dir
+    ranger_dir="$(root_cmd python3 -c 'import os, ranger; print(os.path.dirname(ranger.__file__))' 2>/dev/null)" || return 0
+    [[ -n "$ranger_dir" && -d "$ranger_dir" ]] || return 0
+    root_cmd python3 -O -m compileall -q "$ranger_dir" >/dev/null 2>&1 || true
+}
+
 configure_chrome_wayland_desktop() {
     local desktop_file="$1"
     local browser_cmd="$2"
