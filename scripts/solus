@@ -136,8 +136,12 @@ init () {
     # systemctl enable systemd-timesyncd
 
     # lxappearance
-    # gsettings set org.gnome.desktop.interface gtk-theme Materia-dark-compact
-    # gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark
+    # GTK theme + icons. Without Materia installed, GTK (and thus waybar) falls
+    # back to whatever else is present, which renders workspace buttons more
+    # compactly than on hosts that have it.
+    sudo eopkg it -y materia-gtk-theme-dark-compact papirus-icon-theme
+    apply_user_gsettings set org.gnome.desktop.interface gtk-theme Materia-dark-compact
+    apply_user_gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark
     # sudo sed -i 's/breeze_cursors/Adwaita/g' /usr/share/icons/default/index.theme
 
     # sudo groupadd docker
