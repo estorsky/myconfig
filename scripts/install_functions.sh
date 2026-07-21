@@ -15,6 +15,90 @@ root_cmd() {
     fi
 }
 
+# Install/verify eopkg build dependencies for a source package. Kept next to
+# each install__ function (via the ensure_deps__* wrappers below) so the deps
+# are documented per package and get installed in both `init` and `update`.
+install_build_deps() {
+    [[ "$#" -gt 0 ]] || return 0
+    root_cmd eopkg it -y "$@"
+}
+
+ensure_deps__wl_clipboard() {
+    install_build_deps wayland-devel wayland-protocols-devel
+}
+
+ensure_deps__satty() {
+    # GTK4 based; slurp is needed at runtime for region selection.
+    install_build_deps libgtk-4-devel libadwaita-devel libepoxy-devel slurp
+}
+
+ensure_deps__rofi_wayland() {
+    install_build_deps wayland-devel wayland-protocols-devel gdk-pixbuf-devel \
+        xcb-util-devel xcb-util-wm-devel xcb-util-cursor-devel \
+        libstartup-notification-devel
+}
+
+ensure_deps__rofi_calc() {
+    install_build_deps libqalculate qalculate
+}
+
+ensure_deps__way_displays() {
+    install_build_deps libinput-devel yaml-devel seatd-devel wayland-devel
+}
+
+# Apply a gsettings key as the desktop user against their live session bus.
+# When run over ssh / without a graphical session it is a no-op instead of
+# emitting dconf/dbus-launch warnings from a root shell.
+apply_user_gsettings() {
+    local target_user target_home uid bus
+    target_user="$(desktop_target_user)"
+    target_home="$(desktop_target_home "$target_user")"
+    uid="$(id -u "$target_user" 2>/dev/null)" || return 0
+    bus="/run/user/${uid}/bus"
+
+    [[ -S "$bus" ]] || return 0
+
+    run_as_target_user_with_home "$target_user" "$target_home" \
+        env DBUS_SESSION_BUS_ADDRESS="unix:path=${bus}" gsettings "$@" || true
+}
+
+# Register Sway as a session in the display manager (lightdm reads
+# /usr/share/wayland-sessions). Idempotent.
+install__sway_session() {
+    local session_file tmp
+    session_file="/usr/share/wayland-sessions/sway.desktop"
+    tmp="$(mktemp)" || return 1
+
+    cat > "$tmp" <<'EOF'
+[Desktop Entry]
+Name=Sway
+Comment=An i3-compatible Wayland compositor
+Exec=sway
+Type=Application
+EOF
+
+    if ! root_cmd test -f "$session_file" || ! root_cmd cmp -s "$tmp" "$session_file"; then
+        root_cmd install -Dm644 "$tmp" "$session_file"
+    fi
+
+    rm -f "$tmp"
+}
+
+# Install the repository-managed proxychains config so the ProxyList (local
+# hiddify SOCKS on 127.0.0.1:12334) is reproducible across hosts instead of a
+# one-off `make install-config` edit that only lives on one machine.
+configure_proxychains() {
+    local managed_conf target
+    managed_conf="${INSTALL_DIR}/../dotfiles/proxychains/proxychains.conf"
+    target="/usr/local/etc/proxychains.conf"
+
+    [[ -f "$managed_conf" ]] || return 0
+
+    if ! root_cmd test -f "$target" || ! root_cmd cmp -s "$managed_conf" "$target"; then
+        root_cmd install -Dm644 "$managed_conf" "$target" || return 1
+    fi
+}
+
 ensure_eopkg3p() {
     # eopkg3p is a pip package tied to a specific python3 version. A Solus
     # upgrade can bump the default python3 (e.g. 3.12 -> 3.14), leaving the
@@ -1306,6 +1390,8 @@ install__wl_clipboard () {
 
     local repo_path build_path source_id source_version installed_version
 
+    ensure_deps__wl_clipboard || return 1
+
     repo_path="$(sync_source_repo "wl-clipboard" "https://github.com/bugaevc/wl-clipboard.git")" || return 1
     cd "$repo_path" || return 1
     source_id="$(git rev-parse HEAD)"
@@ -1330,6 +1416,8 @@ install__rofi_wayland () {
 
     local repo_path build_path source_id source_version installed_version
 
+    ensure_deps__rofi_wayland || return 1
+
     repo_path="$(sync_source_repo "rofi-wayland" "https://github.com/in0ni/rofi-wayland.git")" || return 1
     cd "$repo_path" || return 1
     source_id="$(git rev-parse HEAD)"
@@ -1353,6 +1441,8 @@ install__rofi_calc () {
     set -x
 
     local repo_path build_path source_id source_version
+
+    ensure_deps__rofi_calc || return 1
 
     repo_path="$(sync_source_repo "rofi-calc" "https://github.com/svenstaro/rofi-calc.git")" || return 1
     cd "$repo_path" || return 1
@@ -1410,6 +1500,8 @@ install__way_displays () {
 
     local repo_path build_path source_id source_version installed_version
 
+    ensure_deps__way_displays || return 1
+
     repo_path="$(sync_source_repo "way-displays" "https://github.com/alex-courtis/way-displays.git")" || return 1
     cd "$repo_path" || return 1
     source_id="$(git rev-parse HEAD)"
@@ -1432,6 +1524,8 @@ install__satty () {
     set -x
 
     local repo_path build_path source_id source_version installed_version
+
+    ensure_deps__satty || return 1
 
     repo_path="$(sync_source_repo "satty" "https://github.com/Satty-org/Satty.git")" || return 1
     cd "$repo_path" || return 1
@@ -1569,6 +1663,7 @@ ensure_flathub_remote() {
     if [[ "$scope" == "user" ]]; then
         run_as_target_user_with_home_proxy_fallback \
             "$target_user" "$target_home" \
+            timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
             "$flatpak_bin" remote-add --user --if-not-exists \
             flathub https://flathub.org/repo/flathub.flatpakrepo
         return $?
@@ -1576,6 +1671,7 @@ ensure_flathub_remote() {
 
     run_as_target_user_with_home_proxy_fallback \
         "$target_user" "$target_home" \
+        timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
         "$flatpak_bin" remote-add --system --if-not-exists \
         flathub https://flathub.org/repo/flathub.flatpakrepo
 }
@@ -1600,18 +1696,29 @@ install__cassette () {
         return 1
     fi
 
-    ensure_flathub_remote "$target_user" "$target_home" "$flatpak_bin" "$install_scope" || return 1
+    # Cassette is a non-essential extra: when Flathub is unreachable (common on
+    # this network, even via proxychains) treat it as best-effort so it does not
+    # fail the whole init/update.
+    if ! ensure_flathub_remote "$target_user" "$target_home" "$flatpak_bin" "$install_scope"; then
+        echo "cassette: flathub remote unavailable, skipping install"
+        return 0
+    fi
 
     if [[ "$install_scope" == "user" ]]; then
         run_as_target_user_with_home_proxy_fallback \
             "$target_user" "$target_home" \
-            "$flatpak_bin" install --user -y flathub space.rirusha.Cassette
-        return $?
+            timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+            "$flatpak_bin" install --user -y flathub space.rirusha.Cassette \
+            || echo "cassette: install failed (flathub unreachable/timeout), skipping"
+        return 0
     fi
 
     run_as_target_user_with_home_proxy_fallback \
         "$target_user" "$target_home" \
-        "$flatpak_bin" install --system -y flathub space.rirusha.Cassette
+        timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+        "$flatpak_bin" install --system -y flathub space.rirusha.Cassette \
+        || echo "cassette: install failed (flathub unreachable/timeout), skipping"
+    return 0
 }
 
 update__cassette () {
@@ -1635,23 +1742,32 @@ update__cassette () {
 
     cassette_scope="$(flatpak_ref_scope "$flatpak_bin" "space.rirusha.Cassette" "$target_user" "$target_home")"
 
+    # Not installed (e.g. a headless/ssh host) is not an error: nothing to update.
     if [[ "$cassette_scope" == "none" ]]; then
-        echo "space.rirusha.Cassette is not installed"
-        return 1
+        echo "space.rirusha.Cassette is not installed, skipping update"
+        return 0
     fi
 
-    ensure_flathub_remote "$target_user" "$target_home" "$flatpak_bin" "$cassette_scope" || return 1
+    if ! ensure_flathub_remote "$target_user" "$target_home" "$flatpak_bin" "$cassette_scope"; then
+        echo "cassette: flathub remote unavailable, skipping update"
+        return 0
+    fi
 
     if [[ "$cassette_scope" == "user" ]]; then
         run_as_target_user_with_home_proxy_fallback \
             "$target_user" "$target_home" \
-            "$flatpak_bin" update --user -y space.rirusha.Cassette
-        return $?
+            timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+            "$flatpak_bin" update --user -y space.rirusha.Cassette \
+            || echo "cassette: update failed (flathub unreachable/timeout), skipping"
+        return 0
     fi
 
     run_as_target_user_with_home_proxy_fallback \
         "$target_user" "$target_home" \
-        "$flatpak_bin" update --system -y space.rirusha.Cassette
+        timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+        "$flatpak_bin" update --system -y space.rirusha.Cassette \
+        || echo "cassette: update failed (flathub unreachable/timeout), skipping"
+    return 0
 }
 
 install__sublime_text_3 () {
@@ -1845,6 +1961,7 @@ install__proxychains4 () {
     installed_version="$(installed_version__proxychains4)"
 
     if should_skip_source_install "proxychains4" "$source_id" "$source_version" "$installed_version"; then
+        configure_proxychains || return 1
         return 0
     fi
 
@@ -1854,9 +1971,7 @@ install__proxychains4 () {
     make || return 1
     sudo make install || return 1
 
-    if ! sudo test -f /usr/local/etc/proxychains.conf; then
-        sudo make install-config || return 1
-    fi
+    configure_proxychains || return 1
 
     write_source_install_state "proxychains4" "$source_id"
     report_source_install_result "proxychains4" "$source_version"

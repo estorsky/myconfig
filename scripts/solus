@@ -17,10 +17,10 @@ init () {
     run_eopkg_upgrade_with_proxy_fallback || return 1
 
     sudo eopkg it -y screenfetch discord dropbox nautilus-dropbox git tmux \
-        vlc mpv htop btop zsh rofi linux-lts-headers make gcc g++ gnome-tweaks meld \
+        vlc mpv htop btop zsh linux-lts-headers make gcc g++ gnome-tweaks meld \
         llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
         linux-current-headers lm_sensors qbittorrent wireshark xkill \
-        vim neovim helix mtr python3-ipython i3lock krita ranger zathura zathura-poppler cmus cava etcher \
+        vim neovim helix mtr python-ipython i3lock krita ranger zathura zathura-poppler cmus cava etcher \
         speedtest-cli cmatrix highlight curl-gnutls iotop iftop \
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
         openvpn wireguard-tools i3blocks i3 lxappearance dunst kitty \
@@ -28,7 +28,7 @@ init () {
         net-snmp expect qemu dnsmasq openssh openssh-server sshfs-fuse xev \
         ghex picocom golang rust zig nmap maim fzf fd stress-ng valgrind virt-viewer \
         sway waybar grim slurp jq evtest nftables flatpak
-        # openjdk-8 cargo intel-microcode
+        # openjdk-8 cargo intel-microcode rofi
 
     # install__ly
 
@@ -37,7 +37,7 @@ init () {
     sudo eopkg it -y -c system.devel
     sudo eopkg it -y silver-searcher ctags ripgrep ripgrep-all # for vim
     # sudo eopkg it -y yad  # for i3blocks
-    sudo eopkg remove -y firefox hexchat transmission
+    sudo eopkg remove -y hexchat transmission
 
     sudo eopkg it -y pip
     sudo pip3 install eopkg3p
@@ -45,8 +45,8 @@ init () {
     ensure_ranger_bytecode
     # sudo pip2 install autorandr
 
-    gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
-    gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
+    apply_user_gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', '<Alt>Shift_L']"
+    apply_user_gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
 
     # autostart unit
     # sudo cp ../../.myconfig/systemd/autostart_root.service /etc/systemd/system/
@@ -103,20 +103,17 @@ init () {
     # sudo eopkg it -y networkmanager-qt-devel
     # install__nm_tray
 
-    sudo eopkg it -y wayland-devel wayland-protocols-devel # (optional)
+    # Build dependencies now live inside each install__ function (see
+    # ensure_deps__* in install_functions.sh) so `up` also installs them on a
+    # long-stale host instead of failing the source builds.
     install__wl_clipboard
-    sudo eopkg it -y libgtk-4-devel libadwaita-devel libepoxy-devel
     install__satty
-
-    sudo eopkg it -y gdk-pixbuf-devel xcb-util-devel xcb-util-wm-devel xcb-util-cursor-devel libstartup-notification-devel
     install__rofi_wayland
-
-    sudo eopkg it libqalculate
     install__rofi_calc
-
-    sudo eopkg it yaml-devel
     install__way_displays
-    sudo usermod -a -G input "${USER}"
+    sudo usermod -a -G input "$(desktop_target_user)"
+
+    install__sway_session
 
     # sudo eopkg it pango-devel libjpeg-turbo-devel hyprutils-devel hyprwayland-scanner
     # install__hyprpicker
@@ -179,6 +176,7 @@ update () {
     install__rofi_wayland
     install__rofi_calc
     install__way_displays
+    install__sway_session
     install__asusctl
     install__supergfxctl
     install__proxychains4

@@ -63,15 +63,18 @@ check_git () {
 }
 
 check_connection () {
+    # Provisioning (init/update) intentionally keeps going past non-fatal
+    # errors from optional/idempotent steps (e.g. pip3/go install, setxkbmap
+    # without a display, flaky network during source builds), so relax errexit
+    # here on purpose rather than aborting the whole run.
     set +e
     echo -n "Checking internet connection..."
     # wget -q --spider http://google.com
-    ping -q -c 1 google.com &> /dev/null
-    if [ $? -ne 0 ]; then
-        echo "off"
-        exit
-    else
+    if ping -q -c 1 google.com &> /dev/null; then
         echo "on"
+    else
+        echo "off"
+        exit 1
     fi
 }
 
