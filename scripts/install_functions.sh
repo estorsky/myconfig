@@ -1187,8 +1187,9 @@ install__proxy_app_launchers () {
     set -x
 
     local target_user target_group target_home applications_dir
-    local cursor_desktop cursor_proxy_desktop chrome_desktop
-    local tmp_cursor_desktop tmp_cursor_proxy_desktop tmp_chrome_desktop
+    local cursor_desktop cursor_proxy_desktop chrome_desktop hiddify_desktop
+    local tmp_cursor_desktop tmp_cursor_proxy_desktop tmp_chrome_desktop tmp_hiddify_desktop
+    local hiddify_wrapper hiddify_icon
 
     target_user="$(desktop_target_user)"
     target_group="$(id -gn "$target_user")"
@@ -1203,11 +1204,15 @@ install__proxy_app_launchers () {
     cursor_desktop="${applications_dir}/cursor.desktop"
     cursor_proxy_desktop="${applications_dir}/cursor-proxy.desktop"
     chrome_desktop="${applications_dir}/google-chrome-beta-proxy.desktop"
+    hiddify_desktop="${applications_dir}/hiddify.desktop"
+    hiddify_wrapper="${target_home}/Dropbox/bin/hiddify.sh"
+    hiddify_icon="${target_home}/Dropbox/bin/hiddify/hiddify.png"
     tmp_cursor_desktop="$(mktemp)"
     tmp_cursor_proxy_desktop="$(mktemp)"
     tmp_chrome_desktop="$(mktemp)"
+    tmp_hiddify_desktop="$(mktemp)"
 
-    trap 'rm -f "$tmp_cursor_desktop" "$tmp_cursor_proxy_desktop" "$tmp_chrome_desktop"; trap - RETURN' RETURN
+    trap 'rm -f "$tmp_cursor_desktop" "$tmp_cursor_proxy_desktop" "$tmp_chrome_desktop" "$tmp_hiddify_desktop"; trap - RETURN' RETURN
     run_as_target_user "$target_user" mkdir -p "$applications_dir" || return 1
 
     cat > "$tmp_cursor_desktop" <<EOF
@@ -1251,14 +1256,43 @@ MimeType=text/html;text/xml;application/xhtml_xml;x-scheme-handler/http;x-scheme
 StartupWMClass=Google-chrome-beta
 EOF
 
+    [[ -f "$hiddify_icon" ]] || hiddify_icon="hiddify"
+
+    cat > "$tmp_hiddify_desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Hiddify
+Comment=Launch the Hiddify proxy client
+Exec=${hiddify_wrapper} %u
+TryExec=${hiddify_wrapper}
+Icon=${hiddify_icon}
+Terminal=false
+StartupNotify=true
+Categories=Network;
+Keywords=Hiddify;Proxy;VPN;V2ray;Xray;
+MimeType=x-scheme-handler/hiddify;x-scheme-handler/v2ray;x-scheme-handler/v2rayn;x-scheme-handler/v2rayng;x-scheme-handler/clash;x-scheme-handler/clashmeta;x-scheme-handler/sing-box;
+StartupWMClass=hiddify
+Actions=start;stop;
+
+[Desktop Action start]
+Name=Start
+Exec=${hiddify_wrapper} --start %u
+
+[Desktop Action stop]
+Name=Stop
+Exec=${hiddify_wrapper} --stop %u
+EOF
+
     if [[ "$(id -un)" == "$target_user" ]]; then
         install -Dm644 "$tmp_cursor_desktop" "$cursor_desktop" || return 1
         install -Dm644 "$tmp_cursor_proxy_desktop" "$cursor_proxy_desktop" || return 1
         install -Dm644 "$tmp_chrome_desktop" "$chrome_desktop" || return 1
+        install -Dm644 "$tmp_hiddify_desktop" "$hiddify_desktop" || return 1
     else
         root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_cursor_desktop" "$cursor_desktop" || return 1
         root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_cursor_proxy_desktop" "$cursor_proxy_desktop" || return 1
         root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_chrome_desktop" "$chrome_desktop" || return 1
+        root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_hiddify_desktop" "$hiddify_desktop" || return 1
     fi
 
     if command -v update-desktop-database >/dev/null 2>&1; then
