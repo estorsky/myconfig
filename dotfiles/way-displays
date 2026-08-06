@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/alex-courtis/way-displays/refs/heads/master/schema/cfg-1.1.0.yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/alex-courtis/way-displays/refs/heads/master/schema/cfg-2.0.0-SNAPSHOT.yaml
 
 ## way-displays configuration for ASUS laptop
 ## Automatic display management for Sway
@@ -31,38 +31,33 @@ AUTO_SCALE_MAX: 2.0
 ## Override automatic scaling for specific displays
 SCALE:
   # Home monitor Xiaomi - no scaling (was 1.125 by default)
-  - NAME_DESC: '3342300043348'
-    SCALE: 1.0
-  
-  # Office monitors ASUS - no scaling
-  - NAME_DESC: 'JCLMQS009609'
-    SCALE: 1.0
-  
-  - NAME_DESC: 'KALMQS121524'
-    SCALE: 1.0
+  '3342300043348': 1.0
 
-  - NAME_DESC: 'Dangbei'
-    SCALE: 2.0
+  # Office monitors ASUS - no scaling
+  'JCLMQS009609': 1.0
+  'KALMQS121524': 1.0
+
+  'Dangbei': 2.0
 
 ## Override display modes
 MODE:
   # Built-in display - maximum mode (2880x1800@120Hz)
-  - NAME_DESC: eDP-1
+  eDP-1:
     MAX: TRUE
 
   # Home monitor: Xiaomi Mi Monitor - 2560x1440@144Hz (actually 143.998Hz)
-  - NAME_DESC: '3342300043348'
+  '3342300043348':
     WIDTH: 2560
     HEIGHT: 1440
     HZ: 144
 
   # Office monitors: ASUS VS229 - 1920x1080@60Hz
-  - NAME_DESC: 'JCLMQS009609'
+  'JCLMQS009609':
     WIDTH: 1920
     HEIGHT: 1080
     HZ: 60
 
-  - NAME_DESC: 'KALMQS121524'
+  'KALMQS121524':
     WIDTH: 1920
     HEIGHT: 1080
     HZ: 60
@@ -76,19 +71,20 @@ VRR_OFF:
 ## Notifications on display changes, then re-bind workspaces to the new layout
 CALLBACK_CMD: notify-send "way-displays ${CALLBACK_LEVEL}" "${CALLBACK_MSG}"; ~/myconfig/scripts/sway_workspace_layout.sh
 
-## Laptop display prefix
-LAPTOP_DISPLAY_PREFIX: 'eDP'
-
 ## Logging level
 LOG_THRESHOLD: INFO
 
-## Automatically disable built-in display when external monitors are connected
-## This replaces sway_auto_display_manager.sh functionality
-## Work around way-displays 2.x bug where IF condition lists are evaluated as
-## AND instead of OR by using a single regex that matches any known external
-## monitor description/serial.
+## Turn the built-in display off while docked, and while the lid is shut.
+## Two entries rather than one: a list under IF is combined with AND, whereas
+## entries whose key matches the same display are combined with OR. For the same
+## reason the external monitors are one regex instead of three PLUGGED entries.
+## The '!^eDP' entry replaces LAPTOP_DISPLAY_PREFIX, dropped in the v2 schema.
 DISABLED:
-  - NAME_DESC: eDP-1
+  'eDP-1':
     IF:
-      - PLUGGED:
-          - '!(3342300043348|JCLMQS009609|KALMQS121524)'
+    - PLUGGED:
+      - '!(3342300043348|JCLMQS009609|KALMQS121524)'
+
+  '!^eDP':
+    IF:
+    - LID: CLOSED

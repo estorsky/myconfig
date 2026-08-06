@@ -20,9 +20,10 @@ log() {
     printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$LOG_FILE"
 }
 
-# way-displays fires the callback for warnings and errors too; only a completed
-# rearrangement is worth reacting to.
-if [[ -n "${CALLBACK_LEVEL:-}" && "$CALLBACK_LEVEL" != "SUCCEEDED" ]]; then
+# way-displays reports its own log level rather than an outcome keyword: INFO
+# once a rearrangement went through, WARNING or ERROR when it did not.
+if [[ "${CALLBACK_LEVEL:-INFO}" != "INFO" ]]; then
+    log "skipped, way-displays reported $CALLBACK_LEVEL"
     exit 0
 fi
 

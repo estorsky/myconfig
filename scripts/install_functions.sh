@@ -1688,24 +1688,69 @@ flatpak_ref_scope() {
     printf '%s\n' "none"
 }
 
+# System-wide flatpak operations need polkit authorization when started as a
+# regular user, and during `solus up` there is no usable authentication agent:
+# the process ends up in a background process group, so touching the tty raises
+# SIGTTIN and stops it. A stopped process never handles the SIGTERM from
+# timeout, so timeout keeps waiting for it and the whole update deadlocks.
+# Run system scope as root (no polkit involved), keep stdin closed so nothing
+# can block on terminal input, and let timeout signal the whole process group.
+run_flatpak_scoped() {
+    local scope="$1"
+    local target_user="$2"
+    local target_home="$3"
+    shift 3
+
+    local timeout_secs="${FLATPAK_NET_TIMEOUT_SECS:-45}"
+
+    if [[ "$scope" == "user" ]]; then
+        run_as_target_user_with_home_proxy_fallback \
+            "$target_user" "$target_home" \
+            timeout --kill-after=10s "${timeout_secs}s" "$@" </dev/null
+        return $?
+    fi
+
+    run_with_proxychains_fallback \
+        timeout --kill-after=10s "${timeout_secs}s" "$@" </dev/null
+}
+
+flatpak_has_flathub_remote() {
+    local flatpak_bin="$1"
+    local scope="$2"
+    local target_user="$3"
+    local target_home="$4"
+
+    if [[ "$scope" == "user" ]]; then
+        run_as_target_user_with_home "$target_user" "$target_home" \
+            "$flatpak_bin" remotes --user --columns=name 2>/dev/null \
+            | grep -qx flathub
+        return $?
+    fi
+
+    root_cmd "$flatpak_bin" remotes --system --columns=name 2>/dev/null \
+        | grep -qx flathub
+}
+
 ensure_flathub_remote() {
     local target_user="$1"
     local target_home="$2"
     local flatpak_bin="$3"
     local scope="${4:-system}"
 
+    # remote-add still goes through polkit even with --if-not-exists, so avoid
+    # calling it at all once the remote is in place.
+    if flatpak_has_flathub_remote "$flatpak_bin" "$scope" "$target_user" "$target_home"; then
+        return 0
+    fi
+
     if [[ "$scope" == "user" ]]; then
-        run_as_target_user_with_home_proxy_fallback \
-            "$target_user" "$target_home" \
-            timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+        run_flatpak_scoped user "$target_user" "$target_home" \
             "$flatpak_bin" remote-add --user --if-not-exists \
             flathub https://flathub.org/repo/flathub.flatpakrepo
         return $?
     fi
 
-    run_as_target_user_with_home_proxy_fallback \
-        "$target_user" "$target_home" \
-        timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+    run_flatpak_scoped system "$target_user" "$target_home" \
         "$flatpak_bin" remote-add --system --if-not-exists \
         flathub https://flathub.org/repo/flathub.flatpakrepo
 }
@@ -1739,17 +1784,13 @@ install__cassette () {
     fi
 
     if [[ "$install_scope" == "user" ]]; then
-        run_as_target_user_with_home_proxy_fallback \
-            "$target_user" "$target_home" \
-            timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+        run_flatpak_scoped user "$target_user" "$target_home" \
             "$flatpak_bin" install --user -y flathub space.rirusha.Cassette \
             || echo "cassette: install failed (flathub unreachable/timeout), skipping"
         return 0
     fi
 
-    run_as_target_user_with_home_proxy_fallback \
-        "$target_user" "$target_home" \
-        timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+    run_flatpak_scoped system "$target_user" "$target_home" \
         "$flatpak_bin" install --system -y flathub space.rirusha.Cassette \
         || echo "cassette: install failed (flathub unreachable/timeout), skipping"
     return 0
@@ -1788,17 +1829,13 @@ update__cassette () {
     fi
 
     if [[ "$cassette_scope" == "user" ]]; then
-        run_as_target_user_with_home_proxy_fallback \
-            "$target_user" "$target_home" \
-            timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+        run_flatpak_scoped user "$target_user" "$target_home" \
             "$flatpak_bin" update --user -y space.rirusha.Cassette \
             || echo "cassette: update failed (flathub unreachable/timeout), skipping"
         return 0
     fi
 
-    run_as_target_user_with_home_proxy_fallback \
-        "$target_user" "$target_home" \
-        timeout --foreground "${FLATPAK_NET_TIMEOUT_SECS:-45}s" \
+    run_flatpak_scoped system "$target_user" "$target_home" \
         "$flatpak_bin" update --system -y space.rirusha.Cassette \
         || echo "cassette: update failed (flathub unreachable/timeout), skipping"
     return 0
