@@ -376,6 +376,12 @@ setup_log_stream() {
                 line = $0
                 gsub(/\033\[[0-9;]*[[:alpha:]]/, "", line)
 
+                # Extraction progress is printed without a trailing newline, so
+                # the "Upgraded <pkg>" that follows lands in the same record and
+                # would be dropped together with the progress text.
+                gsub(/Extracting the files of [^(]*\([0-9]+%\)( \[complete\])?/, "", line)
+                if (line ~ /^[[:space:]]*$/) { next }
+
                 if (eopkg_pkg_list) {
                     if (line ~ /^Total size of package\(s\):/ ||
                         line ~ /^There are extra packages due to dependencies\./ ||
@@ -395,6 +401,8 @@ setup_log_stream() {
                 if (line ~ /^The following packages (are going|will) to be upgraded:/) { print line; eopkg_pkg_list=1; next }
                 if (line ~ /^No packages to upgrade\./) { print line; next }
                 if (line ~ /^Solus repository information is up-to-date\./) { print line; next }
+                if (line ~ /^Package database updated\./) { print line; next }
+                if (line ~ /^Downloading [0-9]+ package resources/) { print line; next }
                 if (line ~ /^Updating repository:/) { print line; next }
                 if (line ~ /^Disabling keyboard interrupts for file operations\./) { print line; next }
                 if (line ~ /^Total size of package\(s\):/) { print line; next }
@@ -408,6 +416,13 @@ setup_log_stream() {
                 if (line ~ /^Use --debug /) { print line; next }
                 if (line ~ /^Hit max retry count when downloading:/) { print line; next }
                 if (line ~ /^Failed to fetch file, retrying /) { print line; next }
+                # Post-install steps report one status line each; hundreds of
+                # them succeed, so only surface the ones that did not.
+                if (line ~ /^[[:space:]]*\[[^]]*\][[:space:]]/) {
+                    if (line ~ /success[[:space:]]*$/) { next }
+                    print line
+                    next
+                }
                 if (line ~ /\.eopkg/) { next }
                 if (line ~ /^Extracting the files of /) { next }
                 if (line ~ /^Downloading [0-9]+ \/ [0-9]+/) { next }
