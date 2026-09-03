@@ -265,7 +265,8 @@ exec playerctld daemon
 exec sway-xkb-switcher
 exec blueman-applet
 exec dunst
-exec ~/myconfig/scripts/sway_music_pair.sh
+exec spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
+exec flatpak run space.rirusha.Cassette
 exec pavucontrol
 exec blueman-manager
 exec thunderbird
@@ -290,6 +291,8 @@ assign [app_id="pavucontrol"] 9
 assign [app_id="blueman-manager"] 9
 assign [app_id="org.telegram.desktop"] 10
 assign [title="^ovirt: .*"] 1
+
+no_focus [title="^ovirt: .*"]
 
 for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [app_id="nm-connection-editor"] floating enable

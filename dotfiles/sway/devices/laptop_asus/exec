@@ -1,6 +1,6 @@
 exec solaar --window=hide
 exec sleep 6 && ~/myconfig/scripts/myasus session-apply
 exec_always ~/myconfig/scripts/bluetooth_lock_monitor.sh
-# exec ~/myconfig/scripts/sway_auto_display_manager.sh
 exec way-displays > /tmp/way-displays.${XDG_VTNR}.${USER}.log 2>&1
 exec_always ~/myconfig/scripts/sway_workspace_layout.sh
+exec_always ~/myconfig/scripts/swaymnesia.sh
