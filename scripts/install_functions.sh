@@ -692,6 +692,19 @@ source_repo_cache_path() {
     echo "${SOURCE_REPO_CACHE_DIR}/$1"
 }
 
+# An interrupted object write - typically when the disk fills up - leaves a
+# cached repo with a missing blob. fetch, pull and even checkout keep reporting
+# success afterwards, so the damage only surfaces when the build clone fails and
+# the package is skipped without a word. fsck catches it up front. commitGraph
+# is disabled because a stale commit-graph is harmless for building but would
+# otherwise be reported as corruption.
+source_repo_object_store_is_intact() {
+    local repo_path="$1"
+
+    root_cmd git -c core.commitGraph=false -C "$repo_path" \
+        fsck --no-progress --connectivity-only >/dev/null 2>&1
+}
+
 sync_source_repo() {
     local package_name="$1"
     local repo_url="$2"
@@ -701,6 +714,9 @@ sync_source_repo() {
     root_cmd mkdir -p "$SOURCE_REPO_CACHE_DIR"
 
     if ! root_cmd test -d "$repo_path/.git"; then
+        clone_source_repo_with_proxy "$repo_url" "$repo_path" || return 1
+    elif ! source_repo_object_store_is_intact "$repo_path"; then
+        echo "$package_name: cached repo is corrupted, re-cloning" >&2
         clone_source_repo_with_proxy "$repo_url" "$repo_path" || return 1
     else
         root_cmd git -C "$repo_path" remote set-url origin "$repo_url"
