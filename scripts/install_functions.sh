@@ -411,7 +411,14 @@ setup_log_stream() {
                 if (line ~ /^Upgraded /) { print line; next }
                 if (line ~ /^Installed /) { print line; next }
                 if (line ~ /^Removed /) { print line; next }
-                if (line ~ /^Program terminated\./) { print line; next }
+                # Fetch failures are appended to the tail of a progress bar
+                # record and the download errors name a *.eopkg file, so they
+                # have to be matched anywhere and printed before the rule that
+                # drops package file names - otherwise a failed run only shows
+                # the trailing eopkg help hint with no reason for it.
+                if (match(line, /Program terminated\./)) { print substr(line, RSTART); next }
+                if (match(line, /Error downloading /)) { print substr(line, RSTART); next }
+                if (match(line, /One or more errors occurred/)) { print substr(line, RSTART); next }
                 if (line ~ /^Please use /) { print line; next }
                 if (line ~ /^Use --debug /) { print line; next }
                 if (line ~ /^Hit max retry count when downloading:/) { print line; next }
