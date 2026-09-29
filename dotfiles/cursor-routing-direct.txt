@@ -1,0 +1,11 @@
+# Destinations that Cursor (group cursorroute) reaches directly, bypassing the
+# Hiddify SOCKS redirect. Only TCP 80/443 is redirected at all, so SSH and other
+# ports are already direct.
+#
+# RFC1918, loopback and link-local are always direct (see enable.sh).
+# One entry per line: IPv4, IPv4/CIDR or hostname (resolved at apply time).
+#
+# Apply without restarting the helper:
+#   sudo ~/myconfig/scripts/cursor_selective_routing_enable.sh --nft-only
+
+# VDS

@@ -38,6 +38,8 @@ if sudo nft list table ip "$TABLE_NAME" >/dev/null 2>&1; then
     echo "nft_table: present"
     echo "output_chain:"
     sudo nft list chain ip "$TABLE_NAME" output 2>/dev/null || true
+    echo "direct_set:"
+    sudo nft list set ip "$TABLE_NAME" direct_v4 2>/dev/null || true
 else
     echo "nft_table: missing"
 fi

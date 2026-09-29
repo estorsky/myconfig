@@ -15,6 +15,9 @@ LEGACY_REFRESH_SERVICE="cursor-selective-routing-refresh.service"
 LEGACY_REFRESH_TIMER="cursor-selective-routing-refresh.timer"
 HELPER_PID_FILE="${STATE_DIR}/helper.pid"
 HELPER_LOG_FILE="${STATE_DIR}/helper.log"
+DIRECT_SET_NAME="direct_v4"
+DIRECT_NETS_FILE="${CURSOR_SELECTIVE_ROUTING_DIRECT_FILE:-${SCRIPT_DIR}/../dotfiles/cursor-routing-direct.txt}"
+DEFAULT_DIRECT_NETS="127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16"
 
 require_root() {
     if [[ "$(id -u)" -ne 0 ]]; then
@@ -79,15 +82,46 @@ ensure_nftables_objects() {
         exit 1
     fi
 
-    nft list table ip "$TABLE_NAME" >/dev/null 2>&1 || nft add table ip "$TABLE_NAME"
-    nft list chain ip "$TABLE_NAME" "$CHAIN_NAME" >/dev/null 2>&1 || \
-        nft "add chain ip ${TABLE_NAME} ${CHAIN_NAME} { type nat hook output priority dstnat; policy accept; }"
-    nft flush chain ip "$TABLE_NAME" "$CHAIN_NAME"
-    nft add rule ip "$TABLE_NAME" "$CHAIN_NAME" \
-        counter \
-        meta skgid "$gid_value" tcp dport '{' 80, 443 '}' \
-        redirect to :"$HELPER_PORT" \
-        comment "cursor_selective_routing"
+    local -a direct_nets=()
+    mapfile -t direct_nets < <(collect_direct_nets)
+
+    local elements
+    elements="$(IFS=,; printf '%s' "${direct_nets[*]}")"
+
+    # One transaction: on any error nft keeps the previous ruleset untouched,
+    # and established connections keep their conntrack NAT mapping.
+    nft -f - <<EOF
+add table ip ${TABLE_NAME}
+add chain ip ${TABLE_NAME} ${CHAIN_NAME} { type nat hook output priority dstnat; policy accept; }
+add set ip ${TABLE_NAME} ${DIRECT_SET_NAME} { type ipv4_addr; flags interval; auto-merge; }
+flush chain ip ${TABLE_NAME} ${CHAIN_NAME}
+flush set ip ${TABLE_NAME} ${DIRECT_SET_NAME}
+add element ip ${TABLE_NAME} ${DIRECT_SET_NAME} { ${elements} }
+add rule ip ${TABLE_NAME} ${CHAIN_NAME} meta skgid ${gid_value} tcp dport { 80, 443 } ip daddr @${DIRECT_SET_NAME} counter return comment "cursor_direct_nets"
+add rule ip ${TABLE_NAME} ${CHAIN_NAME} meta skgid ${gid_value} tcp dport { 80, 443 } counter redirect to :${HELPER_PORT} comment "cursor_selective_routing"
+EOF
+}
+
+collect_direct_nets() {
+    local entry line
+
+    for entry in $DEFAULT_DIRECT_NETS ${CURSOR_SELECTIVE_ROUTING_DIRECT_NETS:-}; do
+        printf '%s\n' "$entry"
+    done
+
+    [[ -f "$DIRECT_NETS_FILE" ]] || return 0
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line%%#*}"
+        line="${line//[[:space:]]/}"
+        [[ -n "$line" ]] || continue
+
+        if [[ "$line" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}(/[0-9]{1,2})?$ ]]; then
+            printf '%s\n' "$line"
+        elif ! getent ahostsv4 "$line" | awk '{print $1}' | sort -u | rg .; then
+            echo "warning: failed to resolve direct host: $line" >&2
+        fi
+    done < "$DIRECT_NETS_FILE"
 }
 
 start_helper() {
@@ -174,6 +208,7 @@ if [[ "$NFT_ONLY" -eq 1 ]]; then
 fi
 
 if command -v systemctl >/dev/null 2>&1 && [[ -f "/etc/systemd/system/${HELPER_UNIT}" ]]; then
+    ensure_nftables_objects
     systemctl enable --now "$HELPER_UNIT"
 else
     ensure_nftables_objects
