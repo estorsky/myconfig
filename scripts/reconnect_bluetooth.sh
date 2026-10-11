@@ -2,112 +2,100 @@
 
 set -u
 
-DEVICE_ADDRESS="${1:-80:99:E7:FF:97:E2}"
-DEVICE_ID="$(echo "$DEVICE_ADDRESS" | tr '[:upper:]' '[:lower:]' | tr ':' '_')"
-FAST_RETRY_DELAY_SEC=0.5
-FAST_RETRY_COUNT=12
-FALLBACK_RETRY_COUNT=20
+DEVICE_ADDRESS="$(echo "${1:-80:99:E7:FF:97:E2}" | tr '[:lower:]' '[:upper:]')"
+DEVICE_OBJECT="/org/bluez/hci0/dev_${DEVICE_ADDRESS//:/_}"
+RETRY_DELAY_SEC=0.5
+FAST_RETRY_COUNT=20
+FALLBACK_RETRY_COUNT=30
 
 log_message() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [reconnect_bluetooth] $*" >&2
 }
 
-is_bluetooth_connected() {
-    [[ "$(bluetoothctl info "$DEVICE_ADDRESS" 2>/dev/null | awk '/Connected:/ { print $2; exit }')" == "yes" ]]
-}
+have_required_tools() {
+    local tool
 
-get_bluetooth_card() {
-    pactl list short cards 2>/dev/null | awk -v device_id="$DEVICE_ID" '
-        $2 ~ ("bluez_card\\." device_id) { print $2; exit }
-    '
-}
-
-get_bluetooth_sink() {
-    pactl list short sinks 2>/dev/null | awk -v device_id="$DEVICE_ID" '
-        $2 ~ ("bluez_output\\." device_id) { print $2; exit }
-    '
-}
-
-get_bluetooth_a2dp_profile() {
-    local card="$1"
-
-    pactl list cards 2>/dev/null | awk -v card="$card" '
-        /^Card #[0-9]+$/ {
-            in_card = 0
-            in_profiles = 0
-        }
-        $1 == "Name:" {
-            in_card = ($2 == card)
-            in_profiles = 0
-            next
-        }
-        in_card && $1 == "Profiles:" {
-            in_profiles = 1
-            next
-        }
-        in_card && /^[[:space:]]*Active Profile:/ {
-            in_profiles = 0
-        }
-        in_card && in_profiles {
-            line = $0
-            sub(/^[[:space:]]+/, "", line)
-            split(line, parts, ":")
-            profile = parts[1]
-            if (profile ~ /^a2dp-sink/ && best == "") {
-                best = profile
-            }
-        }
-        END {
-            if (best != "") {
-                print best
-            }
-        }
-    '
-}
-
-move_existing_streams() {
-    local sink="$1"
-
-    pactl list short sink-inputs 2>/dev/null | awk '{ print $1 }' | while read -r input_id; do
-        [[ -n "$input_id" ]] || continue
-        pactl move-sink-input "$input_id" "$sink" >/dev/null 2>&1 || true
+    for tool in bluetoothctl busctl jq pw-dump wpctl; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            log_message "Missing required tool: $tool"
+            return 1
+        fi
     done
 }
 
+is_bluetooth_connected() {
+    [[ "$(busctl get-property org.bluez "$DEVICE_OBJECT" org.bluez.Device1 Connected 2>/dev/null | awk '{ print $2; exit }')" == "true" ]]
+}
+
+pw_objects() {
+    pw-dump 2>/dev/null | jq -c --arg address "$DEVICE_ADDRESS" '
+        .[] | select(.info.props."api.bluez5.address"? == $address)
+    '
+}
+
+get_bluetooth_device_id() {
+    jq -r 'select(.info.props."media.class"? == "Audio/Device") | .id' <<< "$1" | awk 'NF { print; exit }'
+}
+
+get_bluetooth_sink_id() {
+    jq -r 'select(.info.props."media.class"? == "Audio/Sink") | .id' <<< "$1" | awk 'NF { print; exit }'
+}
+
+get_bluetooth_a2dp_profile_index() {
+    jq -r '
+        select(.info.props."media.class"? == "Audio/Device")
+        | [.info.params.EnumProfile[]? | select(.name | startswith("a2dp-sink"))]
+        | (map(select(.name == "a2dp-sink")) + .)[0].index // empty
+    ' <<< "$1" | awk 'NF { print; exit }'
+}
+
 ensure_bluetooth_audio() {
-    local card
-    local profile
-    local sink
+    local objects
+    local device_id
+    local profile_index
+    local sink_id
 
-    card="$(get_bluetooth_card)"
-    if [[ -n "$card" ]]; then
-        profile="$(get_bluetooth_a2dp_profile "$card")"
-        if [[ -n "$profile" ]]; then
-            pactl set-card-profile "$card" "$profile" >/dev/null 2>&1 || true
+    objects="$(pw_objects)"
+    [[ -n "$objects" ]] || return 1
+
+    sink_id="$(get_bluetooth_sink_id "$objects")"
+    if [[ -z "$sink_id" ]]; then
+        device_id="$(get_bluetooth_device_id "$objects")"
+        profile_index="$(get_bluetooth_a2dp_profile_index "$objects")"
+        if [[ -n "$device_id" && -n "$profile_index" ]]; then
+            wpctl set-profile "$device_id" "$profile_index" >/dev/null 2>&1 || true
         fi
+        return 1
     fi
 
-    sink="$(get_bluetooth_sink)"
-    if [[ -n "$sink" ]]; then
-        pactl set-default-sink "$sink" >/dev/null 2>&1 || true
-        pactl set-sink-mute "$sink" 0 >/dev/null 2>&1 || true
-        move_existing_streams "$sink"
-        return 0
-    fi
+    wpctl set-default "$sink_id" >/dev/null 2>&1 || true
+    wpctl set-mute "$sink_id" 0 >/dev/null 2>&1 || true
+    return 0
+}
+
+wait_for_bluetooth_audio() {
+    local retries="$1"
+    local i
+
+    for ((i = 0; i < retries; i++)); do
+        if ensure_bluetooth_audio; then
+            return 0
+        fi
+
+        sleep "$RETRY_DELAY_SEC"
+    done
 
     return 1
 }
 
+have_required_tools || exit 0
+
 log_message "Trying fast audio recovery for $DEVICE_ADDRESS"
 
-for ((i = 0; i < FAST_RETRY_COUNT; i++)); do
-    if ensure_bluetooth_audio; then
-        log_message "Bluetooth sink recovered without reconnect"
-        exit 0
-    fi
-
-    sleep "$FAST_RETRY_DELAY_SEC"
-done
+if wait_for_bluetooth_audio "$FAST_RETRY_COUNT"; then
+    log_message "Bluetooth sink recovered without reconnect"
+    exit 0
+fi
 
 if ! is_bluetooth_connected; then
     log_message "Device is not reported as connected yet; forcing reconnect anyway"
@@ -119,14 +107,10 @@ bluetoothctl disconnect "$DEVICE_ADDRESS" >/dev/null 2>&1 || true
 sleep 1
 bluetoothctl connect "$DEVICE_ADDRESS" >/dev/null 2>&1 || true
 
-for ((i = 0; i < FALLBACK_RETRY_COUNT; i++)); do
-    if ensure_bluetooth_audio; then
-        log_message "Bluetooth sink recovered after reconnect"
-        exit 0
-    fi
-
-    sleep "$FAST_RETRY_DELAY_SEC"
-done
+if wait_for_bluetooth_audio "$FALLBACK_RETRY_COUNT"; then
+    log_message "Bluetooth sink recovered after reconnect"
+    exit 0
+fi
 
 log_message "Bluetooth sink was not detected after reconnect"
 exit 1
