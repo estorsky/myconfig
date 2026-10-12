@@ -12,13 +12,14 @@ MAX_TPL_RAW="${BLUETOOTH_LOCK_MAX_TPL_RAW:--6}"
 ARM_TPL_RAW="${BLUETOOTH_LOCK_ARM_TPL_RAW:--4}"
 MANUAL_UNLOCK_RELOCK_TPL_RAW="${BLUETOOTH_LOCK_MANUAL_UNLOCK_RELOCK_TPL_RAW:-}"
 CHECK_INTERVAL_SEC="${BLUETOOTH_LOCK_CHECK_INTERVAL_SEC:-1}"
-BAD_CHECKS_TO_LOCK="${BLUETOOTH_LOCK_BAD_CHECKS_TO_LOCK:-1}"
+BAD_CHECKS_TO_LOCK="${BLUETOOTH_LOCK_BAD_CHECKS_TO_LOCK:-2}"
 LOCK_COOLDOWN_SEC="${BLUETOOTH_LOCK_COOLDOWN_SEC:-0}"
 STARTUP_GRACE_SEC="${BLUETOOTH_LOCK_STARTUP_GRACE_SEC:-3}"
 ENABLE_SCAN="${BLUETOOTH_LOCK_ENABLE_SCAN:-true}"
 RSSI_SCAN_INTERVAL_SEC="${BLUETOOTH_LOCK_RSSI_SCAN_INTERVAL_SEC:-20}"
 RSSI_SCAN_DURATION_SEC="${BLUETOOTH_LOCK_RSSI_SCAN_DURATION_SEC:-3}"
 MISSING_GRACE_SEC="${BLUETOOTH_LOCK_MISSING_GRACE_SEC:-35}"
+LOCK_ON_MISSING="${BLUETOOTH_LOCK_ON_MISSING:-false}"
 DEBUG="${BLUETOOTH_LOCK_DEBUG:-false}"
 LOCK_SCRIPT="${BLUETOOTH_LOCK_SCRIPT:-$HOME/myconfig/scripts/swaylock.sh}"
 LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/bluetooth_lock_monitor.lock"
@@ -108,10 +109,11 @@ Environment:
   BLUETOOTH_LOCK_ARM_TPL_RAW         TPL close enough to arm/reset the monitor. Default: -4
   BLUETOOTH_LOCK_MANUAL_UNLOCK_RELOCK_TPL_RAW
                                       Relock after manual unlock at this stronger bad TPL. Default: disabled
-  BLUETOOTH_LOCK_BAD_CHECKS_TO_LOCK  Consecutive bad checks before lock. Default: 1
+  BLUETOOTH_LOCK_BAD_CHECKS_TO_LOCK  Consecutive bad checks before lock. Default: 2
   BLUETOOTH_LOCK_CHECK_INTERVAL_SEC  Check interval. Default: 1
   BLUETOOTH_LOCK_ENABLE_SCAN         Scan for unpaired devices. Default: true
   BLUETOOTH_LOCK_MISSING_GRACE_SEC   Missing-device grace after last good sighting. Default: 35
+  BLUETOOTH_LOCK_ON_MISSING          Lock when an armed device fully disappears. Default: false
   BLUETOOTH_LOCK_DEBUG               Log every monitor decision. Default: false
 EOF
 }
@@ -460,6 +462,13 @@ check_phone() {
     elif is_integer "$rssi" && (( rssi < MIN_RSSI )); then
         reason="$DEVICE_NAME ($DEVICE_ADDRESS) weak RSSI ${rssi} dBm < ${MIN_RSSI} dBm"
     elif ! is_connected_state "$connected" && ! is_integer "$rssi"; then
+        if [[ "$LOCK_ON_MISSING" != "true" ]]; then
+            bad_checks=0
+            locked_for_current_bad_state=false
+            log_status "missing-idle" "$DEVICE_NAME ($DEVICE_ADDRESS) is not connected or visible; lock-on-missing is disabled"
+            return 0
+        fi
+
         if [[ "$armed" != true ]]; then
             bad_checks=0
             log_status "not-armed-disconnected" "$DEVICE_NAME ($DEVICE_ADDRESS) is not connected or visible yet; waiting before arming"
@@ -526,7 +535,7 @@ check_phone() {
 }
 
 main() {
-    log_message "Bluetooth lock monitor started: name='$DEVICE_NAME' address='${DEVICE_ADDRESS:-auto}' max_tpl_raw=$MAX_TPL_RAW arm_tpl_raw=$ARM_TPL_RAW manual_unlock_relock_tpl_raw=$MANUAL_UNLOCK_RELOCK_TPL_RAW min_rssi_raw=$MIN_RSSI_RAW bad_checks=$BAD_CHECKS_TO_LOCK check_interval=${CHECK_INTERVAL_SEC}s debug=$DEBUG lock_script='$LOCK_SCRIPT'"
+    log_message "Bluetooth lock monitor started: name='$DEVICE_NAME' address='${DEVICE_ADDRESS:-auto}' max_tpl_raw=$MAX_TPL_RAW arm_tpl_raw=$ARM_TPL_RAW manual_unlock_relock_tpl_raw=$MANUAL_UNLOCK_RELOCK_TPL_RAW min_rssi_raw=$MIN_RSSI_RAW bad_checks=$BAD_CHECKS_TO_LOCK check_interval=${CHECK_INTERVAL_SEC}s lock_on_missing=$LOCK_ON_MISSING debug=$DEBUG lock_script='$LOCK_SCRIPT'"
 
     while true; do
         check_phone
