@@ -485,7 +485,7 @@ setup_log_stream() {
 
 run_eopkg_upgrade_with_proxy_fallback() {
     echo "__SOLUS_EOPKG_UP_BEGIN__"
-    run_with_proxychains_fallback eopkg up -y
+    run_with_proxychains_fallback eopkg up -y -x json-c # json-c 0.19 - memory leak
     local exit_code=$?
     echo "__SOLUS_EOPKG_UP_END__"
     return "$exit_code"

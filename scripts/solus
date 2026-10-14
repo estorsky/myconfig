@@ -21,7 +21,7 @@ init () {
         llvm-clang gdb mc ncdu calibre gimp nodejs man-pages \
         linux-current-headers lm_sensors qbittorrent wireshark xkill \
         vim neovim helix mtr python-ipython i3lock krita ranger zathura zathura-poppler cmus cava etcher \
-        speedtest-cli cmatrix highlight curl-gnutls iotop iftop \
+        speedtest-cli cmatrix highlight curl-gnutls iotop iftop netcat \
         glances feh gnuplot shellcheck kdeconnect translate-shell rsync thunderbird \
         openvpn wireguard-tools i3blocks i3 lxappearance dunst kitty \
         xsel docker blueman solaar pavucontrol doxygen cppcheck font-awesome-ttf \
