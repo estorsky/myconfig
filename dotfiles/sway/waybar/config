@@ -198,6 +198,7 @@
         "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
     },
     "custom/weather": {
+        // "exec": "/usr/local/bin/proxychains4 -q /home/dmitry/myconfig/dotfiles/sway/waybar/waybar_weather.py",
         "exec": "/home/dmitry/myconfig/dotfiles/sway/waybar/waybar_weather.py",
         "return-type": "json",
         "format": "{}",
