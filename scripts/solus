@@ -9,12 +9,22 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/common_funcs.sh"
 source "${DIR}/install_functions.sh"
 
+# Packages kept at an older release, see EOPKG_PINS in install_functions.sh:
+#   "package|bad repo release|url of the eopkg to keep"
+EOPKG_PINS=(
+    # json-c 0.19-16 leaks every freed object or array: json_object_put frees
+    # containers inside assert(), which Solus compiles out with -DNDEBUG
+    # (fixed upstream in json-c PR #936, not released yet).
+    "json-c|16|https://cdn.getsol.us/repo/polaris/j/json-c/json-c-0.18-15-1-x86_64.eopkg"
+)
+
 run_with_root "$1"
 
 init () {
     cd "$DIR"
 
     run_eopkg_upgrade_with_proxy_fallback || return 1
+    apply_eopkg_pins || true
 
     sudo eopkg it -y screenfetch discord dropbox nautilus-dropbox git tmux \
         vlc mpv htop btop zsh linux-lts-headers make gcc g++ gnome-tweaks meld \
@@ -164,6 +174,7 @@ update () {
     # TODO: pip packagees update
 
     run_eopkg_upgrade_with_proxy_fallback || return 1
+    apply_eopkg_pins || true
 
     ensure_ranger_bytecode
 

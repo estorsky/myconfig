@@ -461,6 +461,7 @@ setup_log_stream() {
             /^Unpacking objects:/ { next }
             /^Disabling keyboard interrupts for file operations\./ { print; next }
             /^Full log:/ { print; next }
+            /^eopkg pin:/ { print; next }
             /^Checking internet connection/ { print; next }
             /^Updating repositories/ { print; next }
             /^Updating repository:/ { print; next }
@@ -484,10 +485,133 @@ setup_log_stream() {
 }
 
 run_eopkg_upgrade_with_proxy_fallback() {
+    local exclude_args=()
+    local pkg
+
     echo "__SOLUS_EOPKG_UP_BEGIN__"
-    run_with_proxychains_fallback eopkg up -y
+
+    # Pins are checked against the repository index, so refresh it first or
+    # the run that brings a fixed release would still exclude the package.
+    if [[ -n "${EOPKG_PINS[*]-}" ]]; then
+        run_with_proxychains_fallback eopkg ur
+    fi
+
+    for pkg in "${EOPKG_UPGRADE_EXCLUDES[@]+"${EOPKG_UPGRADE_EXCLUDES[@]}"}" $(eopkg_active_pins); do
+        exclude_args+=(-x "$pkg")
+    done
+
+    run_with_proxychains_fallback eopkg up -y "${exclude_args[@]}"
     local exit_code=$?
     echo "__SOLUS_EOPKG_UP_END__"
+    return "$exit_code"
+}
+
+# Prints the release of an installed ("installed") or repository ("repo")
+# package, or nothing if there is none.
+eopkg_package_release() {
+    LC_ALL=C eopkg info -N "$1" 2>/dev/null | awk -v want="$2" '
+        /^Installed package:/ { section = "installed"; next }
+        /^Package found in .* repository:/ { section = "repo"; next }
+        section == want && /^Name[[:space:]]*:/ {
+            if (match($0, /release: [0-9]+/)) print substr($0, RSTART + 9, RLENGTH - 9)
+            exit
+        }'
+}
+
+# eopkg has no version pins: `up --exclude` only skips the package itself, a
+# dependency of another upgraded package still pulls it in. EOPKG_PINS (set by
+# the caller) lists packages to keep at an older release; each entry is
+#   "package|bad repo release|url of the eopkg to keep"
+# The pinned release is taken from the eopkg file name
+# (<package>-<version>-<release>-<build>-<arch>.eopkg). A pin applies only
+# while the repository still ships the bad release, so it lapses on its own
+# once a fixed release appears.
+EOPKG_PIN_CACHE_DIR="/var/cache/eopkg-pins"
+
+eopkg_file_release() {
+    local name
+
+    name="$(basename "$1" .eopkg)"
+    name="${name%-*}"
+    name="${name%-*}"
+    echo "${name##*-}"
+}
+
+eopkg_pin_is_active() {
+    local pkg="$1" bad_release="$2"
+
+    [[ "$(eopkg_package_release "$pkg" repo)" == "$bad_release" ]]
+}
+
+# Prints the packages of pins that currently apply.
+eopkg_active_pins() {
+    local entry pkg bad_release
+
+    for entry in "${EOPKG_PINS[@]+"${EOPKG_PINS[@]}"}"; do
+        IFS='|' read -r pkg bad_release _ <<< "$entry"
+        if eopkg_pin_is_active "$pkg" "$bad_release"; then
+            echo "$pkg"
+        fi
+    done
+}
+
+fetch_eopkg_pin_package() {
+    local pkg="$1" url="$2" pkg_file
+
+    pkg_file="$EOPKG_PIN_CACHE_DIR/$(basename "$url")"
+    mkdir -p "$EOPKG_PIN_CACHE_DIR" || return 1
+
+    if [[ ! -s "$pkg_file" ]]; then
+        if ! run_with_proxychains_fallback curl -fsSL -o "$pkg_file.part" "$url"; then
+            rm -f "$pkg_file.part"
+            echo "eopkg pin: $pkg download failed: $url" >&2
+            return 1
+        fi
+        mv "$pkg_file.part" "$pkg_file" || return 1
+    fi
+
+    echo "$pkg_file"
+}
+
+apply_eopkg_pin() {
+    local pkg="$1" bad_release="$2" url="$3"
+    local pin_release repo_release installed_release pkg_file exit_code
+
+    repo_release="$(eopkg_package_release "$pkg" repo)"
+    if [[ "$repo_release" != "$bad_release" ]]; then
+        echo "eopkg pin: $pkg repository release is ${repo_release:-unknown}, not $bad_release; pin no longer applies, remove it from EOPKG_PINS"
+        return 0
+    fi
+
+    pin_release="$(eopkg_file_release "$url")"
+    installed_release="$(eopkg_package_release "$pkg" installed)"
+    if [[ -z "$installed_release" || "$installed_release" == "$pin_release" ]]; then
+        return 0
+    fi
+
+    pkg_file="$(fetch_eopkg_pin_package "$pkg" "$url" 2>&1)" || {
+        echo "$pkg_file"
+        return 1
+    }
+
+    echo "eopkg pin: $pkg release $installed_release -> $pin_release"
+    echo "__SOLUS_EOPKG_UP_BEGIN__"
+    eopkg it -y "$pkg_file"
+    exit_code=$?
+    echo "__SOLUS_EOPKG_UP_END__"
+    return "$exit_code"
+}
+
+# Reinstalls pinned releases that the upgrade replaced; a failed pin is
+# reported and does not stop the others.
+apply_eopkg_pins() {
+    local entry pkg bad_release url exit_code=0
+
+    for entry in "${EOPKG_PINS[@]+"${EOPKG_PINS[@]}"}"; do
+        IFS='|' read -r pkg bad_release url <<< "$entry"
+        apply_eopkg_pin "$pkg" "$bad_release" "$url" || exit_code=1
+    done
+
     return "$exit_code"
 }
 
