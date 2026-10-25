@@ -1,0 +1,7 @@
+[Unit]
+Description=Refresh local xray config from the VPN subscription
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/myconfig/scripts/xray-sub-update

@@ -5,8 +5,10 @@ Wants=network.target
 
 [Service]
 Type=exec
+Environment=CURSOR_SELECTIVE_ROUTING_SOCKS_PORT=12334
+EnvironmentFile=-/home/dmitry/myconfig/dotfiles/cursor-routing.env
 ExecStartPre=/home/dmitry/myconfig/scripts/cursor_selective_routing_enable.sh --nft-only
-ExecStart=/usr/bin/python3 /home/dmitry/myconfig/scripts/cursor_selective_transparent_proxy.py --listen-host 127.0.0.1 --listen-port 12335 --socks-host 127.0.0.1 --socks-port 12334
+ExecStart=/usr/bin/python3 /home/dmitry/myconfig/scripts/cursor_selective_transparent_proxy.py --listen-host 127.0.0.1 --listen-port 12335 --socks-host 127.0.0.1 --socks-port ${CURSOR_SELECTIVE_ROUTING_SOCKS_PORT}
 ExecStopPost=/home/dmitry/myconfig/scripts/cursor_selective_routing_disable.sh --nft-only
 Restart=on-failure
 RestartSec=2

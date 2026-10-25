@@ -1,0 +1,63 @@
+#!/bin/bash
+# Install/update the local xray client fed by the VPN subscription (user units, no root).
+#   binary + geo files: ~/.local/share/xray-sub/
+#   config + URL:       ~/.config/xray-sub/{config.json,url}
+#   units:              xray-sub.service, xray-sub-update.{service,timer} (systemctl --user)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ASSET_DIR="${XRAY_SUB_ASSET_DIR:-$HOME/.local/share/xray-sub}"
+CONF_DIR="${XRAY_SUB_CONF_DIR:-$HOME/.config/xray-sub}"
+UNIT_DIR="$HOME/.config/systemd/user"
+ASSET="Xray-linux-64.zip"
+
+if [[ "$(id -u)" -eq 0 ]]; then
+    echo "run as the desktop user, not root" >&2
+    exit 1
+fi
+
+fetch() {
+    curl --connect-timeout 15 --max-time 300 -fsSL "$@" ||
+        curl --connect-timeout 15 --max-time 300 -fsSL --socks5-hostname 127.0.0.1:12334 "$@"
+}
+
+mkdir -p "$ASSET_DIR" "$CONF_DIR" "$UNIT_DIR"
+chmod 700 "$CONF_DIR"
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+fetch "https://api.github.com/repos/XTLS/Xray-core/releases/latest" -o "$tmp/release.json"
+latest="$(jq -r '.tag_name' "$tmp/release.json")"
+digest="$(jq -r --arg a "$ASSET" '.assets[] | select(.name == $a) | .digest // "" | sub("^sha256:"; "")' "$tmp/release.json")"
+url="$(jq -r --arg a "$ASSET" '.assets[] | select(.name == $a) | .browser_download_url' "$tmp/release.json")"
+installed=""
+[[ -x "$ASSET_DIR/xray" ]] && installed="v$("$ASSET_DIR/xray" version | awk 'NR==1 {print $2}')"
+
+if [[ "$installed" == "$latest" ]]; then
+    echo "xray is already up to date ($installed)"
+else
+    fetch "$url" -o "$tmp/$ASSET"
+    if [[ -n "$digest" ]]; then
+        printf '%s  %s\n' "$digest" "$tmp/$ASSET" | sha256sum -c - >/dev/null
+    fi
+    unzip -q -o "$tmp/$ASSET" xray -d "$tmp/x"
+    install -m 755 "$tmp/x/xray" "$ASSET_DIR/xray"
+    echo "xray ${installed:-none} -> $latest"
+fi
+
+for unit in xray-sub.service xray-sub-update.service xray-sub-update.timer; do
+    install -m 644 "$SCRIPT_DIR/../systemd/user/$unit" "$UNIT_DIR/$unit"
+done
+systemctl --user daemon-reload
+systemctl --user enable xray-sub.service xray-sub-update.timer >/dev/null
+systemctl --user start xray-sub-update.timer
+
+if [[ ! -f "$CONF_DIR/url" ]]; then
+    echo "put the subscription URL into $CONF_DIR/url (chmod 600), then: systemctl --user start xray-sub-update.service"
+    exit 0
+fi
+systemctl --user start xray-sub-update.service
+systemctl --user start xray-sub.service
+systemctl --user --no-pager --lines=0 status xray-sub.service | head -3

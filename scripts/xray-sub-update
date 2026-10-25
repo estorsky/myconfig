@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+"""Refresh the local xray client config from the VPN subscription.
+
+Takes the balancer profile ("Автовыбор") from the Happ subscription, validates it
+with `xray run -test` and restarts xray-sub.service only when the config changed.
+On download or validation errors the current config stays in place.
+
+The subscription URL contains a personal token: keep it in
+~/.config/xray-sub/url (mode 600), never in this repository.
+"""
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import time
+
+HOME = os.path.expanduser("~")
+CONF_DIR = os.environ.get("XRAY_SUB_CONF_DIR", f"{HOME}/.config/xray-sub")
+ASSET_DIR = os.environ.get("XRAY_SUB_ASSET_DIR", f"{HOME}/.local/share/xray-sub")
+URL_FILE = os.path.join(CONF_DIR, "url")
+CONFIG = os.path.join(CONF_DIR, "config.json")
+XRAY = os.path.join(ASSET_DIR, "xray")
+UNIT = "xray-sub.service"
+SOCKS_PORT = os.environ.get("XRAY_SUB_SOCKS_PORT")
+GEO_MAX_AGE = 7 * 86400
+GEO_URLS = {
+    "geoip.dat": "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat",
+    "geosite.dat": "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat",
+}
+
+
+def log(msg):
+    print(msg, flush=True)
+
+
+def curl(url, out, via_socks=False):
+    cmd = ["curl", "-fsSL", "--connect-timeout", "15", "--max-time", "120", "-o", out]
+    if via_socks:
+        cmd += ["--socks5-hostname", "127.0.0.1:10808"]
+    else:
+        cmd += ["--noproxy", "*"]
+    return subprocess.run(cmd + [url], capture_output=True, text=True).returncode == 0
+
+
+def fetch(url, out):
+    """Direct first; through the running local xray as a fallback."""
+    return curl(url, out) or curl(url, out, via_socks=True)
+
+
+def update_geo():
+    for name, url in GEO_URLS.items():
+        path = os.path.join(ASSET_DIR, name)
+        if os.path.exists(path) and time.time() - os.path.getmtime(path) < GEO_MAX_AGE:
+            continue
+        tmp = path + ".tmp"
+        if fetch(url, tmp) and os.path.getsize(tmp) > 100_000:
+            os.replace(tmp, path)
+            log(f"updated {name}")
+        else:
+            if os.path.exists(tmp):
+                os.remove(tmp)
+            log(f"warning: could not update {name}, keeping the old one")
+
+
+def pick_profile(configs):
+    for cfg in configs:
+        if cfg.get("routing", {}).get("balancers"):
+            return cfg
+    return configs[0]
+
+
+def localize(cfg):
+    cfg.setdefault("log", {})["loglevel"] = "warning"
+    if SOCKS_PORT:
+        for ib in cfg.get("inbounds", []):
+            if ib.get("protocol") == "socks":
+                ib["port"] = int(SOCKS_PORT)
+    return cfg
+
+
+def xray_test(path):
+    env = dict(os.environ, XRAY_LOCATION_ASSET=ASSET_DIR)
+    r = subprocess.run([XRAY, "run", "-test", "-c", path], capture_output=True, text=True, env=env)
+    return r.returncode == 0, (r.stdout + r.stderr).strip().splitlines()[-1:] or [""]
+
+
+def main():
+    if not os.path.exists(URL_FILE):
+        log(f"no subscription URL: put it into {URL_FILE} (chmod 600)")
+        return 1
+    url = open(URL_FILE).read().strip()
+    os.makedirs(CONF_DIR, exist_ok=True)
+    update_geo()
+
+    with tempfile.TemporaryDirectory() as tmp:
+        body = os.path.join(tmp, "sub.json")
+        if not fetch(url, body):
+            log("warning: subscription download failed, keeping the current config")
+            return 0 if os.path.exists(CONFIG) else 1
+        try:
+            configs = json.load(open(body))
+            assert isinstance(configs, list) and configs
+        except (ValueError, AssertionError):
+            log("warning: subscription is not a JSON array of xray configs, keeping the current config")
+            return 0 if os.path.exists(CONFIG) else 1
+
+        new = json.dumps(localize(pick_profile(configs)), ensure_ascii=False, indent=2) + "\n"
+        old = open(CONFIG).read() if os.path.exists(CONFIG) else ""
+        if new == old:
+            log("config unchanged")
+            return 0
+
+        nxt = os.path.join(tmp, "config.json")
+        with open(nxt, "w") as f:
+            f.write(new)
+        ok, msg = xray_test(nxt)
+        if not ok:
+            log(f"warning: new config failed xray -test ({msg[0]}), keeping the current config")
+            return 0 if old else 1
+        fd = os.open(CONFIG + ".tmp", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f:
+            f.write(new)
+        os.replace(CONFIG + ".tmp", CONFIG)
+        log("config updated")
+
+    subprocess.run(["systemctl", "--user", "restart", UNIT])
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

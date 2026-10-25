@@ -2408,6 +2408,20 @@ EOF
     chown -R "${target_user}:${target_group}" "$app_dir" "$wrapper_path" || return 1
 }
 
+install__xray_sub () {
+    local target_user target_uid
+
+    target_user="$(desktop_target_user)"
+    target_uid="$(id -u "$target_user")"
+
+    if [[ "$(id -u)" -eq "$target_uid" ]]; then
+        "${INSTALL_DIR}/xray-sub-install"
+    else
+        sudo -u "$target_user" env XDG_RUNTIME_DIR="/run/user/${target_uid}" \
+            "${INSTALL_DIR}/xray-sub-install"
+    fi
+}
+
 install__ly () {
     set -x
 

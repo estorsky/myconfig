@@ -1,0 +1,13 @@
+[Unit]
+Description=Local xray client from the VPN subscription (SOCKS 127.0.0.1:10808, HTTP 10809)
+After=network-online.target
+ConditionPathExists=%h/.config/xray-sub/config.json
+
+[Service]
+Environment=XRAY_LOCATION_ASSET=%h/.local/share/xray-sub
+ExecStart=%h/.local/share/xray-sub/xray run -c %h/.config/xray-sub/config.json
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
