@@ -12,6 +12,8 @@ CONF_DIR="${XRAY_SUB_CONF_DIR:-$HOME/.config/xray-sub}"
 UNIT_DIR="$HOME/.config/systemd/user"
 ASSET="Xray-linux-64.zip"
 
+source "${SCRIPT_DIR}/proxy_env.sh"
+
 if [[ "$(id -u)" -eq 0 ]]; then
     echo "run as the desktop user, not root" >&2
     exit 1
@@ -19,7 +21,7 @@ fi
 
 fetch() {
     curl --connect-timeout 15 --max-time 300 -fsSL "$@" ||
-        curl --connect-timeout 15 --max-time 300 -fsSL --socks5-hostname 127.0.0.1:12334 "$@"
+        curl --connect-timeout 15 --max-time 300 -fsSL --socks5-hostname "${MYCONFIG_SOCKS_HOST}:${MYCONFIG_SOCKS_PORT}" "$@"
 }
 
 mkdir -p "$ASSET_DIR" "$CONF_DIR" "$UNIT_DIR"

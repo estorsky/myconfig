@@ -35,7 +35,15 @@ find_cursor_bin() {
     command -v cursor 2>/dev/null || true
 }
 
-proxy_server="${CURSOR_PROXY_SERVER:-${MYCONFIG_PROXY_SERVER:-socks5://127.0.0.1:12334}}"
+script_dir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+routing_env_file="${CURSOR_SELECTIVE_ROUTING_ENV_FILE:-${script_dir}/../dotfiles/cursor-routing.env}"
+if [[ -z "${CURSOR_SELECTIVE_ROUTING_SOCKS_PORT:-}" && -f "$routing_env_file" ]]; then
+    # shellcheck disable=SC1090
+    . "$routing_env_file"
+fi
+source "${script_dir}/proxy_env.sh"
+
+proxy_server="${CURSOR_PROXY_SERVER:-${MYCONFIG_PROXY_SERVER:-socks5://${MYCONFIG_SOCKS_HOST}:${CURSOR_SELECTIVE_ROUTING_SOCKS_PORT:-${MYCONFIG_SOCKS_PORT}}}}"
 cursor_bin="$(find_cursor_bin)"
 
 if [[ -z "$cursor_bin" ]]; then

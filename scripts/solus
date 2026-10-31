@@ -23,6 +23,7 @@ run_with_root "$1"
 init () {
     cd "$DIR"
 
+    configure_proxychains || true
     run_eopkg_upgrade_with_proxy_fallback || return 1
     apply_eopkg_pins || true
 
@@ -174,6 +175,7 @@ init () {
 update () {
     # TODO: pip packagees update
 
+    configure_proxychains || true
     run_eopkg_upgrade_with_proxy_fallback || return 1
     apply_eopkg_pins || true
 
@@ -225,10 +227,12 @@ then
         init) setup_log_stream init; check_connection; init; exit;;
         up) setup_log_stream up; check_connection; update; exit;;
         clean) setup_log_stream clean; clean; exit;;
+        proxy) configure_proxychains || exit 1
+               grep -E '^socks5[[:space:]]' /usr/local/etc/proxychains.conf; exit;;
         * ) echo "$1 is not an option"
             exit;;
     esac
 fi
 
-echo -e "params: init, up, clean"
+echo -e "params: init, up, clean, proxy"
 

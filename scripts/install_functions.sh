@@ -6,6 +6,7 @@ SOURCE_INSTALL_STATE_DIR="/usr/local/share/myconfig-source-installs"
 SOURCE_REPO_CACHE_DIR="/var/tmp/myconfig-source-repos"
 
 source "${INSTALL_DIR}/common_funcs.sh"
+source "${INSTALL_DIR}/proxy_env.sh"
 
 root_cmd() {
     if [[ $(id -u) -eq 0 ]]; then
@@ -84,19 +85,30 @@ EOF
     rm -f "$tmp"
 }
 
-# Install the repository-managed proxychains config so the ProxyList (local
-# hiddify SOCKS on 127.0.0.1:12334) is reproducible across hosts instead of a
-# one-off `make install-config` edit that only lives on one machine.
+# Install the repository-managed proxychains config so the ProxyList is
+# reproducible across hosts instead of a one-off `make install-config` edit that
+# only lives on one machine. The SOCKS endpoint comes from dotfiles/proxy.env.
 configure_proxychains() {
-    local managed_conf target
+    local managed_conf target rendered
     managed_conf="${INSTALL_DIR}/../dotfiles/proxychains/proxychains.conf"
     target="/usr/local/etc/proxychains.conf"
 
     [[ -f "$managed_conf" ]] || return 0
 
-    if ! root_cmd test -f "$target" || ! root_cmd cmp -s "$managed_conf" "$target"; then
-        root_cmd install -Dm644 "$managed_conf" "$target" || return 1
+    if [[ ! "$MYCONFIG_SOCKS_HOST" =~ ^[0-9]+(\.[0-9]+){3}$ || ! "$MYCONFIG_SOCKS_PORT" =~ ^[0-9]+$ ]]; then
+        echo "invalid proxychains SOCKS endpoint: ${MYCONFIG_SOCKS_HOST}:${MYCONFIG_SOCKS_PORT}" >&2
+        return 1
     fi
+
+    rendered="$(mktemp)"
+    sed -E "s/^socks5[[:space:]]+[0-9.]+[[:space:]]+[0-9]+[[:space:]]*$/socks5  ${MYCONFIG_SOCKS_HOST} ${MYCONFIG_SOCKS_PORT}/" \
+        "$managed_conf" >"$rendered"
+
+    if ! root_cmd test -f "$target" || ! root_cmd cmp -s "$rendered" "$target"; then
+        root_cmd install -Dm644 "$rendered" "$target" || { rm -f "$rendered"; return 1; }
+    fi
+
+    rm -f "$rendered"
 }
 
 ensure_eopkg3p() {
@@ -1521,7 +1533,7 @@ telegram_download_proxy() {
         fi
     done
 
-    printf '%s\n' "socks5h://127.0.0.1:12334"
+    printf '%s\n' "socks5h://${MYCONFIG_SOCKS_HOST}:${MYCONFIG_SOCKS_PORT}"
 }
 
 telegram_version_from_download_url() {
@@ -1800,7 +1812,7 @@ install__xkb_switch () {
 install__google_chrome () {
     # Use secure DNS (Add custom DNS service provider): https://dns.comss.one/dns-query
     #
-    # Or --proxy-server="socks5://127.0.0.1:12334"
+    # Or scripts/google-chrome-beta-proxy (--proxy-server from dotfiles/proxy.env)
     # https://github.com/hiddify/hiddify-app
     # ./Hiddify-Linux-x64.AppImage --appimage-extract
 
