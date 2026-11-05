@@ -2,6 +2,14 @@
 
 set -e
 
+# SPICE agent tunnel: load the patched libspice-client-glib that exposes a
+# local 127.0.0.1:2222 bridged to the work VM over the SPICE agent channel.
+# Falls back to the system library automatically if the build is absent.
+SPICETUN_LIB="${HOME}/projects/virt/build/out/clientglib"
+if [ -e "${SPICETUN_LIB}/libspice-client-glib-2.0.so.8" ]; then
+    export LD_LIBRARY_PATH="${SPICETUN_LIB}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+fi
+
 exec "${HOME}/myconfig/scripts/ovirt_rv" \
     "dmitriy.privalov" \
     --credentials-file "${HOME}/.config/ovirt/credentials.json.gpg" \
