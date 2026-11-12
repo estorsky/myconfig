@@ -179,6 +179,12 @@ if [[ -x "${HOME}/myconfig/scripts/cursor-route" ]]; then
     alias cursorr='cursor_restart'
 fi
 
+if [[ -x "${HOME}/myconfig/scripts/t3code-route" ]]; then
+    t3code() {
+        "${HOME}/myconfig/scripts/t3code-route" "$@"
+    }
+fi
+
 if [[ -x "${HOME}/myconfig/scripts/cursor_agent_proxy.sh" ]]; then
     agent() {
         "${HOME}/myconfig/scripts/cursor_agent_proxy.sh" "$@"

@@ -1361,8 +1361,8 @@ install__proxy_app_launchers () {
     set -x
 
     local target_user target_group target_home applications_dir
-    local cursor_desktop cursor_proxy_desktop chrome_desktop hiddify_desktop
-    local tmp_cursor_desktop tmp_cursor_proxy_desktop tmp_chrome_desktop tmp_hiddify_desktop
+    local cursor_desktop cursor_proxy_desktop chrome_desktop hiddify_desktop t3code_desktop
+    local tmp_cursor_desktop tmp_cursor_proxy_desktop tmp_chrome_desktop tmp_hiddify_desktop tmp_t3code_desktop
     local hiddify_wrapper hiddify_icon
 
     target_user="$(desktop_target_user)"
@@ -1379,14 +1379,16 @@ install__proxy_app_launchers () {
     cursor_proxy_desktop="${applications_dir}/cursor-proxy.desktop"
     chrome_desktop="${applications_dir}/google-chrome-beta-proxy.desktop"
     hiddify_desktop="${applications_dir}/hiddify.desktop"
+    t3code_desktop="${applications_dir}/t3code.desktop"
     hiddify_wrapper="${target_home}/Dropbox/bin/hiddify.sh"
     hiddify_icon="${target_home}/Dropbox/bin/hiddify/hiddify.png"
     tmp_cursor_desktop="$(mktemp)"
     tmp_cursor_proxy_desktop="$(mktemp)"
     tmp_chrome_desktop="$(mktemp)"
     tmp_hiddify_desktop="$(mktemp)"
+    tmp_t3code_desktop="$(mktemp)"
 
-    trap 'rm -f "$tmp_cursor_desktop" "$tmp_cursor_proxy_desktop" "$tmp_chrome_desktop" "$tmp_hiddify_desktop"; trap - RETURN' RETURN
+    trap 'rm -f "$tmp_cursor_desktop" "$tmp_cursor_proxy_desktop" "$tmp_chrome_desktop" "$tmp_hiddify_desktop" "$tmp_t3code_desktop"; trap - RETURN' RETURN
     run_as_target_user "$target_user" mkdir -p "$applications_dir" || return 1
 
     cat > "$tmp_cursor_desktop" <<EOF
@@ -1400,6 +1402,20 @@ Icon=cursor
 Terminal=false
 StartupNotify=true
 Categories=Development;IDE;
+EOF
+
+    cat > "$tmp_t3code_desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=T3 Code
+Comment=Launch T3 Code with selective routing
+Exec=${target_home}/myconfig/scripts/t3code-route %U
+TryExec=${target_home}/myconfig/scripts/t3code-route
+Icon=com.t3tools.T3Code
+Terminal=false
+StartupNotify=true
+Categories=Development;IDE;
+Keywords=T3;Agent;
 EOF
 
     cat > "$tmp_cursor_proxy_desktop" <<EOF
@@ -1462,11 +1478,13 @@ EOF
         install -Dm644 "$tmp_cursor_proxy_desktop" "$cursor_proxy_desktop" || return 1
         install -Dm644 "$tmp_chrome_desktop" "$chrome_desktop" || return 1
         install -Dm644 "$tmp_hiddify_desktop" "$hiddify_desktop" || return 1
+        install -Dm644 "$tmp_t3code_desktop" "$t3code_desktop" || return 1
     else
         root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_cursor_desktop" "$cursor_desktop" || return 1
         root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_cursor_proxy_desktop" "$cursor_proxy_desktop" || return 1
         root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_chrome_desktop" "$chrome_desktop" || return 1
         root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_hiddify_desktop" "$hiddify_desktop" || return 1
+        root_cmd install -o "$target_user" -g "$target_group" -Dm644 "$tmp_t3code_desktop" "$t3code_desktop" || return 1
     fi
 
     if command -v update-desktop-database >/dev/null 2>&1; then

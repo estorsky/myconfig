@@ -5,6 +5,8 @@ set -euo pipefail
 ROUTE_GROUP="${CURSOR_SELECTIVE_ROUTING_GROUP:-cursorroute}"
 RESTART_EXISTING=0
 DISABLE_QUIC="${CURSOR_SELECTIVE_ROUTING_DISABLE_QUIC:-1}"
+APP_NAME="${CURSOR_ROUTE_APP_NAME:-Cursor}"
+APP_CMD="${CURSOR_ROUTE_APP_CMD:-cursor-route}"
 
 find_cursor_bin() {
     local candidate
@@ -97,7 +99,7 @@ fi
 cursor_bin="$(find_cursor_bin)"
 
 if [[ -z "$cursor_bin" ]]; then
-    echo "cursor binary was not found" >&2
+    echo "$APP_NAME binary was not found" >&2
     exit 1
 fi
 
@@ -126,8 +128,8 @@ if [[ "$RESTART_EXISTING" -eq 1 ]]; then
 else
     mapfile -t non_routed_pids < <(find_non_routed_cursor_pids)
     if [[ "${#non_routed_pids[@]}" -gt 0 ]]; then
-        echo "Cursor is already running outside routing group $ROUTE_GROUP: ${non_routed_pids[*]}" >&2
-        echo "close existing Cursor windows or run: cursor-route --restart" >&2
+        echo "$APP_NAME is already running outside routing group $ROUTE_GROUP: ${non_routed_pids[*]}" >&2
+        echo "close existing $APP_NAME windows or run: $APP_CMD --restart" >&2
         exit 1
     fi
 fi

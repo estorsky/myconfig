@@ -1,0 +1,14 @@
+#!/bin/sh
+# Usage: mcp-with-env <env-file> <command> [args...]
+# Replacement for "envFile" in ~/.cursor/mcp.json: the Cursor SDK (T3 Code) ignores
+# envFile, and Cursor IDE mangles "$" in args, so the env is loaded here.
+set -eu
+
+env_file="$1"
+shift
+
+set -a
+. "$env_file"
+set +a
+
+exec "$@"

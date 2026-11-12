@@ -1,0 +1,30 @@
+#!/bin/sh
+# Usage: cursor-agents-sync [project-dir...]   (default: current directory)
+# Copies user subagents from ~/.cursor/agents into <project>/.cursor/agents.
+# The Cursor SDK (T3 Code) only reads project-level .cursor/agents and skips a
+# symlinked directory, so real copies are needed; they are kept out of git.
+set -eu
+
+src="${CURSOR_AGENTS_SRC:-$HOME/.cursor/agents}"
+[ -d "$src" ] || { echo "no subagents in $src" >&2; exit 1; }
+
+[ "$#" -gt 0 ] || set -- .
+
+for project in "$@"; do
+    dst="$project/.cursor/agents"
+    if [ -L "$dst" ]; then
+        rm "$dst"
+    fi
+    mkdir -p "$dst"
+    cp -p "$src"/*.md "$dst"/
+
+    if git -C "$project" rev-parse --git-dir >/dev/null 2>&1; then
+        exclude="$(git -C "$project" rev-parse --git-path info/exclude)"
+        case "$exclude" in /*) ;; *) exclude="$project/$exclude" ;; esac
+        mkdir -p "$(dirname "$exclude")"
+        grep -qx '.cursor/agents/' "$exclude" 2>/dev/null || grep -qx '.cursor/agents' "$exclude" 2>/dev/null \
+            || echo '.cursor/agents/' >> "$exclude"
+    fi
+
+    echo "$dst: $(ls "$dst" | tr '\n' ' ')"
+done

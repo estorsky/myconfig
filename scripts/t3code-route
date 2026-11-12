@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# T3 Code desktop under the same selective routing as Cursor: the bundled server
+# runs @cursor/sdk in-process and must reach api2.cursor.sh through the tunnel.
+
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+
+t3code_bin="${T3CODE_BIN:-}"
+if [[ -z "$t3code_bin" ]]; then
+    for candidate in "$HOME/Dropbox/bin/t3code" "$HOME/.local/bin/t3code"; do
+        if [[ -x "$candidate" && ! -d "$candidate" ]]; then
+            t3code_bin="$candidate"
+            break
+        fi
+    done
+fi
+
+if [[ -z "$t3code_bin" ]]; then
+    echo "T3 Code AppImage was not found (set T3CODE_BIN)" >&2
+    exit 1
+fi
+
+# The AppImage runs from /tmp/.mount_t3code*, which cursor-route's path check
+# does not see; a stray instance would swallow this launch via the single-instance lock.
+route_gid="$(getent group "${CURSOR_SELECTIVE_ROUTING_GROUP:-cursorroute}" | cut -d: -f3 | head -n 1)"
+mapfile -t stray_pids < <(ps -eo pid=,egid=,args= | awk -v g="$route_gid" '$2 != g && $3 ~ /\/\.mount_t3code/ { print $1 }')
+if [[ "${#stray_pids[@]}" -gt 0 ]]; then
+    if [[ "${1:-}" == "--restart" ]]; then
+        kill "${stray_pids[@]}" 2>/dev/null || true
+        sleep 2
+        kill -9 "${stray_pids[@]}" 2>/dev/null || true
+    else
+        echo "T3 Code is already running outside the routing group: ${stray_pids[*]}" >&2
+        echo "quit it or run: t3code-route --restart" >&2
+        exit 1
+    fi
+fi
+
+export CURSOR_BIN="$t3code_bin"
+export CURSOR_ROUTE_APP_NAME="T3 Code"
+export CURSOR_ROUTE_APP_CMD="t3code-route"
+
+exec "$script_dir/cursor-route" "$@"
