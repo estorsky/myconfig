@@ -22,6 +22,8 @@ HELPER_PID_FILE="${STATE_DIR}/helper.pid"
 HELPER_LOG_FILE="${STATE_DIR}/helper.log"
 DIRECT_SET_NAME="direct_v4"
 DIRECT_NETS_FILE="${CURSOR_SELECTIVE_ROUTING_DIRECT_FILE:-${SCRIPT_DIR}/../dotfiles/cursor-routing-direct.txt}"
+# 7844: cloudflared edge (T3 Connect); direct TCP registration stalls on Russian networks.
+REDIRECT_PORTS="${CURSOR_SELECTIVE_ROUTING_PORTS:-80, 443, 7844}"
 DEFAULT_DIRECT_NETS="127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16"
 
 require_root() {
@@ -102,8 +104,8 @@ add set ip ${TABLE_NAME} ${DIRECT_SET_NAME} { type ipv4_addr; flags interval; au
 flush chain ip ${TABLE_NAME} ${CHAIN_NAME}
 flush set ip ${TABLE_NAME} ${DIRECT_SET_NAME}
 add element ip ${TABLE_NAME} ${DIRECT_SET_NAME} { ${elements} }
-add rule ip ${TABLE_NAME} ${CHAIN_NAME} meta skgid ${gid_value} tcp dport { 80, 443 } ip daddr @${DIRECT_SET_NAME} counter return comment "cursor_direct_nets"
-add rule ip ${TABLE_NAME} ${CHAIN_NAME} meta skgid ${gid_value} tcp dport { 80, 443 } counter redirect to :${HELPER_PORT} comment "cursor_selective_routing"
+add rule ip ${TABLE_NAME} ${CHAIN_NAME} meta skgid ${gid_value} tcp dport { ${REDIRECT_PORTS} } ip daddr @${DIRECT_SET_NAME} counter return comment "cursor_direct_nets"
+add rule ip ${TABLE_NAME} ${CHAIN_NAME} meta skgid ${gid_value} tcp dport { ${REDIRECT_PORTS} } counter redirect to :${HELPER_PORT} comment "cursor_selective_routing"
 EOF
 }
 

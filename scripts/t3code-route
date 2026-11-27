@@ -9,7 +9,10 @@ script_dir="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
 t3code_bin="${T3CODE_BIN:-}"
 if [[ -z "$t3code_bin" ]]; then
-    for candidate in "$HOME/Dropbox/bin/t3code" "$HOME/.local/bin/t3code"; do
+    # Temporary: extracted 0.1.13 with the Linux worker.register check patched out
+    # (pingdotgg/t3code#41929). Remove the directory once a release has the fix.
+    for candidate in "$HOME/.local/share/t3code-patched/squashfs-root/AppRun" \
+        "$HOME/Dropbox/bin/t3code" "$HOME/.local/bin/t3code"; do
         if [[ -x "$candidate" && ! -d "$candidate" ]]; then
             t3code_bin="$candidate"
             break
@@ -37,6 +40,15 @@ if [[ "${#stray_pids[@]}" -gt 0 ]]; then
         exit 1
     fi
 fi
+
+# Before ~/.local/bin: its Cursor CLI shim execs the first other `cursor` in PATH.
+# T3 re-reads PATH from a login shell; dotfiles/zshrc puts T3CODE_ROUTE_SHIMS first again.
+export T3CODE_ROUTE_SHIMS="$script_dir/t3code-shims"
+export PATH="$T3CODE_ROUTE_SHIMS:$PATH"
+
+# T3 Connect's cloudflared: QUIC (UDP 7844) to Cloudflare stalls on some networks and the
+# fallback is not reliable; TCP works everywhere.
+export TUNNEL_TRANSPORT_PROTOCOL="${TUNNEL_TRANSPORT_PROTOCOL:-http2}"
 
 export CURSOR_BIN="$t3code_bin"
 export CURSOR_ROUTE_APP_NAME="T3 Code"

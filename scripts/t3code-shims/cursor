@@ -1,0 +1,11 @@
+#!/bin/sh
+# T3 Code (0.1.13+) probes editors with `cursor --version`; the Cursor AppImage
+# opens a new window on it instead of printing the version.
+case "${1:-}" in
+    --version|-v)
+        echo "cursor (t3code-route shim)"
+        exit 0
+        ;;
+esac
+
+exec "${T3CODE_REAL_CURSOR:-$HOME/Dropbox/bin/cursor}" "$@"

@@ -72,10 +72,13 @@ def pick_profile(configs):
 
 def localize(cfg):
     cfg.setdefault("log", {})["loglevel"] = "warning"
-    if SOCKS_PORT:
-        for ib in cfg.get("inbounds", []):
-            if ib.get("protocol") == "socks":
-                ib["port"] = int(SOCKS_PORT)
+    for ib in cfg.get("inbounds", []):
+        if SOCKS_PORT and ib.get("protocol") == "socks":
+            ib["port"] = int(SOCKS_PORT)
+        # Sniffed names only for routing: cloudflared's SNI h2.cftunnel.com does not resolve,
+        # so overriding the requested IP with it breaks T3 Connect.
+        if ib.get("sniffing", {}).get("enabled"):
+            ib["sniffing"]["routeOnly"] = True
     return cfg
 
 

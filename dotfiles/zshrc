@@ -284,3 +284,6 @@ compinit
 
 
 # eval "$(starship init zsh)"
+
+# T3 Code puts this login shell's PATH ahead of its own; keep t3code-route's shims first.
+[[ -n ${T3CODE_ROUTE_SHIMS:-} ]] && export PATH="$T3CODE_ROUTE_SHIMS:$PATH"
